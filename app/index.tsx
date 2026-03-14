@@ -15,7 +15,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -164,22 +163,7 @@ function WelcomeSlide({ slide, isActive }: WelcomeSlideProps) {
 export default function WelcomeScreen() {
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const translateX = useSharedValue(0);
   const buttonScale = useSharedValue(1);
-
-  const panGesture = Gesture.Pan()
-    .onUpdate((e) => {
-      translateX.value = e.translationX;
-    })
-    .onEnd((e) => {
-      const threshold = width * 0.2;
-      if (e.translationX < -threshold && currentSlide < slides.length - 1) {
-        setCurrentSlide((prev) => prev + 1);
-      } else if (e.translationX > threshold && currentSlide > 0) {
-        setCurrentSlide((prev) => prev - 1);
-      }
-      translateX.value = withSpring(0, { damping: 20, stiffness: 100 });
-    });
 
   const handleNext = useCallback(() => {
     if (currentSlide < slides.length - 1) {
@@ -192,10 +176,6 @@ export default function WelcomeScreen() {
   const handleSkip = useCallback(() => {
     router.replace("/(tabs)");
   }, [router]);
-
-  const containerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
 
   const buttonAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
@@ -222,21 +202,33 @@ export default function WelcomeScreen() {
             <SkipForward size={16} color="rgba(255,255,255,0.8)" />
           </TouchableOpacity>
 
-          <GestureDetector gesture={panGesture}>
-            <Animated.View
-              style={containerAnimatedStyle}
-              className="flex-1 flex-row"
-            >
-              {slides.map((slide) => (
-                <View key={slide.id} className="flex-1" style={{ width }}>
-                  <WelcomeSlide
-                    slide={slide}
-                    isActive={slide.id === currentSlide}
-                  />
-                </View>
-              ))}
-            </Animated.View>
-          </GestureDetector>
+          <View className="flex-1 relative overflow-hidden">
+            {slides.map((slide, index) => (
+              <Animated.View
+                key={slide.id}
+                className="absolute inset-0 w-full h-full"
+                style={{
+                  opacity: index === currentSlide ? 1 : 0,
+                  transform: [
+                    {
+                      translateX:
+                        index < currentSlide
+                          ? -width * 0.3
+                          : index > currentSlide
+                            ? width * 0.3
+                            : 0,
+                    },
+                  ],
+                }}
+                pointerEvents={index === currentSlide ? "auto" : "none"}
+              >
+                <WelcomeSlide
+                  slide={slide}
+                  isActive={slide.id === currentSlide}
+                />
+              </Animated.View>
+            ))}
+          </View>
 
           <View className="pb-16 px-6">
             <View className="flex-row items-center justify-center mb-8">
