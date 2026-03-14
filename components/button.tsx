@@ -1,25 +1,22 @@
-import React from 'react';
+import React from "react";
 import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
   ActivityIndicator,
+  Text,
+  TouchableOpacity,
   TouchableOpacityProps,
-} from 'react-native';
-import { useTheme } from '@/hooks/use-theme';
-import { spacing, borderRadius, typography } from '@/constants/design-system';
+} from "react-native";
 
 interface ButtonProps extends TouchableOpacityProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   loading?: boolean;
   fullWidth?: boolean;
 }
 
 export function Button({
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   children,
   loading = false,
   fullWidth = false,
@@ -27,106 +24,59 @@ export function Button({
   style,
   ...props
 }: ButtonProps) {
-  const { colors, isDark } = useTheme();
-
-  const getVariantStyle = () => {
+  const getVariantClasses = () => {
     switch (variant) {
-      case 'primary':
-        return {
-          backgroundColor: colors.primary,
-          borderColor: colors.primary,
-        };
-      case 'secondary':
-        return {
-          backgroundColor: colors.secondary,
-          borderColor: colors.secondary,
-        };
-      case 'outline':
-        return {
-          backgroundColor: 'transparent',
-          borderColor: colors.primary,
-          borderWidth: 1,
-        };
-      case 'ghost':
-        return {
-          backgroundColor: 'transparent',
-          borderColor: 'transparent',
-        };
+      case "primary":
+        return "bg-blue-500 border-blue-500";
+      case "secondary":
+        return "bg-purple-500 border-purple-500";
+      case "outline":
+        return "bg-transparent border-blue-500 border";
+      case "ghost":
+        return "bg-transparent border-transparent";
     }
   };
 
-  const getSizeStyle = () => {
+  const getSizeClasses = () => {
     switch (size) {
-      case 'sm':
-        return {
-          paddingVertical: spacing.sm,
-          paddingHorizontal: spacing.lg,
-          borderRadius: borderRadius.md,
-        };
-      case 'md':
-        return {
-          paddingVertical: spacing.md,
-          paddingHorizontal: spacing.xl,
-          borderRadius: borderRadius.lg,
-        };
-      case 'lg':
-        return {
-          paddingVertical: spacing.lg,
-          paddingHorizontal: spacing['2xl'],
-          borderRadius: borderRadius.xl,
-        };
+      case "sm":
+        return "py-2 px-4 rounded-md";
+      case "md":
+        return "py-3 px-6 rounded-lg";
+      case "lg":
+        return "py-4 px-8 rounded-xl";
     }
   };
 
-  const getTextStyle = () => {
+  const getTextClasses = () => {
     switch (variant) {
-      case 'outline':
-      case 'primary':
-      case 'secondary':
-        return { color: colors.primaryForeground };
-      case 'ghost':
-        return { color: colors.primary };
+      case "outline":
+      case "ghost":
+        return "text-blue-500";
+      default:
+        return "text-white";
     }
   };
 
   return (
     <TouchableOpacity
-      style={[
-        styles.base,
-        getVariantStyle(),
-        getSizeStyle(),
-        fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
-        style,
-      ]}
+      className={`flex-row items-center justify-center active:opacity-80 ${getVariantClasses()} ${getSizeClasses()} ${fullWidth ? "w-full" : ""} ${disabled ? "opacity-50" : ""}`}
+      style={style}
       disabled={disabled || loading}
       activeOpacity={0.7}
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={colors.primaryForeground} />
+        <ActivityIndicator
+          color={
+            variant === "outline" || variant === "ghost" ? "#0A7EA4" : "#FFF"
+          }
+        />
       ) : (
-        <Text style={[styles.text, getTextStyle(), { fontSize: typography.fontSize.md, fontWeight: typography.fontWeight.semibold }]}>
+        <Text className={`text-center font-semibold ${getTextClasses()}`}>
           {children}
         </Text>
       )}
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fullWidth: {
-    width: '100%',
-  },
-  text: {
-    textAlign: 'center',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});

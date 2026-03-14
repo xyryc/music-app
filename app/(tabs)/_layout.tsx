@@ -1,37 +1,33 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/constants/design-system';
+import { Tabs } from "expo-router";
+import { Compass, Home } from "lucide-react-native";
+import React from "react";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const themeColors = colors[colorScheme];
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: themeColors.tabIconSelected,
-        tabBarInactiveTintColor: themeColors.tabIconDefault,
+        tabBarActiveTintColor: "#0A7EA4",
+        tabBarInactiveTintColor: "#9CA3AF",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: themeColors.background,
-          borderTopColor: themeColors.border,
+          backgroundColor: "#FFFFFF",
+          borderTopColor: "#E5E7EB",
           borderTopWidth: 1,
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <Ionicons size={28} name="home" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <Ionicons size={28} name="compass" color={color} />,
+          title: "Explore",
+          tabBarIcon: ({ color }) => <Compass size={24} color={color} />,
         }}
       />
     </Tabs>

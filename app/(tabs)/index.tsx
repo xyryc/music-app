@@ -1,51 +1,42 @@
-import { View, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Card } from '@/components/card';
-import { Button } from '@/components/button';
-import { useTheme } from '@/hooks/use-theme';
-import { spacing } from '@/constants/design-system';
+import { Button } from "@/components/button";
+import { Card } from "@/components/card";
+import { StyledText } from "@/components/styled-text";
+import { spacing } from "@/constants/design-system";
+import { BookOpen, FolderOpen, Layers, Zap } from "lucide-react-native";
+import { ScrollView, View } from "react-native";
 
 export default function HomeScreen() {
-  const { colors } = useTheme();
-
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: spacing['3xl'] }}>
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{ paddingBottom: spacing["3xl"] }}
+    >
       {/* Header */}
-      <View style={{ padding: spacing.xl, paddingTop: spacing['3xl'] }}>
-        <ThemedText variant="title" weight="bold">
+      <View className="px-6 pt-14 pb-6">
+        <StyledText variant="title" weight="bold">
           Welcome Back
-        </ThemedText>
-        <ThemedText variant="body" style={{ marginTop: spacing.sm, color: colors.textSecondary }}>
+        </StyledText>
+        <StyledText variant="body" className="text-gray-500 mt-1">
           Ready to build something amazing?
-        </ThemedText>
+        </StyledText>
       </View>
 
       {/* Quick Actions */}
-      <View style={{ paddingHorizontal: spacing.xl, marginBottom: spacing['2xl'] }}>
-        <ThemedText variant="subtitle" style={{ marginBottom: spacing.lg }}>
+      <View className="px-6 mb-6">
+        <StyledText variant="subtitle" weight="semibold" className="mb-4">
           Quick Actions
-        </ThemedText>
-        <View style={{ gap: spacing.md }}>
+        </StyledText>
+        <View className="gap-3">
           <Card>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 12,
-                  backgroundColor: colors.primary,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <ThemedText style={{ color: colors.primaryForeground, fontSize: 24 }}>⚡</ThemedText>
+            <View className="flex-row items-center gap-4">
+              <View className="w-12 h-12 rounded-xl bg-blue-500 items-center justify-center">
+                <Zap size={24} color="#FFFFFF" fill="#FFFFFF" />
               </View>
-              <View style={{ flex: 1 }}>
-                <ThemedText weight="semibold">Get Started</ThemedText>
-                <ThemedText variant="caption" style={{ marginTop: 2 }}>
+              <View className="flex-1">
+                <StyledText weight="semibold">Get Started</StyledText>
+                <StyledText variant="caption" className="mt-0.5">
                   Start building your first feature
-                </ThemedText>
+                </StyledText>
               </View>
               <Button size="sm" variant="outline">
                 Go
@@ -54,24 +45,15 @@ export default function HomeScreen() {
           </Card>
 
           <Card>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
-              <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 12,
-                  backgroundColor: colors.secondary,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <ThemedText style={{ color: colors.secondaryForeground, fontSize: 24 }}>📚</ThemedText>
+            <View className="flex-row items-center gap-4">
+              <View className="w-12 h-12 rounded-xl bg-purple-500 items-center justify-center">
+                <BookOpen size={24} color="#FFFFFF" />
               </View>
-              <View style={{ flex: 1 }}>
-                <ThemedText weight="semibold">Learn More</ThemedText>
-                <ThemedText variant="caption" style={{ marginTop: 2 }}>
+              <View className="flex-1">
+                <StyledText weight="semibold">Learn More</StyledText>
+                <StyledText variant="caption" className="mt-0.5">
                   Explore the documentation
-                </ThemedText>
+                </StyledText>
               </View>
               <Button size="sm" variant="outline">
                 View
@@ -82,22 +64,28 @@ export default function HomeScreen() {
       </View>
 
       {/* Stats Section */}
-      <View style={{ paddingHorizontal: spacing.xl }}>
-        <ThemedText variant="subtitle" style={{ marginBottom: spacing.lg }}>
+      <View className="px-6">
+        <StyledText variant="subtitle" weight="semibold" className="mb-4">
           Overview
-        </ThemedText>
-        <View style={{ flexDirection: 'row', gap: spacing.md }}>
-          <Card style={{ flex: 1 }} padding="xl">
-            <ThemedText variant="caption">Projects</ThemedText>
-            <ThemedText variant="title" weight="bold" style={{ marginTop: spacing.sm }}>
+        </StyledText>
+        <View className="flex-row gap-3">
+          <Card className="flex-1 p-4 items-center">
+            <FolderOpen size={28} color="#0A7EA4" />
+            <StyledText variant="caption" className="mt-2">
+              Projects
+            </StyledText>
+            <StyledText variant="title" weight="bold" className="mt-1">
               12
-            </ThemedText>
+            </StyledText>
           </Card>
-          <Card style={{ flex: 1 }} padding="xl">
-            <ThemedText variant="caption">Components</ThemedText>
-            <ThemedText variant="title" weight="bold" style={{ marginTop: spacing.sm }}>
+          <Card className="flex-1 p-4 items-center">
+            <Layers size={28} color="#0A7EA4" />
+            <StyledText variant="caption" className="mt-2">
+              Components
+            </StyledText>
+            <StyledText variant="title" weight="bold" className="mt-1">
               48
-            </ThemedText>
+            </StyledText>
           </Card>
         </View>
       </View>
