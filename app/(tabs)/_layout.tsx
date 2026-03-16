@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Compass, Home } from "lucide-react-native";
+import { ListMusic, Music, Settings } from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -17,17 +17,24 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="library"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
+          title: "Library",
+          tabBarIcon: ({ color }) => <Music size={24} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="playlists"
         options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => <Compass size={24} color={color} />,
+          title: "Playlists",
+          tabBarIcon: ({ color }) => <ListMusic size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
         }}
       />
     </Tabs>
