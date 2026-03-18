@@ -24,11 +24,20 @@ export default function LibraryScreen() {
   }, [loadLibrary]);
 
   const handlePlayTrack = async (track: Track) => {
+    console.log("Playing track:", track.title);
     await controls.play(track, library);
-    // Navigate to player screen after track starts playing
-    setTimeout(() => {
-      router.push("/player");
-    }, 300);
+
+    // Navigate with full track data as params
+    router.push({
+      pathname: "/player",
+      params: {
+        trackId: track.id,
+        trackTitle: track.title,
+        trackUri: track.uri,
+        trackArtist: track.artist || "",
+        trackDuration: track.duration.toString(),
+      },
+    });
   };
 
   const handleImport = () => {

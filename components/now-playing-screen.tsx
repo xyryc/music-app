@@ -1,6 +1,7 @@
 import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/hooks/use-player";
 import { RepeatMode } from "@/types/player";
+import { Track } from "@/types/track";
 import Slider from "@react-native-community/slider";
 import {
   ChevronDown,
@@ -18,15 +19,22 @@ import { Image, TouchableOpacity, View } from "react-native";
 
 interface NowPlayingScreenProps {
   onMinimize: () => void;
+  initialTrack?: Track;
 }
 
-export function NowPlayingScreen({ onMinimize }: NowPlayingScreenProps) {
+export function NowPlayingScreen({
+  onMinimize,
+  initialTrack,
+}: NowPlayingScreenProps) {
   const { state, controls } = usePlayer();
   const [localPosition, setLocalPosition] = useState(0);
 
+  // Use initialTrack if provided, otherwise use state.currentTrack
+  const currentTrack = initialTrack || state.currentTrack;
+
   useEffect(() => {
-    setLocalPosition(state.position);
-  }, [state.position]);
+    setLocalPosition(currentTrack ? state.position : 0);
+  }, [state.position, currentTrack]);
 
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -46,7 +54,13 @@ export function NowPlayingScreen({ onMinimize }: NowPlayingScreenProps) {
     controls.setRepeatMode(modes[(currentIndex + 1) % modes.length]);
   };
 
-  if (!state.currentTrack) return null;
+  if (!currentTrack) {
+    return (
+      <View className="flex-1 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 items-center justify-center">
+        <StyledText className="text-white text-lg">No track playing</StyledText>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
@@ -66,9 +80,9 @@ export function NowPlayingScreen({ onMinimize }: NowPlayingScreenProps) {
       {/* Album Art */}
       <View className="flex-1 items-center justify-center px-8">
         <View className="w-72 h-72 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center shadow-2xl overflow-hidden">
-          {state.currentTrack?.coverArt ? (
+          {currentTrack.coverArt ? (
             <Image
-              source={{ uri: state.currentTrack.coverArt }}
+              source={{ uri: currentTrack.coverArt }}
               className="w-full h-full"
               resizeMode="cover"
             />
@@ -89,10 +103,10 @@ export function NowPlayingScreen({ onMinimize }: NowPlayingScreenProps) {
             className="text-white text-xl mb-1"
             numberOfLines={1}
           >
-            {state.currentTrack.title}
+            {currentTrack.title}
           </StyledText>
           <StyledText className="text-gray-400" numberOfLines={1}>
-            {state.currentTrack.artist || "Unknown Artist"}
+            {currentTrack.artist || "Unknown Artist"}
           </StyledText>
         </View>
 

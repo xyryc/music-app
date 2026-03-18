@@ -26,6 +26,7 @@ class AudioService {
     onStatusUpdate?: (status: PlaybackStatus) => void,
   ) {
     try {
+      console.log("🔊 Loading track URI:", track.uri);
       await this.unload();
 
       this.onStatusUpdate = onStatusUpdate || null;
@@ -39,10 +40,12 @@ class AudioService {
         this.onStatusUpdate,
       );
 
+      console.log("✅ Sound created successfully");
       this.sound = sound;
       return true;
     } catch (error) {
-      console.error("Error loading track:", error);
+      console.error("❌ Error loading track:", error);
+      console.error("❌ URI was:", track.uri);
       return false;
     }
   }
