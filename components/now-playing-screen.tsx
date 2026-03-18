@@ -3,6 +3,7 @@ import { usePlayer } from "@/hooks/use-player";
 import { RepeatMode } from "@/types/player";
 import Slider from "@react-native-community/slider";
 import {
+  ChevronDown,
   ListMusic,
   Pause,
   Play,
@@ -11,16 +12,15 @@ import {
   SkipBack,
   SkipForward,
   Volume2,
-  X,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 
 interface NowPlayingScreenProps {
-  onClose: () => void;
+  onMinimize: () => void;
 }
 
-export function NowPlayingScreen({ onClose }: NowPlayingScreenProps) {
+export function NowPlayingScreen({ onMinimize }: NowPlayingScreenProps) {
   const { state, controls } = usePlayer();
   const [localPosition, setLocalPosition] = useState(0);
 
@@ -40,16 +40,22 @@ export function NowPlayingScreen({ onClose }: NowPlayingScreenProps) {
     setLocalPosition(positionMs);
   };
 
+  const handleRepeatPress = () => {
+    const modes: RepeatMode[] = ["off", "all", "one"];
+    const currentIndex = modes.indexOf(state.repeatMode);
+    controls.setRepeatMode(modes[(currentIndex + 1) % modes.length]);
+  };
+
   if (!state.currentTrack) return null;
 
   return (
     <View className="flex-1 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 pt-14 pb-4">
-        <TouchableOpacity onPress={onClose} className="p-2">
-          <X size={24} color="#FFFFFF" />
+      <View className="flex-row items-center justify-between px-4 py-4">
+        <TouchableOpacity onPress={onMinimize} className="p-2">
+          <ChevronDown size={28} color="#FFFFFF" />
         </TouchableOpacity>
-        <StyledText weight="semibold" className="text-white">
+        <StyledText weight="semibold" className="text-white text-sm">
           NOW PLAYING
         </StyledText>
         <TouchableOpacity className="p-2">
@@ -59,39 +65,39 @@ export function NowPlayingScreen({ onClose }: NowPlayingScreenProps) {
 
       {/* Album Art */}
       <View className="flex-1 items-center justify-center px-8">
-        <View className="w-72 h-72 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center shadow-2xl">
-          {state.currentTrack.coverArt ? (
+        <View className="w-72 h-72 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center shadow-2xl overflow-hidden">
+          {state.currentTrack?.coverArt ? (
             <Image
               source={{ uri: state.currentTrack.coverArt }}
-              className="w-full h-full rounded-2xl"
+              className="w-full h-full"
               resizeMode="cover"
             />
           ) : (
-            <Volume2 size={80} color="#FFFFFF" opacity={0.5} />
+            <View className="items-center justify-center">
+              <Volume2 size={80} color="#FFFFFF" opacity={0.5} />
+            </View>
           )}
         </View>
       </View>
 
       {/* Track Info */}
       <View className="px-8 mb-6">
-        <View className="flex-row items-center justify-between mb-2">
-          <View className="flex-1">
-            <StyledText
-              variant="title"
-              weight="bold"
-              className="text-white text-xl"
-              numberOfLines={1}
-            >
-              {state.currentTrack.title}
-            </StyledText>
-            <StyledText className="text-gray-400" numberOfLines={1}>
-              {state.currentTrack.artist || "Unknown Artist"}
-            </StyledText>
-          </View>
+        <View className="mb-6">
+          <StyledText
+            variant="title"
+            weight="bold"
+            className="text-white text-xl mb-1"
+            numberOfLines={1}
+          >
+            {state.currentTrack.title}
+          </StyledText>
+          <StyledText className="text-gray-400" numberOfLines={1}>
+            {state.currentTrack.artist || "Unknown Artist"}
+          </StyledText>
         </View>
 
         {/* Progress Bar */}
-        <View className="mt-6">
+        <View className="mb-6">
           <Slider
             value={localPosition / 1000}
             minimumValue={0}
@@ -113,11 +119,8 @@ export function NowPlayingScreen({ onClose }: NowPlayingScreenProps) {
         </View>
 
         {/* Controls */}
-        <View className="flex-row items-center justify-center mt-6 gap-8">
-          <TouchableOpacity
-            onPress={controls.toggleShuffle}
-            className={`p-3 ${state.isShuffled ? "text-blue-500" : ""}`}
-          >
+        <View className="flex-row items-center justify-center gap-6 mb-8">
+          <TouchableOpacity onPress={controls.toggleShuffle} className="p-3">
             <Shuffle
               size={24}
               color={state.isShuffled ? "#0A7EA4" : "#9CA3AF"}
@@ -144,14 +147,7 @@ export function NowPlayingScreen({ onClose }: NowPlayingScreenProps) {
             <SkipForward size={32} color="#FFFFFF" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              const modes: RepeatMode[] = ["off", "all", "one"];
-              const currentIndex = modes.indexOf(state.repeatMode);
-              controls.setRepeatMode(modes[(currentIndex + 1) % modes.length]);
-            }}
-            className="p-3"
-          >
+          <TouchableOpacity onPress={handleRepeatPress} className="p-3">
             <Repeat
               size={24}
               color={state.repeatMode !== "off" ? "#0A7EA4" : "#9CA3AF"}

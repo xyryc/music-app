@@ -1,5 +1,4 @@
 import { MiniPlayer } from "@/components/mini-player";
-import { NowPlayingScreen } from "@/components/now-playing-screen";
 import { StyledText } from "@/components/styled-text";
 import { TrackItem } from "@/components/track-item";
 import { usePlayer } from "@/hooks/use-player";
@@ -8,13 +7,12 @@ import { Track } from "@/types/track";
 import { useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 
 export default function LibraryScreen() {
   const router = useRouter();
   const { state, controls } = usePlayer();
   const [library, setLibrary] = useState<Track[]>([]);
-  const [showNowPlaying, setShowNowPlaying] = useState(false);
 
   const loadLibrary = useCallback(async () => {
     const tracks = await storageService.getLibrary();
@@ -25,12 +23,20 @@ export default function LibraryScreen() {
     loadLibrary();
   }, [loadLibrary]);
 
-  const handlePlayTrack = (track: Track) => {
-    controls.play(track, library);
+  const handlePlayTrack = async (track: Track) => {
+    await controls.play(track, library);
+    // Navigate to player screen after track starts playing
+    setTimeout(() => {
+      router.push("/player");
+    }, 300);
   };
 
   const handleImport = () => {
     router.push("/import");
+  };
+
+  const openPlayer = () => {
+    router.push("/player");
   };
 
   if (library.length === 0) {
@@ -75,18 +81,7 @@ export default function LibraryScreen() {
           </TouchableOpacity>
         </View>
 
-        {state.currentTrack && (
-          <MiniPlayer onPress={() => setShowNowPlaying(true)} />
-        )}
-
-        <Modal
-          visible={showNowPlaying}
-          animationType="slide"
-          presentationStyle="fullScreen"
-          onRequestClose={() => setShowNowPlaying(false)}
-        >
-          <NowPlayingScreen onClose={() => setShowNowPlaying(false)} />
-        </Modal>
+        {state.currentTrack && <MiniPlayer onPress={openPlayer} />}
       </View>
     );
   }
@@ -119,18 +114,7 @@ export default function LibraryScreen() {
         ))}
       </ScrollView>
 
-      {state.currentTrack && (
-        <MiniPlayer onPress={() => setShowNowPlaying(true)} />
-      )}
-
-      <Modal
-        visible={showNowPlaying}
-        animationType="slide"
-        presentationStyle="fullScreen"
-        onRequestClose={() => setShowNowPlaying(false)}
-      >
-        <NowPlayingScreen onClose={() => setShowNowPlaying(false)} />
-      </Modal>
+      {state.currentTrack && <MiniPlayer onPress={openPlayer} />}
     </View>
   );
 }

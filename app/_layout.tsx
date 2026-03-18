@@ -17,6 +17,14 @@ export default function RootLayout() {
             presentation: "card",
           }}
         />
+        <Stack.Screen
+          name="player"
+          options={{
+            headerShown: false,
+            presentation: "card",
+            animation: "slide_from_bottom",
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </GestureHandlerRootView>

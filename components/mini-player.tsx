@@ -1,7 +1,7 @@
-import { View, TouchableOpacity, ActivityIndicator } from "react-native";
 import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/hooks/use-player";
-import { Play, Pause, Music } from "lucide-react-native";
+import { Music, Pause, Play } from "lucide-react-native";
+import { TouchableOpacity, View } from "react-native";
 
 interface MiniPlayerProps {
   onPress: () => void;
@@ -29,7 +29,11 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           <StyledText weight="semibold" numberOfLines={1}>
             {state.currentTrack.title}
           </StyledText>
-          <StyledText variant="caption" className="text-gray-500" numberOfLines={1}>
+          <StyledText
+            variant="caption"
+            className="text-gray-500"
+            numberOfLines={1}
+          >
             {state.currentTrack.artist || "Unknown Artist"}
           </StyledText>
         </View>
@@ -56,9 +60,7 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           className="h-full bg-blue-500 rounded-full"
           style={{
             width: `${
-              state.duration > 0
-                ? (state.position / state.duration) * 100
-                : 0
+              state.duration > 0 ? (state.position / state.duration) * 100 : 0
             }%`,
           }}
         />
