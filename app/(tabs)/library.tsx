@@ -24,7 +24,6 @@ export default function LibraryScreen() {
   }, [loadLibrary]);
 
   const handlePlayTrack = async (track: Track) => {
-    console.log("Playing track:", track.title);
     await controls.play(track, library);
 
     // Navigate with full track data as params

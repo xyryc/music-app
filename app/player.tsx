@@ -1,7 +1,6 @@
 import { NowPlayingScreen } from "@/components/now-playing-screen";
 import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/hooks/use-player";
-import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -13,10 +12,11 @@ export default function PlayerScreen() {
   const { state, controls } = usePlayer();
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    // Priority 1: Use track from params if available
-    if (params.trackUri) {
+    // Priority 1: Use track from params if available and not already loaded
+    if (params.trackUri && !hasLoaded) {
       const track: Track = {
         id: params.trackId as string,
         title: params.trackTitle as string,
@@ -28,9 +28,7 @@ export default function PlayerScreen() {
         playCount: 0,
       };
       setCurrentTrack(track);
-
-      // Also start playing it via controls
-      controls.play(track);
+      setHasLoaded(true);
       setIsLoading(false);
       return;
     }
@@ -42,29 +40,8 @@ export default function PlayerScreen() {
       return;
     }
 
-    // Priority 3: Try to load from library by trackId
-    if (params.trackId && !state.currentTrack) {
-      loadTrackFromLibrary(params.trackId as string);
-      return;
-    }
-
     setIsLoading(false);
-  }, [params.trackUri, params.trackId, state.currentTrack]);
-
-  const loadTrackFromLibrary = async (trackId: string) => {
-    try {
-      const library = await storageService.getLibrary();
-      const track = library.find((t) => t.id === trackId);
-
-      if (track) {
-        setCurrentTrack(track);
-        controls.play(track);
-      }
-    } catch (error) {
-      console.error("Error loading track:", error);
-    }
-    setIsLoading(false);
-  };
+  }, [params.trackUri, params.trackId, state.currentTrack, hasLoaded]);
 
   const handleMinimize = () => {
     router.back();

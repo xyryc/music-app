@@ -113,25 +113,15 @@ export function usePlayer() {
           trackToPlay,
           handleStatusUpdate,
         );
-        console.log("🎯 Track loaded result:", loaded);
         if (loaded) {
-          console.log("▶️ Calling audioService.play()...");
-          const playResult = await audioService.play();
-          console.log("▶️ Play result:", playResult);
-
-          console.log("🔊 Setting volume:", state.volume);
+          await audioService.play();
           await audioService.setVolume(state.volume);
 
-          console.log("📝 Updating state with track:", trackToPlay.title);
-          setState((prev) => {
-            console.log("📝 State updater called");
-            return {
-              ...prev,
-              currentTrack: trackToPlay,
-              isPlaying: true,
-            };
-          });
-          console.log("✅ State update complete");
+          setState((prev) => ({
+            ...prev,
+            currentTrack: trackToPlay,
+            isPlaying: true,
+          }));
 
           const library = await storageService.getLibrary();
           const updatedLibrary = library.map((t) =>
@@ -140,9 +130,6 @@ export function usePlayer() {
               : t,
           );
           await storageService.saveLibrary(updatedLibrary);
-          console.log("📚 Library updated");
-        } else {
-          console.log("❌ Track failed to load");
         }
       } catch (error) {
         console.error("Error playing track:", error);
