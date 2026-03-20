@@ -22,6 +22,7 @@ const defaultPlayerState: PlayerState = {
 export function usePlayer() {
   const [state, setState] = useState<PlayerState>(defaultPlayerState);
   const statusUpdateRef = useRef<number | null>(null);
+  const currentTrackRef = useRef<Track | null>(null);
 
   useEffect(() => {
     audioService.initialize();
@@ -88,11 +89,30 @@ export function usePlayer() {
 
   const play = useCallback(
     async (track?: Track, queue?: Track[]) => {
+      console.log(
+        "play() called with track:",
+        track?.title,
+        "state.currentTrack:",
+        state.currentTrack?.title,
+        "ref.currentTrack:",
+        currentTrackRef.current?.title,
+      );
       try {
-        let trackToPlay = track || state.currentTrack;
+        // Use the track parameter first
+        let trackToPlay = track;
         let queueToUse = queue || state.queue;
 
-        if (!trackToPlay) return;
+        // If no track passed, try state.currentTrack, then ref
+        if (!trackToPlay) {
+          trackToPlay =
+            state.currentTrack ?? currentTrackRef.current ?? undefined;
+          console.log("Using fallback track:", trackToPlay?.title);
+        }
+
+        if (!trackToPlay) {
+          console.log("No track to play!");
+          return;
+        }
 
         if (queue || (track && !state.queue.some((t) => t.id === track.id))) {
           if (!queue && track) {
@@ -114,14 +134,27 @@ export function usePlayer() {
           handleStatusUpdate,
         );
         if (loaded) {
-          await audioService.play();
-          await audioService.setVolume(state.volume);
+          console.log("About to setState, trackToPlay:", trackToPlay.title);
+          // Update ref for immediate access in callbacks
+          currentTrackRef.current = trackToPlay;
 
-          setState((prev) => ({
-            ...prev,
-            currentTrack: trackToPlay,
-            isPlaying: true,
-          }));
+          setState((prev) => {
+            console.log(
+              "setState callback called, prev.currentTrack:",
+              prev.currentTrack?.title,
+            );
+            const newState = {
+              ...prev,
+              currentTrack: trackToPlay,
+              isPlaying: true,
+            };
+            console.log(
+              "New state currentTrack:",
+              newState.currentTrack?.title,
+            );
+            return newState;
+          });
+          console.log("setState completed");
 
           const library = await storageService.getLibrary();
           const updatedLibrary = library.map((t) =>
@@ -148,10 +181,21 @@ export function usePlayer() {
   }, []);
 
   const togglePlayPause = useCallback(async () => {
+    console.log(
+      "togglePlayPause called, isPlaying:",
+      state.isPlaying,
+      "currentTrack:",
+      state.currentTrack?.title,
+      "ref:",
+      currentTrackRef.current?.title,
+    );
     if (state.isPlaying) {
+      console.log("Pausing...");
       await pause();
     } else {
-      await play();
+      console.log("Playing...");
+      // Pass the track from ref if state doesn't have it
+      await play(currentTrackRef.current || undefined);
     }
   }, [state.isPlaying, pause, play]);
 

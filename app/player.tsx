@@ -30,6 +30,9 @@ export default function PlayerScreen() {
       setCurrentTrack(track);
       setHasLoaded(true);
       setIsLoading(false);
+
+      // CRITICAL: Also load it into global player state so controls work
+      controls.play(track);
       return;
     }
 
@@ -41,7 +44,13 @@ export default function PlayerScreen() {
     }
 
     setIsLoading(false);
-  }, [params.trackUri, params.trackId, state.currentTrack, hasLoaded]);
+  }, [
+    params.trackUri,
+    params.trackId,
+    state.currentTrack,
+    hasLoaded,
+    controls,
+  ]);
 
   const handleMinimize = () => {
     router.back();

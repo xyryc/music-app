@@ -48,6 +48,14 @@ export function NowPlayingScreen({
     setLocalPosition(positionMs);
   };
 
+  const handlePlayPause = async () => {
+    console.log("Play/Pause pressed");
+    console.log("Current isPlaying:", state.isPlaying);
+    console.log("Current track:", currentTrack?.title);
+    await controls.togglePlayPause();
+    console.log("After toggle, isPlaying:", state.isPlaying);
+  };
+
   const handleRepeatPress = () => {
     const modes: RepeatMode[] = ["off", "all", "one"];
     const currentIndex = modes.indexOf(state.repeatMode);
@@ -147,7 +155,7 @@ export function NowPlayingScreen({
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={controls.togglePlayPause}
+            onPress={handlePlayPause}
             className="w-20 h-20 rounded-full bg-white items-center justify-center"
           >
             {state.isPlaying ? (
