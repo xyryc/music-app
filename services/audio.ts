@@ -69,11 +69,12 @@ class AudioService {
       console.log("audioService.play() called, sound exists:", !!this.sound);
       if (this.sound) {
         const status = await this.sound.getStatusAsync();
-        if (status.isLoaded && !status.isPlaying) {
+        console.log("audioService.play() status:", status?.isLoaded, status?.isPlaying);
+        if (status.isLoaded) {
           await this.sound.playAsync();
           console.log("audioService.playAsync() completed");
+          return true;
         }
-        return true;
       }
       console.log("audioService.play() failed: no sound instance");
       return false;

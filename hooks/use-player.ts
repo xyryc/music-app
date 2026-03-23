@@ -237,10 +237,13 @@ export function usePlayer() {
       await pause();
     } else {
       console.log("Playing...");
-      // Pass the track from ref if state doesn't have it
-      await play(currentTrackRef.current || undefined);
+      // Directly resume playback using audioService
+      const success = await audioService.play();
+      if (success) {
+        setState(prev => ({ ...prev, isPlaying: true }));
+      }
     }
-  }, [state.isPlaying, pause, play]);
+  }, [state.isPlaying, pause]);
 
   const stop = useCallback(async () => {
     try {
