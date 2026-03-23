@@ -2,7 +2,7 @@ import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/contexts/player-provider";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Music, Pause, Play } from "lucide-react-native";
+import { Music, Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
 import { TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
 
@@ -16,40 +16,58 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
 
   if (!state.currentTrack) return null;
 
+  const formatTime = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
-      className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3 shadow-lg"
+      className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg"
     >
-      <View className="flex-row items-center">
-        {/* Track Cover / Placeholder */}
-        {state.currentTrack.coverArt ? (
-          <Image
-            source={{ uri: state.currentTrack.coverArt }}
-            placeholder={state.currentTrack.coverArtBlurhash}
-            style={{ width: 48, height: 48, borderRadius: 8, marginRight: 16 }}
-            contentFit="cover"
-            transition={200}
-          />
-        ) : (
-          <LinearGradient
-            colors={
-              colorScheme === "dark"
-                ? ["#1f2937", "#111827", "#000000"]
-                : ["#f3f4f6", "#e5e7eb", "#ffffff"]
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
-          >
-            <Music size={20} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
-          </LinearGradient>
-        )}
+      <View className="h-1 bg-gray-200 dark:bg-gray-800 w-full">
+        <View
+          className="h-full bg-blue-500"
+          style={{
+            width: `${
+              state.duration > 0 ? (state.position / state.duration) * 100 : 0
+            }%`,
+          }}
+        />
+      </View>
 
-        {/* Track Info */}
-        <View className="flex-1">
-          <StyledText weight="semibold" numberOfLines={1}>
+      <View className="flex-row items-center px-4 py-3">
+        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+          {state.currentTrack.coverArt ? (
+            <Image
+              source={{ uri: state.currentTrack.coverArt }}
+              placeholder={state.currentTrack.coverArtBlurhash}
+              style={{ width: 48, height: 48, borderRadius: 8, marginRight: 12 }}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : (
+            <LinearGradient
+              colors={
+                colorScheme === "dark"
+                  ? ["#1f2937", "#111827", "#000000"]
+                  : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+              }
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="items-center justify-center"
+              style={{ width: 48, height: 48, borderRadius: 8, marginRight: 12 }}
+            >
+              <Music size={20} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
+            </LinearGradient>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="flex-1">
+          <StyledText weight="semibold" numberOfLines={1} className="text-base">
             {state.currentTrack.title}
           </StyledText>
           <StyledText
@@ -59,34 +77,52 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           >
             {state.currentTrack.artist || "Unknown Artist"}
           </StyledText>
-        </View>
-
-        {/* Play/Pause Button */}
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation();
-            controls.togglePlayPause();
-          }}
-          className="w-10 h-10 items-center justify-center"
-        >
-          {state.isPlaying ? (
-            <Pause size={24} color={colorScheme === "dark" ? "#0A7EA4" : "#000000"} />
-          ) : (
-            <Play size={24} color={colorScheme === "dark" ? "#0A7EA4" : "#000000"} style={{ marginLeft: 4 }} />
-          )}
         </TouchableOpacity>
+
+        <View className="flex-row items-center ml-2">
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              controls.playPrevious();
+            }}
+            className="w-10 h-10 items-center justify-center mr-1"
+          >
+            <SkipBack size={22} color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              controls.togglePlayPause();
+            }}
+            className="w-10 h-10 rounded-full bg-blue-500 items-center justify-center mr-1"
+          >
+            {state.isPlaying ? (
+              <Pause size={22} color="#FFFFFF" />
+            ) : (
+              <Play size={22} color="#FFFFFF" style={{ marginLeft: 2 }} />
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              controls.playNext();
+            }}
+            className="w-10 h-10 items-center justify-center"
+          >
+            <SkipForward size={22} color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"} />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Progress Bar */}
-      <View className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
-        <View
-          className="h-full bg-blue-500 rounded-full"
-          style={{
-            width: `${
-              state.duration > 0 ? (state.position / state.duration) * 100 : 0
-            }%`,
-          }}
-        />
+      <View className="flex-row justify-between px-4 pb-2">
+        <StyledText variant="caption" className="text-gray-400">
+          {formatTime(state.position)}
+        </StyledText>
+        <StyledText variant="caption" className="text-gray-400">
+          {formatTime(state.duration)}
+        </StyledText>
       </View>
     </TouchableOpacity>
   );
