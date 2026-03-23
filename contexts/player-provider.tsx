@@ -21,12 +21,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     [player.state, player.controls],
   );
 
-  console.log(
-    "PlayerProvider: state.currentTrack =",
-    contextValue.state.currentTrack?.title,
-  );
-  console.log("PlayerProvider: isPlaying =", contextValue.state.isPlaying);
-
   return (
     <PlayerContext.Provider value={contextValue}>
       {children}
@@ -39,9 +33,5 @@ export function usePlayer() {
   if (context === undefined) {
     throw new Error("usePlayer must be used within a PlayerProvider");
   }
-  console.log(
-    "usePlayer() called, returning track:",
-    context.state.currentTrack?.title,
-  );
   return context;
 }

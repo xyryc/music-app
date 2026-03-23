@@ -29,7 +29,7 @@ export function usePlayer() {
     return () => {
       audioService.unload();
       if (statusUpdateRef.current) {
-        window.clearInterval(statusUpdateRef.current);
+        clearInterval(statusUpdateRef.current);
       }
     };
   }, []);
@@ -43,30 +43,28 @@ export function usePlayer() {
       position: status.positionMillis || 0,
       duration: status.durationMillis || 0,
     }));
-
-    if (status.didJustFinish && !status.isPlaying) {
-      handleTrackEnd();
-    }
   }, []);
 
   useEffect(() => {
-    if (state.isPlaying) {
-      statusUpdateRef.current = window.setInterval(async () => {
-        const status = await audioService.getStatus();
-        if (status && "isPlaying" in status) {
-          handleStatusUpdate(status as PlaybackStatus);
-        }
-      }, 1000);
-    } else if (statusUpdateRef.current) {
-      window.clearInterval(statusUpdateRef.current);
-    }
+    const id = setInterval(async () => {
+      const status = await audioService.getStatus();
+      if (status && status.isLoaded) {
+        setState((prev) => ({
+          ...prev,
+          isPlaying: status.isPlaying,
+          position: status.positionMillis || 0,
+          duration: status.durationMillis || 0,
+        }));
+      }
+    }, 500);
+    statusUpdateRef.current = id;
 
     return () => {
       if (statusUpdateRef.current) {
-        window.clearInterval(statusUpdateRef.current);
+        clearInterval(statusUpdateRef.current);
       }
     };
-  }, [state.isPlaying, handleStatusUpdate]);
+  }, []);
 
   const handleTrackEnd = useCallback(() => {
     setState((prev) => {
@@ -80,7 +78,46 @@ export function usePlayer() {
         prev.repeatMode === "all" ||
         prev.queueIndex < prev.queue.length - 1
       ) {
-        setTimeout(() => playNext(), 0);
+        const nextIndex = prev.queueIndex + 1;
+        if (nextIndex < prev.queue.length) {
+          const nextTrack = prev.queue[nextIndex];
+          audioService.loadTrack(nextTrack, (status) => {
+            if (status.isLoaded) {
+              setState((s) => ({
+                ...s,
+                isPlaying: status.isPlaying,
+                position: status.positionMillis || 0,
+                duration: status.durationMillis || 0,
+              }));
+            }
+          });
+          audioService.play();
+          return {
+            ...prev,
+            currentTrack: nextTrack,
+            queueIndex: nextIndex,
+            isPlaying: true,
+          };
+        } else if (prev.repeatMode === "all") {
+          const firstTrack = prev.queue[0];
+          audioService.loadTrack(firstTrack, (status) => {
+            if (status.isLoaded) {
+              setState((s) => ({
+                ...s,
+                isPlaying: status.isPlaying,
+                position: status.positionMillis || 0,
+                duration: status.durationMillis || 0,
+              }));
+            }
+          });
+          audioService.play();
+          return {
+            ...prev,
+            currentTrack: firstTrack,
+            queueIndex: 0,
+            isPlaying: true,
+          };
+        }
       }
 
       return prev;
@@ -229,7 +266,7 @@ export function usePlayer() {
     setState((prev) => ({ ...prev, volume: normalizedVolume }));
   }, []);
 
-  const playNext = useCallback(async () => {
+  const playNext = useCallback(() => {
     setState((prev) => {
       const nextIndex = prev.queueIndex + 1;
       if (nextIndex < prev.queue.length) {

@@ -15,7 +15,7 @@ import {
   SkipForward,
   Volume2,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 
 interface NowPlayingScreenProps {
@@ -28,14 +28,7 @@ export function NowPlayingScreen({
   initialTrack,
 }: NowPlayingScreenProps) {
   const { state, controls } = usePlayer();
-  const [localPosition, setLocalPosition] = useState(0);
-
-  // Use state.currentTrack as the source of truth, fall back to initialTrack
   const currentTrack = state.currentTrack || initialTrack;
-
-  useEffect(() => {
-    setLocalPosition(currentTrack ? state.position : 0);
-  }, [state.position, currentTrack]);
 
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -46,7 +39,6 @@ export function NowPlayingScreen({
   const handleSeek = (value: number) => {
     const positionMs = value * 1000;
     controls.seek(positionMs);
-    setLocalPosition(positionMs);
   };
 
   const handlePlayPause = async () => {
@@ -128,7 +120,7 @@ export function NowPlayingScreen({
           {/* Progress Bar */}
           <View className="mb-8">
             <Slider
-              value={localPosition / 1000}
+              value={state.position / 1000}
               minimumValue={0}
               maximumValue={state.duration / 1000 || 100}
               onValueChange={handleSeek}
@@ -139,7 +131,7 @@ export function NowPlayingScreen({
             />
             <View className="flex-row justify-between mt-1">
               <StyledText variant="caption" className="text-gray-500 font-medium">
-                {formatTime(localPosition)}
+                {formatTime(state.position)}
               </StyledText>
               <StyledText variant="caption" className="text-gray-500 font-medium">
                 {formatTime(state.duration)}
