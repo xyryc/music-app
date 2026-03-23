@@ -3,6 +3,7 @@ import { usePlayer } from "@/hooks/use-player";
 import { RepeatMode } from "@/types/player";
 import { Track } from "@/types/track";
 import Slider from "@react-native-community/slider";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   ChevronDown,
   ListMusic,
@@ -29,8 +30,8 @@ export function NowPlayingScreen({
   const { state, controls } = usePlayer();
   const [localPosition, setLocalPosition] = useState(0);
 
-  // Use initialTrack if provided, otherwise use state.currentTrack
-  const currentTrack = initialTrack || state.currentTrack;
+  // Use state.currentTrack as the source of truth, fall back to initialTrack
+  const currentTrack = state.currentTrack || initialTrack;
 
   useEffect(() => {
     setLocalPosition(currentTrack ? state.position : 0);
@@ -49,11 +50,8 @@ export function NowPlayingScreen({
   };
 
   const handlePlayPause = async () => {
-    console.log("Play/Pause pressed");
-    console.log("Current isPlaying:", state.isPlaying);
-    console.log("Current track:", currentTrack?.title);
+    console.log("=== handlePlayPause ===");
     await controls.togglePlayPause();
-    console.log("After toggle, isPlaying:", state.isPlaying);
   };
 
   const handleRepeatPress = () => {
@@ -64,120 +62,128 @@ export function NowPlayingScreen({
 
   if (!currentTrack) {
     return (
-      <View className="flex-1 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 items-center justify-center">
+      <View style={{ flex: 1, backgroundColor: "#111827" }} className="items-center justify-center">
         <StyledText className="text-white text-lg">No track playing</StyledText>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-4">
-        <TouchableOpacity onPress={onMinimize} className="p-2">
-          <ChevronDown size={28} color="#FFFFFF" />
-        </TouchableOpacity>
-        <StyledText weight="semibold" className="text-white text-sm">
-          NOW PLAYING
-        </StyledText>
-        <TouchableOpacity className="p-2">
-          <ListMusic size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Album Art */}
-      <View className="flex-1 items-center justify-center px-8">
-        <View className="w-72 h-72 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center shadow-2xl overflow-hidden">
-          {currentTrack.coverArt ? (
-            <Image
-              source={{ uri: currentTrack.coverArt }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
-          ) : (
-            <View className="items-center justify-center">
-              <Volume2 size={80} color="#FFFFFF" opacity={0.5} />
-            </View>
-          )}
+    <LinearGradient
+      colors={["#1f2937", "#111827", "#000000"]}
+      style={{ flex: 1 }}
+    >
+      <View style={{ flex: 1 }}>
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-4 py-4 mt-8">
+          <TouchableOpacity onPress={onMinimize} className="p-2">
+            <ChevronDown size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+          <StyledText weight="semibold" className="text-white text-sm">
+            NOW PLAYING
+          </StyledText>
+          <TouchableOpacity className="p-2">
+            <ListMusic size={24} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Track Info */}
-      <View className="px-8 mb-6">
-        <View className="mb-6">
-          <StyledText
-            variant="title"
-            weight="bold"
-            className="text-white text-xl mb-1"
-            numberOfLines={1}
+        {/* Album Art */}
+        <View className="flex-1 items-center justify-center px-8">
+          <LinearGradient
+            colors={["#3b82f6", "#9333ea"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="w-72 h-72 rounded-3xl items-center justify-center shadow-2xl overflow-hidden"
           >
-            {currentTrack.title}
-          </StyledText>
-          <StyledText className="text-gray-400" numberOfLines={1}>
-            {currentTrack.artist || "Unknown Artist"}
-          </StyledText>
+            {currentTrack.coverArt ? (
+              <Image
+                source={{ uri: currentTrack.coverArt }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="items-center justify-center">
+                <Volume2 size={80} color="#FFFFFF" opacity={0.5} />
+              </View>
+            )}
+          </LinearGradient>
         </View>
 
-        {/* Progress Bar */}
-        <View className="mb-6">
-          <Slider
-            value={localPosition / 1000}
-            minimumValue={0}
-            maximumValue={state.duration / 1000 || 100}
-            onValueChange={handleSeek}
-            minimumTrackTintColor="#0A7EA4"
-            maximumTrackTintColor="#4B5563"
-            thumbTintColor="#0A7EA4"
-            className="h-12"
-          />
-          <View className="flex-row justify-between mt-2">
-            <StyledText variant="caption" className="text-gray-400">
-              {formatTime(localPosition)}
+        {/* Track Info */}
+        <View className="px-8 mb-10">
+          <View className="mb-8">
+            <StyledText
+              variant="title"
+              weight="bold"
+              className="text-white text-2xl mb-2"
+              numberOfLines={1}
+            >
+              {currentTrack.title}
             </StyledText>
-            <StyledText variant="caption" className="text-gray-400">
-              {formatTime(state.duration)}
+            <StyledText className="text-gray-400 text-lg" numberOfLines={1}>
+              {currentTrack.artist || "Unknown Artist"}
             </StyledText>
           </View>
-        </View>
 
-        {/* Controls */}
-        <View className="flex-row items-center justify-center gap-6 mb-8">
-          <TouchableOpacity onPress={controls.toggleShuffle} className="p-3">
-            <Shuffle
-              size={24}
-              color={state.isShuffled ? "#0A7EA4" : "#9CA3AF"}
-              fill={state.isShuffled ? "#0A7EA4" : "none"}
+          {/* Progress Bar */}
+          <View className="mb-8">
+            <Slider
+              value={localPosition / 1000}
+              minimumValue={0}
+              maximumValue={state.duration / 1000 || 100}
+              onValueChange={handleSeek}
+              minimumTrackTintColor="#3b82f6"
+              maximumTrackTintColor="#4B5563"
+              thumbTintColor="#FFFFFF"
+              className="h-10"
             />
-          </TouchableOpacity>
+            <View className="flex-row justify-between mt-1">
+              <StyledText variant="caption" className="text-gray-500 font-medium">
+                {formatTime(localPosition)}
+              </StyledText>
+              <StyledText variant="caption" className="text-gray-500 font-medium">
+                {formatTime(state.duration)}
+              </StyledText>
+            </View>
+          </View>
 
-          <TouchableOpacity onPress={controls.playPrevious} className="p-3">
-            <SkipBack size={32} color="#FFFFFF" />
-          </TouchableOpacity>
+          {/* Controls */}
+          <View className="flex-row items-center justify-between px-2 mb-10">
+            <TouchableOpacity onPress={controls.toggleShuffle}>
+              <Shuffle
+                size={22}
+                color={state.isShuffled ? "#3b82f6" : "#9CA3AF"}
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={handlePlayPause}
-            className="w-20 h-20 rounded-full bg-white items-center justify-center"
-          >
-            {state.isPlaying ? (
-              <Pause size={36} color="#1A1A1A" />
-            ) : (
-              <Play size={36} color="#1A1A1A" style={{ marginLeft: 4 }} />
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity onPress={controls.playPrevious}>
+              <SkipBack size={36} color="#FFFFFF" />
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={controls.playNext} className="p-3">
-            <SkipForward size={32} color="#FFFFFF" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handlePlayPause}
+              className="w-20 h-20 rounded-full bg-white items-center justify-center shadow-lg"
+            >
+              {state.isPlaying ? (
+                <Pause size={36} color="#000000" />
+              ) : (
+                <Play size={36} color="#000000" style={{ marginLeft: 4 }} />
+              )}
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleRepeatPress} className="p-3">
-            <Repeat
-              size={24}
-              color={state.repeatMode !== "off" ? "#0A7EA4" : "#9CA3AF"}
-              fill={state.repeatMode !== "off" ? "#0A7EA4" : "none"}
-            />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={controls.playNext}>
+              <SkipForward size={36} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleRepeatPress}>
+              <Repeat
+                size={22}
+                color={state.repeatMode !== "off" ? "#3b82f6" : "#9CA3AF"}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }

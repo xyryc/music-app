@@ -1,5 +1,6 @@
 import { Track } from "@/types/track";
 import { Audio } from "expo-av";
+import { getInfoAsync } from "expo-file-system/legacy";
 
 type PlaybackStatus = any;
 
@@ -24,22 +25,37 @@ class AudioService {
   async loadTrack(
     track: Track,
     onStatusUpdate?: (status: PlaybackStatus) => void,
+    shouldPlay: boolean = true,
   ) {
     try {
       await this.unload();
 
       this.onStatusUpdate = onStatusUpdate || null;
 
+      console.log("audioService.loadTrack() loading:", track.title, "shouldPlay:", shouldPlay);
+
+      // Check if file exists if it's a local file
+      if (track.source === 'local' || track.uri.startsWith('file://')) {
+        const fileInfo = await getInfoAsync(track.uri);
+        if (!fileInfo.exists) {
+          console.error("❌ Audio file not found at URI:", track.uri);
+          throw new Error("Audio file not found. Please re-import the track.");
+        }
+      }
+
       const { sound } = await Audio.Sound.createAsync(
         { uri: track.uri },
         {
-          shouldPlay: false,
+          shouldPlay,
           isLooping: false,
+          volume: 1.0,
+          androidImplementation: 'MediaPlayer', // Use MediaPlayer for better local file support on some Android devices
         },
         this.onStatusUpdate,
       );
 
       this.sound = sound;
+      console.log("audioService.loadTrack() loaded successfully");
       return true;
     } catch (error) {
       console.error("❌ Error loading track:", error);
@@ -50,13 +66,19 @@ class AudioService {
 
   async play() {
     try {
+      console.log("audioService.play() called, sound exists:", !!this.sound);
       if (this.sound) {
-        await this.sound.playAsync();
+        const status = await this.sound.getStatusAsync();
+        if (status.isLoaded && !status.isPlaying) {
+          await this.sound.playAsync();
+          console.log("audioService.playAsync() completed");
+        }
         return true;
       }
+      console.log("audioService.play() failed: no sound instance");
       return false;
     } catch (error) {
-      console.error("Error playing:", error);
+      console.error("audioService.play() error:", error);
       return false;
     }
   }
@@ -172,8 +194,10 @@ class AudioService {
     }
   }
 
-  isPlaying(): boolean {
-    return false;
+  async isPlaying(): Promise<boolean> {
+    if (!this.sound) return false;
+    const status = await this.getStatus();
+    return status?.isPlaying || false;
   }
 }
 

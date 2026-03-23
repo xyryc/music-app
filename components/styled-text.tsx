@@ -10,10 +10,14 @@ interface StyledTextProps extends TextProps {
 export function StyledText({
   variant = 'default',
   weight = 'regular',
+  className = '',
   style,
   children,
   ...props
 }: StyledTextProps) {
+  // Check if a text color class is already provided in className
+  const hasColorClass = className.includes('text-');
+
   const getVariantClasses = () => {
     switch (variant) {
       case 'title':
@@ -42,9 +46,12 @@ export function StyledText({
     }
   };
 
+  // Only add a default text color if none is provided
+  const defaultColorClass = hasColorClass ? '' : 'text-gray-900 dark:text-gray-100';
+
   return (
     <Text
-      className={`text-foreground ${getVariantClasses()} ${getWeightClasses()}`}
+      className={`${defaultColorClass} ${getVariantClasses()} ${getWeightClasses()} ${className}`}
       style={style}
       {...props}
     >

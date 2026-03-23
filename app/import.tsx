@@ -3,6 +3,12 @@ import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
 import { Audio } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
+import {
+  documentDirectory,
+  makeDirectoryAsync,
+  copyAsync,
+  getInfoAsync,
+} from "expo-file-system/legacy";
 import { useRouter } from "expo-router";
 import { Link, Music, Upload, X } from "lucide-react-native";
 import { useState } from "react";
@@ -27,12 +33,16 @@ export default function ImportScreen() {
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri },
-        { shouldPlay: false },
+        { 
+          shouldPlay: false,
+          androidImplementation: 'MediaPlayer',
+        },
       );
       const status = await sound.getStatusAsync();
       await sound.unloadAsync();
       return (status as any).durationMillis || 0;
-    } catch {
+    } catch (error) {
+      console.error("Error getting duration:", error);
       return 0;
     }
   };
@@ -50,13 +60,44 @@ export default function ImportScreen() {
 
       setIsImporting(true);
 
+      const tracksDir = `${documentDirectory}tracks/`;
+      const dirInfo = await getInfoAsync(tracksDir);
+      if (!dirInfo.exists) {
+        await makeDirectoryAsync(tracksDir, { intermediates: true });
+      }
+
       for (const asset of result.assets) {
-        const duration = await getDurationFromUri(asset.uri);
+        // Verify source file exists
+        const assetInfo = await getInfoAsync(asset.uri);
+        if (!assetInfo.exists) {
+          console.error("Source file does not exist:", asset.uri);
+          continue;
+        }
+
+        const fileExt = asset.name.split(".").pop() || "mp3";
+        const fileName = `${generateId()}.${fileExt}`;
+        const permanentUri = `${tracksDir}${fileName}`;
+
+        // Copy from cache to permanent storage
+        await copyAsync({
+          from: asset.uri,
+          to: permanentUri,
+        });
+
+        // Verify copied file
+        const checkInfo = await getInfoAsync(permanentUri);
+        if (!checkInfo.exists || checkInfo.size === 0) {
+          console.error("Failed to copy file or file is empty:", permanentUri);
+          continue;
+        }
+
+        // Use the permanent URI to get duration and for playback
+        const duration = await getDurationFromUri(permanentUri);
 
         const track: Track = {
           id: generateId(),
           title: asset.name.replace(/\.[^/.]+$/, "") || "Unknown Track",
-          uri: asset.uri,
+          uri: permanentUri,
           source: "local",
           duration: duration,
           dateAdded: Date.now(),
