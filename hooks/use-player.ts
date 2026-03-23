@@ -130,7 +130,7 @@ export function usePlayer() {
         "play() called with track:",
         track?.title || "none",
         "currentTrack:",
-        currentTrackRef.current?.title || "none"
+        currentTrackRef.current?.title || "none",
       );
       try {
         let trackToPlay = track || currentTrackRef.current;
@@ -152,11 +152,14 @@ export function usePlayer() {
         }
 
         // If we are paused on this track, just play
-        if (currentTrackRef.current?.id === trackToPlay.id && !state.isPlaying) {
+        if (
+          currentTrackRef.current?.id === trackToPlay.id &&
+          !state.isPlaying
+        ) {
           console.log("Resuming current track");
           const success = await audioService.play();
           if (success) {
-            setState(prev => ({ ...prev, isPlaying: true }));
+            setState((prev) => ({ ...prev, isPlaying: true }));
           }
           return;
         }
@@ -165,19 +168,19 @@ export function usePlayer() {
 
         // Update queue if provided
         if (queue) {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             queue: queue,
-            queueIndex: queue.findIndex(t => t.id === trackToPlay!.id)
+            queueIndex: queue.findIndex((t) => t.id === trackToPlay!.id),
           }));
           await storageService.saveQueue(queue);
-        } else if (track && !state.queue.some(t => t.id === track.id)) {
+        } else if (track && !state.queue.some((t) => t.id === track.id)) {
           // Add single track to queue if not present
           const newQueue = [...state.queue, track];
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             queue: newQueue,
-            queueIndex: newQueue.length - 1
+            queueIndex: newQueue.length - 1,
           }));
           await storageService.saveQueue(newQueue);
         }
@@ -185,7 +188,7 @@ export function usePlayer() {
         const loaded = await audioService.loadTrack(
           trackToPlay,
           handleStatusUpdate,
-          true // shouldPlay
+          true, // shouldPlay
         );
 
         if (loaded) {
@@ -202,7 +205,7 @@ export function usePlayer() {
             const updatedLibrary = library.map((t) =>
               t.id === trackToPlay!.id
                 ? { ...t, playCount: t.playCount + 1, lastPlayed: Date.now() }
-                : t
+                : t,
             );
             await storageService.saveLibrary(updatedLibrary);
           });
@@ -211,7 +214,7 @@ export function usePlayer() {
         console.error("Error playing track:", error);
       }
     },
-    [state.queue, state.currentTrack, handleStatusUpdate]
+    [state.queue, state.currentTrack, handleStatusUpdate],
   );
 
   const pause = useCallback(async () => {
@@ -240,7 +243,7 @@ export function usePlayer() {
       // Directly resume playback using audioService
       const success = await audioService.play();
       if (success) {
-        setState(prev => ({ ...prev, isPlaying: true }));
+        setState((prev) => ({ ...prev, isPlaying: true }));
       }
     }
   }, [state.isPlaying, pause]);
@@ -269,7 +272,7 @@ export function usePlayer() {
     setState((prev) => ({ ...prev, volume: normalizedVolume }));
   }, []);
 
-  const playNext = useCallback(() => {
+  const playNext = useCallback(async (): Promise<void> => {
     setState((prev) => {
       const nextIndex = prev.queueIndex + 1;
       if (nextIndex < prev.queue.length) {
@@ -364,35 +367,38 @@ export function usePlayer() {
     }));
   }, []);
 
-  const controls = useMemo<PlayerControls>(() => ({
-    play,
-    pause,
-    togglePlayPause,
-    stop,
-    seek,
-    setVolume,
-    playNext,
-    playPrevious,
-    setRepeatMode,
-    toggleShuffle,
-    addToQueue,
-    removeFromQueue,
-    clearQueue,
-  }), [
-    play,
-    pause,
-    togglePlayPause,
-    stop,
-    seek,
-    setVolume,
-    playNext,
-    playPrevious,
-    setRepeatMode,
-    toggleShuffle,
-    addToQueue,
-    removeFromQueue,
-    clearQueue,
-  ]);
+  const controls = useMemo<PlayerControls>(
+    () => ({
+      play,
+      pause,
+      togglePlayPause,
+      stop,
+      seek,
+      setVolume,
+      playNext,
+      playPrevious,
+      setRepeatMode,
+      toggleShuffle,
+      addToQueue,
+      removeFromQueue,
+      clearQueue,
+    }),
+    [
+      play,
+      pause,
+      togglePlayPause,
+      stop,
+      seek,
+      setVolume,
+      playNext,
+      playPrevious,
+      setRepeatMode,
+      toggleShuffle,
+      addToQueue,
+      removeFromQueue,
+      clearQueue,
+    ],
+  );
 
   return { state, controls };
 }

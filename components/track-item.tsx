@@ -1,7 +1,8 @@
-import { View, TouchableOpacity } from "react-native";
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
-import { Music, MoreVertical } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { MoreVertical, Music } from "lucide-react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 
 interface TrackItemProps {
   track: Track;
@@ -10,7 +11,12 @@ interface TrackItemProps {
   isPlaying?: boolean;
 }
 
-export function TrackItem({ track, onPress, onMorePress, isPlaying }: TrackItemProps) {
+export function TrackItem({
+  track,
+  onPress,
+  onMorePress,
+  isPlaying,
+}: TrackItemProps) {
   const formatDuration = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -23,10 +29,23 @@ export function TrackItem({ track, onPress, onMorePress, isPlaying }: TrackItemP
       activeOpacity={0.7}
       className="flex-row items-center px-4 py-3 bg-white border-b border-gray-100"
     >
-      {/* Track Icon / Cover */}
-      <View className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 items-center justify-center mr-4">
-        <Music size={20} color="#FFFFFF" />
-      </View>
+      {/* Track Cover / Placeholder */}
+      {track.coverArt ? (
+        <Image
+          source={{ uri: track.coverArt }}
+          className="w-12 h-12 rounded-lg mr-4"
+          resizeMode="cover"
+        />
+      ) : (
+        <LinearGradient
+          colors={["#3B82F6", "#9333EA"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
+        >
+          <Music size={20} color="#FFFFFF" />
+        </LinearGradient>
+      )}
 
       {/* Track Info */}
       <View className="flex-1">

@@ -32,10 +32,15 @@ class AudioService {
 
       this.onStatusUpdate = onStatusUpdate || null;
 
-      console.log("audioService.loadTrack() loading:", track.title, "shouldPlay:", shouldPlay);
+      console.log(
+        "audioService.loadTrack() loading:",
+        track.title,
+        "shouldPlay:",
+        shouldPlay,
+      );
 
       // Check if file exists if it's a local file
-      if (track.source === 'local' || track.uri.startsWith('file://')) {
+      if (track.source === "local" || track.uri.startsWith("file://")) {
         const fileInfo = await getInfoAsync(track.uri);
         if (!fileInfo.exists) {
           console.error("❌ Audio file not found at URI:", track.uri);
@@ -49,7 +54,7 @@ class AudioService {
           shouldPlay,
           isLooping: false,
           volume: 1.0,
-          androidImplementation: 'MediaPlayer', // Use MediaPlayer for better local file support on some Android devices
+          androidImplementation: "MediaPlayer", // Use MediaPlayer for better local file support on some Android devices
         },
         this.onStatusUpdate,
       );
@@ -68,13 +73,9 @@ class AudioService {
     try {
       console.log("audioService.play() called, sound exists:", !!this.sound);
       if (this.sound) {
-        const status = await this.sound.getStatusAsync();
-        console.log("audioService.play() status:", status?.isLoaded, status?.isPlaying);
-        if (status.isLoaded) {
-          await this.sound.playAsync();
-          console.log("audioService.playAsync() completed");
-          return true;
-        }
+        await this.sound.playAsync();
+        console.log("audioService.playAsync() completed");
+        return true;
       }
       console.log("audioService.play() failed: no sound instance");
       return false;
