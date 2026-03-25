@@ -25,7 +25,7 @@ export function StyledText({
       case 'subtitle':
         return 'text-lg';
       case 'caption':
-        return 'text-sm text-gray-500';
+        return 'text-sm text-gray-500 dark:text-gray-400';
       case 'body':
         return 'text-base leading-relaxed';
       default:

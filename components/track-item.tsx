@@ -27,7 +27,7 @@ export function TrackItem({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className="flex-row items-center px-4 py-3 bg-white border-b border-gray-100"
+      className="flex-row items-center px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800"
     >
       {/* Track Cover / Placeholder */}
       {track.coverArt ? (
@@ -63,7 +63,7 @@ export function TrackItem({
 
       {/* Duration */}
       <View className="items-center mr-3">
-        <StyledText variant="caption" className="text-gray-400">
+        <StyledText variant="caption" className="text-gray-400 dark:text-gray-500">
           {formatDuration(track.duration)}
         </StyledText>
       </View>

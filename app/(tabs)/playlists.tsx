@@ -65,8 +65,8 @@ export default function PlaylistsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white border-b border-gray-200">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
+      <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <StyledText variant="title" weight="bold">
           Playlists
         </StyledText>
@@ -82,13 +82,13 @@ export default function PlaylistsScreen() {
       <ScrollView className="flex-1 p-4">
         {playlists.length === 0 ? (
           <View className="items-center justify-center mt-20">
-            <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center mb-4">
+            <View className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 items-center justify-center mb-4">
               <Music size={32} color="#9CA3AF" />
             </View>
             <StyledText weight="semibold" className="mb-2">
               No playlists yet
             </StyledText>
-            <StyledText variant="caption" className="text-gray-500 text-center">
+            <StyledText variant="caption" className="text-gray-500 dark:text-gray-400 text-center">
               Create your first playlist to organize your music
             </StyledText>
           </View>
@@ -97,9 +97,9 @@ export default function PlaylistsScreen() {
             {playlists.map((playlist) => (
               <View
                 key={playlist.id}
-                className="bg-white rounded-xl p-4 flex-row items-center"
+                className="bg-white dark:bg-gray-900 rounded-xl p-4 flex-row items-center"
               >
-                <View className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center mr-4">
+                <View className="w-14 h-14 rounded-lg bg-purple-500 items-center justify-center mr-4">
                   <Music size={24} color="#FFFFFF" />
                 </View>
                 <View className="flex-1">

@@ -51,8 +51,8 @@ export default function LibraryScreen() {
 
   if (library.length === 0) {
     return (
-      <View className="flex-1 bg-gray-50">
-        <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white border-b border-gray-200">
+      <View className="flex-1 bg-gray-50 dark:bg-gray-950">
+        <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <StyledText variant="title" weight="bold">
             Library
           </StyledText>
@@ -68,7 +68,7 @@ export default function LibraryScreen() {
         </View>
 
         <View className="flex-1 items-center justify-center px-8">
-          <View className="w-20 h-20 rounded-full bg-gray-200 items-center justify-center mb-4">
+          <View className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-800 items-center justify-center mb-4">
             <Music size={40} color="#9CA3AF" />
           </View>
           <StyledText
@@ -78,7 +78,7 @@ export default function LibraryScreen() {
           >
             Your library is empty
           </StyledText>
-          <StyledText variant="body" className="text-center text-gray-500 mb-6">
+          <StyledText variant="body" className="text-center text-gray-500 dark:text-gray-400 mb-6">
             Import songs from your device or add from URL to get started
           </StyledText>
           <TouchableOpacity
@@ -97,8 +97,8 @@ export default function LibraryScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white border-b border-gray-200">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
+      <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <StyledText variant="title" weight="bold">
           Library
         </StyledText>

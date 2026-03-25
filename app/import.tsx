@@ -165,11 +165,11 @@ export default function ImportScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <View className="flex-row items-center px-4 pt-14 pb-4 bg-white border-b border-gray-200">
+      <View className="flex-row items-center px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
-          <X size={24} color="#1A1A1A" />
+          <X size={24} color="#9CA3AF" />
         </TouchableOpacity>
         <StyledText variant="title" weight="bold">
           Import Music
@@ -178,7 +178,7 @@ export default function ImportScreen() {
 
       <ScrollView className="flex-1 p-4">
         {/* Import from File */}
-        <View className="bg-white rounded-xl p-6 mb-4 shadow-sm">
+        <View className="bg-white dark:bg-gray-900 rounded-xl p-6 mb-4 shadow-sm">
           <View className="flex-row items-center mb-4">
             <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mr-4">
               <Upload size={24} color="#0A7EA4" />
@@ -204,7 +204,7 @@ export default function ImportScreen() {
         </View>
 
         {/* Import from URL */}
-        <View className="bg-white rounded-xl p-6 mb-4 shadow-sm">
+        <View className="bg-white dark:bg-gray-900 rounded-xl p-6 mb-4 shadow-sm">
           <View className="flex-row items-center mb-4">
             <View className="w-12 h-12 rounded-full bg-purple-100 items-center justify-center mr-4">
               <Link size={24} color="#7C3AED" />
@@ -224,7 +224,7 @@ export default function ImportScreen() {
             onChangeText={setUrl}
             placeholder="https://example.com/song.mp3"
             placeholderTextColor="#9CA3AF"
-            className="bg-gray-100 rounded-lg px-4 py-3 mb-3 text-base"
+            className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 mb-3 text-base text-gray-900 dark:text-gray-100"
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isImporting}

@@ -17,7 +17,7 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
-      className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg"
+      className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3 shadow-lg"
     >
       <View className="flex-row items-center">
         {/* Track Cover / Placeholder */}
@@ -45,7 +45,7 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           </StyledText>
           <StyledText
             variant="caption"
-            className="text-gray-500"
+            className="text-gray-500 dark:text-gray-400"
             numberOfLines={1}
           >
             {state.currentTrack.artist || "Unknown Artist"}
