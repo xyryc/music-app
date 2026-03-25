@@ -1,7 +1,8 @@
 import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/contexts/player-provider";
+import { LinearGradient } from "expo-linear-gradient";
 import { Music, Pause, Play } from "lucide-react-native";
-import { TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 
 interface MiniPlayerProps {
   onPress: () => void;
@@ -19,10 +20,23 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
       className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg"
     >
       <View className="flex-row items-center">
-        {/* Track Icon */}
-        <View className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 items-center justify-center mr-4">
-          <Music size={20} color="#FFFFFF" />
-        </View>
+        {/* Track Cover / Placeholder */}
+        {state.currentTrack.coverArt ? (
+          <Image
+            source={{ uri: state.currentTrack.coverArt }}
+            className="w-12 h-12 rounded-lg mr-4"
+            resizeMode="cover"
+          />
+        ) : (
+          <LinearGradient
+            colors={["#3B82F6", "#9333EA"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
+          >
+            <Music size={20} color="#FFFFFF" />
+          </LinearGradient>
+        )}
 
         {/* Track Info */}
         <View className="flex-1">
