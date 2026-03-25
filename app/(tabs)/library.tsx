@@ -4,9 +4,9 @@ import { TrackItem } from "@/components/track-item";
 import { usePlayer } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 
 export default function LibraryScreen() {
@@ -19,9 +19,11 @@ export default function LibraryScreen() {
     setLibrary(tracks);
   }, []);
 
-  useEffect(() => {
-    loadLibrary();
-  }, [loadLibrary]);
+  useFocusEffect(
+    useCallback(() => {
+      loadLibrary();
+    }, [loadLibrary]),
+  );
 
   const handlePlayTrack = async (track: Track) => {
     await controls.play(track, library);
