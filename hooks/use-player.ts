@@ -34,21 +34,106 @@ export function usePlayer() {
     };
   }, []);
 
-  const handleStatusUpdate = useCallback((status: PlaybackStatus) => {
-    if (!status.isLoaded) return;
+  const handleTrackEnd = useCallback(() => {
+    setState((prev) => {
+      if (prev.repeatMode === "one") {
+        void (async () => {
+          await audioService.seek(0);
+          await audioService.play();
+        })();
+        return {
+          ...prev,
+          isPlaying: true,
+          position: 0,
+        };
+      }
 
-    setState((prev) => ({
-      ...prev,
-      isPlaying: status.isPlaying,
-      position: status.positionMillis || 0,
-      duration: status.durationMillis || 0,
-    }));
+      if (
+        prev.repeatMode === "all" ||
+        prev.queueIndex < prev.queue.length - 1
+      ) {
+        const nextIndex = prev.queueIndex + 1;
+        if (nextIndex < prev.queue.length) {
+          const nextTrack = prev.queue[nextIndex];
+          currentTrackRef.current = nextTrack;
+          void audioService.loadTrack(nextTrack, (status) => {
+            if (!status.isLoaded || status.didJustFinish) return;
+
+            setState((current) => ({
+              ...current,
+              isPlaying: status.isPlaying,
+              position: status.positionMillis || 0,
+              duration: status.durationMillis || 0,
+            }));
+          }, true);
+          return {
+            ...prev,
+            currentTrack: nextTrack,
+            queueIndex: nextIndex,
+            isPlaying: true,
+            position: 0,
+          };
+        }
+
+        if (prev.repeatMode === "all" && prev.queue.length > 0) {
+          const firstTrack = prev.queue[0];
+          currentTrackRef.current = firstTrack;
+          void audioService.loadTrack(firstTrack, (status) => {
+            if (!status.isLoaded || status.didJustFinish) return;
+
+            setState((current) => ({
+              ...current,
+              isPlaying: status.isPlaying,
+              position: status.positionMillis || 0,
+              duration: status.durationMillis || 0,
+            }));
+          }, true);
+          return {
+            ...prev,
+            currentTrack: firstTrack,
+            queueIndex: 0,
+            isPlaying: true,
+            position: 0,
+          };
+        }
+      }
+
+      return {
+        ...prev,
+        isPlaying: false,
+        position: prev.duration,
+      };
+    });
   }, []);
+
+  const handleStatusUpdate = useCallback(
+    (status: PlaybackStatus) => {
+      if (!status.isLoaded) return;
+
+      if (status.didJustFinish) {
+        handleTrackEnd();
+        return;
+      }
+
+      setState((prev) => ({
+        ...prev,
+        isPlaying: status.isPlaying,
+        position: status.positionMillis || 0,
+        duration: status.durationMillis || 0,
+      }));
+    },
+    [handleTrackEnd],
+  );
 
   useEffect(() => {
     const id = setInterval(async () => {
       const status = await audioService.getStatus();
       if (status && status.isLoaded) {
+        if (status.didJustFinish) {
+          handleTrackEnd();
+          return;
+        }
+
         setState((prev) => ({
           ...prev,
           isPlaying: status.isPlaying,
@@ -64,65 +149,8 @@ export function usePlayer() {
         clearInterval(statusUpdateRef.current);
       }
     };
-  }, []);
+  }, [handleTrackEnd]);
 
-  const handleTrackEnd = useCallback(() => {
-    setState((prev) => {
-      if (prev.repeatMode === "one") {
-        audioService.seek(0);
-        audioService.play();
-        return prev;
-      }
-
-      if (
-        prev.repeatMode === "all" ||
-        prev.queueIndex < prev.queue.length - 1
-      ) {
-        const nextIndex = prev.queueIndex + 1;
-        if (nextIndex < prev.queue.length) {
-          const nextTrack = prev.queue[nextIndex];
-          audioService.loadTrack(nextTrack, (status) => {
-            if (status.isLoaded) {
-              setState((s) => ({
-                ...s,
-                isPlaying: status.isPlaying,
-                position: status.positionMillis || 0,
-                duration: status.durationMillis || 0,
-              }));
-            }
-          });
-          audioService.play();
-          return {
-            ...prev,
-            currentTrack: nextTrack,
-            queueIndex: nextIndex,
-            isPlaying: true,
-          };
-        } else if (prev.repeatMode === "all") {
-          const firstTrack = prev.queue[0];
-          audioService.loadTrack(firstTrack, (status) => {
-            if (status.isLoaded) {
-              setState((s) => ({
-                ...s,
-                isPlaying: status.isPlaying,
-                position: status.positionMillis || 0,
-                duration: status.durationMillis || 0,
-              }));
-            }
-          });
-          audioService.play();
-          return {
-            ...prev,
-            currentTrack: firstTrack,
-            queueIndex: 0,
-            isPlaying: true,
-          };
-        }
-      }
-
-      return prev;
-    });
-  }, []);
 
   const play = useCallback(
     async (track?: Track, queue?: Track[]) => {
