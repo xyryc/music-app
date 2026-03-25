@@ -1,5 +1,5 @@
 import { StyledText } from "@/components/styled-text";
-import { usePlayer } from "@/hooks/use-player";
+import { usePlayer } from "@/contexts/player-provider";
 import { RepeatMode } from "@/types/player";
 import { Track } from "@/types/track";
 import Slider from "@react-native-community/slider";

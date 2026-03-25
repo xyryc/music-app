@@ -1,7 +1,7 @@
 import { MiniPlayer } from "@/components/mini-player";
 import { StyledText } from "@/components/styled-text";
 import { TrackItem } from "@/components/track-item";
-import { usePlayer } from "@/hooks/use-player";
+import { usePlayer } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
 import { useRouter } from "expo-router";

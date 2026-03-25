@@ -1,5 +1,5 @@
 import { StyledText } from "@/components/styled-text";
-import { usePlayer } from "@/hooks/use-player";
+import { usePlayer } from "@/contexts/player-provider";
 import { Music, Pause, Play } from "lucide-react-native";
 import { TouchableOpacity, View } from "react-native";
 
