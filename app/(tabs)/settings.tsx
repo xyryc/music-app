@@ -2,6 +2,7 @@ import { StyledText } from "@/components/styled-text";
 import { AppSettings, storageService } from "@/services/storage";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
+import { useColorScheme } from "nativewind";
 import {
   Alert,
   ScrollView,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 
 export default function SettingsScreen() {
+  const { setColorScheme } = useColorScheme();
   const [settings, setSettings] = useState<AppSettings>({
     theme: "system",
     skipSilence: false,
@@ -33,6 +35,17 @@ export default function SettingsScreen() {
   ) => {
     await storageService.saveSettings({ [key]: value });
     setSettings((prev) => ({ ...prev, [key]: value }));
+
+    if (key === "theme") {
+      setColorScheme(value as AppSettings["theme"]);
+    }
+  };
+
+  const resetSettings: AppSettings = {
+    theme: "system",
+    skipSilence: false,
+    equalizerEnabled: false,
+    showLyrics: false,
   };
 
   const handleClearLibrary = () => {
@@ -46,12 +59,8 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: async () => {
             await storageService.clearAll();
-            setSettings({
-              theme: "system",
-              skipSilence: false,
-              equalizerEnabled: false,
-              showLyrics: false,
-            });
+            setSettings(resetSettings);
+            setColorScheme(resetSettings.theme);
             Alert.alert("Success", "Library cleared successfully");
           },
         },

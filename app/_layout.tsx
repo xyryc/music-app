@@ -4,9 +4,20 @@ import "react-native-reanimated";
 import "../global.css";
 
 import { PlayerProvider } from "@/contexts/player-provider";
+import { storageService } from "@/services/storage";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useColorScheme } from "nativewind";
 
 export default function RootLayout() {
+  const { colorScheme, setColorScheme } = useColorScheme();
+
+  useEffect(() => {
+    storageService.getSettings().then((settings) => {
+      setColorScheme(settings.theme);
+    });
+  }, [setColorScheme]);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PlayerProvider>
@@ -28,7 +39,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </PlayerProvider>
     </GestureHandlerRootView>
   );
