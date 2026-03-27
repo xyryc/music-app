@@ -46,10 +46,9 @@ class AudioService {
           Command.STOP,
         ],
         compactCapabilities: [
-          Command.PLAY,
-          Command.PAUSE,
-          Command.NEXT_TRACK,
           Command.PREVIOUS_TRACK,
+          Command.PLAY,
+          Command.NEXT_TRACK,
         ],
         notification: {
           showWhenClosed: true,
@@ -129,6 +128,18 @@ class AudioService {
     );
   }
 
+  private async getRawStatus(): Promise<AVPlaybackStatus | null> {
+    try {
+      if (this.sound) {
+        return await this.sound.getStatusAsync();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting raw status:", error);
+      return null;
+    }
+  }
+
   private handleExpoStatus = async (status: AVPlaybackStatus) => {
     if (!status.isLoaded) return;
 
@@ -151,17 +162,6 @@ class AudioService {
     }
   };
 
-  private async getRawStatus(): Promise<AVPlaybackStatus | null> {
-    try {
-      if (this.sound) {
-        return await this.sound.getStatusAsync();
-      }
-      return null;
-    } catch (error) {
-      console.error("Error getting raw status:", error);
-      return null;
-    }
-  }
 
   async loadTrack(
     track: Track,
@@ -183,7 +183,7 @@ class AudioService {
       const { sound } = await Audio.Sound.createAsync(
         { uri: track.uri },
         {
-          shouldPlay: false,
+          shouldPlay: shouldPlay,
           isLooping: false,
           volume: 1,
           androidImplementation: "MediaPlayer",
@@ -192,17 +192,6 @@ class AudioService {
       );
 
       this.sound = sound;
-
-      // Set initial metadata
-      await this.syncMediaControls();
-
-      // Now start playback if requested
-      if (shouldPlay) {
-        await this.sound.playAsync();
-        // Explicitly update playback state to PLAYING to trigger notification
-        await this.forceNotificationUpdate();
-      }
-
       return true;
     } catch (error) {
       console.error("Error loading track:", error);
@@ -293,15 +282,17 @@ class AudioService {
 
   async getStatus(): Promise<PlaybackStatus | null> {
     try {
-      const status = await this.getRawStatus();
-      if (status && status.isLoaded) {
-        return {
-          isLoaded: true,
-          isPlaying: status.isPlaying,
-          positionMillis: status.positionMillis ?? 0,
-          durationMillis: status.durationMillis ?? 0,
-          didJustFinish: status.didJustFinish,
-        };
+      if (this.sound) {
+        const status = await this.sound.getStatusAsync();
+        if (status.isLoaded) {
+          return {
+            isLoaded: true,
+            isPlaying: status.isPlaying,
+            positionMillis: status.positionMillis ?? 0,
+            durationMillis: status.durationMillis ?? 0,
+            didJustFinish: status.didJustFinish,
+          };
+        }
       }
       return null;
     } catch (error) {
@@ -350,38 +341,6 @@ class AudioService {
       await removeAllListeners();
     } catch (error) {
       console.error("Error cleaning up media controls:", error);
-    }
-  }
-
-  // Force notification to show by explicitly updating playback state
-  private async forceNotificationUpdate() {
-    try {
-      const status = await this.getRawStatus();
-      if (!status || !status.isLoaded) return;
-
-      const positionSeconds = (status.positionMillis ?? 0) / 1000;
-
-      await updateMetadata({
-        title: this.currentTrack?.title || "Unknown Track",
-        artist: this.currentTrack?.artist || "Unknown Artist",
-        album: this.currentTrack?.album || "",
-        artwork: this.currentTrack?.coverArt
-          ? { uri: this.currentTrack.coverArt, width: 256, height: 256 }
-          : undefined,
-        duration: (this.currentTrack?.duration ?? status.durationMillis ?? 0) / 1000,
-        elapsedTime: positionSeconds,
-        color: "#0A7EA4",
-        colorized: true,
-      });
-
-      // This triggers the notification to show
-      await updatePlaybackState(
-        PlaybackState.PLAYING,
-        positionSeconds,
-        1.0,
-      );
-    } catch (error) {
-      console.error("Error forcing notification update:", error);
     }
   }
 }

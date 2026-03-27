@@ -28,7 +28,8 @@
       "permissions": [
         "POST_NOTIFICATIONS",
         "WAKE_LOCK",
-        "FOREGROUND_SERVICE"
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ]
     },
     "web": {
@@ -51,7 +52,14 @@
         }
       ],
       "expo-secure-store",
-      "expo-media-control"
+      [
+        "expo-media-control",
+        {
+          "enableBackgroundAudio": true,
+          "audioSessionCategory": "playback",
+          "notificationIcon": "./assets/images/notification-icon.png"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
