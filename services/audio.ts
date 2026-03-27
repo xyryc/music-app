@@ -1,12 +1,30 @@
 import { Track } from "@/types/track";
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatus } from "expo-av";
 import { getInfoAsync } from "expo-file-system/legacy";
+import {
+  addListener,
+  Command,
+  enableMediaControls,
+  PlaybackState,
+  removeAllListeners,
+  updateMetadata,
+  updatePlaybackState,
+} from "expo-media-control";
 
-type PlaybackStatus = any;
+type PlaybackStatus = {
+  isLoaded: boolean;
+  isPlaying: boolean;
+  positionMillis: number;
+  durationMillis: number;
+  didJustFinish?: boolean;
+};
 
 class AudioService {
   private sound: Audio.Sound | null = null;
   private onStatusUpdate: ((status: PlaybackStatus) => void) | null = null;
+  private onTrackEnd: (() => void) | null = null;
+  private remoteListenerCleanup: (() => void) | null = null;
+  private currentTrack: Track | null = null;
 
   async initialize() {
     try {
@@ -17,8 +35,131 @@ class AudioService {
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
       });
+
+      await enableMediaControls({
+        capabilities: [
+          Command.PLAY,
+          Command.PAUSE,
+          Command.NEXT_TRACK,
+          Command.PREVIOUS_TRACK,
+          Command.SEEK,
+          Command.STOP,
+        ],
+        compactCapabilities: [
+          Command.PLAY,
+          Command.PAUSE,
+          Command.NEXT_TRACK,
+          Command.PREVIOUS_TRACK,
+        ],
+        notification: {
+          showWhenClosed: true,
+          color: "#0A7EA4",
+        },
+        android: {
+          skipInterval: 10,
+        },
+        ios: {
+          skipInterval: 10,
+        },
+      });
+
+      this.remoteListenerCleanup = addListener(async (event) => {
+        switch (event.command) {
+          case Command.PLAY:
+            await this.play();
+            break;
+          case Command.PAUSE:
+            await this.pause();
+            break;
+          case Command.STOP:
+            await this.stop();
+            break;
+          case Command.SEEK:
+            await this.seek((event.data?.position ?? 0) * 1000);
+            break;
+          case Command.NEXT_TRACK:
+          case Command.PREVIOUS_TRACK:
+            if (this.onTrackEnd) {
+              this.onTrackEnd();
+            }
+            break;
+        }
+      });
     } catch (error) {
       console.error("Error initializing audio:", error);
+    }
+  }
+
+  private async syncMediaControls(status?: AVPlaybackStatus) {
+    if (!this.currentTrack) return;
+
+    const resolvedStatus = status ?? (await this.getRawStatus());
+    const isLoaded = !!resolvedStatus && resolvedStatus.isLoaded;
+    const positionSeconds = isLoaded
+      ? (resolvedStatus.positionMillis ?? 0) / 1000
+      : 0;
+    const durationSeconds = isLoaded
+      ? (resolvedStatus.durationMillis ?? this.currentTrack.duration ?? 0) / 1000
+      : (this.currentTrack.duration ?? 0) / 1000;
+
+    // Build artwork URI - prefer coverArt, fallback to a default
+    const artworkUri = this.currentTrack.coverArt?.startsWith("http")
+      ? this.currentTrack.coverArt
+      : this.currentTrack.coverArt;
+
+    await updateMetadata({
+      title: this.currentTrack.title || "Unknown Track",
+      artist: this.currentTrack.artist || "Unknown Artist",
+      album: this.currentTrack.album || "",
+      artwork: artworkUri
+        ? { uri: artworkUri, width: 256, height: 256 }
+        : undefined,
+      duration: durationSeconds,
+      elapsedTime: positionSeconds,
+      color: "#0A7EA4",
+      colorized: true,
+    });
+
+    await updatePlaybackState(
+      isLoaded && resolvedStatus.isPlaying
+        ? PlaybackState.PLAYING
+        : PlaybackState.PAUSED,
+      positionSeconds,
+      isLoaded && resolvedStatus.isPlaying ? 1 : 0,
+    );
+  }
+
+  private handleExpoStatus = async (status: AVPlaybackStatus) => {
+    if (!status.isLoaded) return;
+
+    const mapped: PlaybackStatus = {
+      isLoaded: true,
+      isPlaying: status.isPlaying,
+      positionMillis: status.positionMillis ?? 0,
+      durationMillis: status.durationMillis ?? 0,
+      didJustFinish: status.didJustFinish,
+    };
+
+    if (this.onStatusUpdate) {
+      this.onStatusUpdate(mapped);
+    }
+
+    await this.syncMediaControls(status);
+
+    if (status.didJustFinish && this.onTrackEnd) {
+      this.onTrackEnd();
+    }
+  };
+
+  private async getRawStatus(): Promise<AVPlaybackStatus | null> {
+    try {
+      if (this.sound) {
+        return await this.sound.getStatusAsync();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting raw status:", error);
+      return null;
     }
   }
 
@@ -29,21 +170,12 @@ class AudioService {
   ) {
     try {
       await this.unload();
-
+      this.currentTrack = track;
       this.onStatusUpdate = onStatusUpdate || null;
 
-      console.log(
-        "audioService.loadTrack() loading:",
-        track.title,
-        "shouldPlay:",
-        shouldPlay,
-      );
-
-      // Check if file exists if it's a local file
       if (track.source === "local" || track.uri.startsWith("file://")) {
         const fileInfo = await getInfoAsync(track.uri);
         if (!fileInfo.exists) {
-          console.error("❌ Audio file not found at URI:", track.uri);
           throw new Error("Audio file not found. Please re-import the track.");
         }
       }
@@ -51,33 +183,40 @@ class AudioService {
       const { sound } = await Audio.Sound.createAsync(
         { uri: track.uri },
         {
-          shouldPlay,
+          shouldPlay: false,
           isLooping: false,
-          volume: 1.0,
-          androidImplementation: "MediaPlayer", // Use MediaPlayer for better local file support on some Android devices
+          volume: 1,
+          androidImplementation: "MediaPlayer",
         },
-        this.onStatusUpdate,
+        this.handleExpoStatus,
       );
 
       this.sound = sound;
-      console.log("audioService.loadTrack() loaded successfully");
+
+      // Set initial metadata
+      await this.syncMediaControls();
+
+      // Now start playback if requested
+      if (shouldPlay) {
+        await this.sound.playAsync();
+        // Explicitly update playback state to PLAYING to trigger notification
+        await this.forceNotificationUpdate();
+      }
+
       return true;
     } catch (error) {
-      console.error("❌ Error loading track:", error);
-      console.error("❌ URI was:", track.uri);
+      console.error("Error loading track:", error);
       return false;
     }
   }
 
   async play() {
     try {
-      console.log("audioService.play() called, sound exists:", !!this.sound);
       if (this.sound) {
         await this.sound.playAsync();
-        console.log("audioService.playAsync() completed");
+        await this.syncMediaControls();
         return true;
       }
-      console.log("audioService.play() failed: no sound instance");
       return false;
     } catch (error) {
       console.error("audioService.play() error:", error);
@@ -89,6 +228,7 @@ class AudioService {
     try {
       if (this.sound) {
         await this.sound.pauseAsync();
+        await this.syncMediaControls();
         return true;
       }
       return false;
@@ -102,6 +242,7 @@ class AudioService {
     try {
       if (this.sound) {
         await this.sound.stopAsync();
+        await updatePlaybackState(PlaybackState.STOPPED, 0, 0);
       }
       return true;
     } catch (error) {
@@ -127,6 +268,7 @@ class AudioService {
     try {
       if (this.sound) {
         await this.sound.setPositionAsync(positionMillis);
+        await this.syncMediaControls();
         return true;
       }
       return false;
@@ -151,8 +293,15 @@ class AudioService {
 
   async getStatus(): Promise<PlaybackStatus | null> {
     try {
-      if (this.sound) {
-        return await this.sound.getStatusAsync();
+      const status = await this.getRawStatus();
+      if (status && status.isLoaded) {
+        return {
+          isLoaded: true,
+          isPlaying: status.isPlaying,
+          positionMillis: status.positionMillis ?? 0,
+          durationMillis: status.durationMillis ?? 0,
+          didJustFinish: status.didJustFinish,
+        };
       }
       return null;
     } catch (error) {
@@ -163,20 +312,16 @@ class AudioService {
 
   async setOnStatusUpdate(callback: (status: PlaybackStatus) => void) {
     this.onStatusUpdate = callback;
-    if (this.sound) {
-      await this.sound.setOnPlaybackStatusUpdate(callback);
-    }
+  }
+
+  async setOnTrackEnd(callback: () => void) {
+    this.onTrackEnd = callback;
   }
 
   async getDuration(): Promise<number> {
     try {
-      if (this.sound) {
-        const status = await this.getStatus();
-        if (status && "durationMillis" in status) {
-          return (status as any).durationMillis || 0;
-        }
-      }
-      return 0;
+      const status = await this.getStatus();
+      return status?.durationMillis || 0;
     } catch {
       return 0;
     }
@@ -184,22 +329,60 @@ class AudioService {
 
   async getPosition(): Promise<number> {
     try {
-      if (this.sound) {
-        const status = await this.getStatus();
-        if (status && "positionMillis" in status) {
-          return (status as any).positionMillis || 0;
-        }
-      }
-      return 0;
+      const status = await this.getStatus();
+      return status?.positionMillis || 0;
     } catch {
       return 0;
     }
   }
 
   async isPlaying(): Promise<boolean> {
-    if (!this.sound) return false;
     const status = await this.getStatus();
     return status?.isPlaying || false;
+  }
+
+  async cleanup() {
+    try {
+      if (this.remoteListenerCleanup) {
+        this.remoteListenerCleanup();
+        this.remoteListenerCleanup = null;
+      }
+      await removeAllListeners();
+    } catch (error) {
+      console.error("Error cleaning up media controls:", error);
+    }
+  }
+
+  // Force notification to show by explicitly updating playback state
+  private async forceNotificationUpdate() {
+    try {
+      const status = await this.getRawStatus();
+      if (!status || !status.isLoaded) return;
+
+      const positionSeconds = (status.positionMillis ?? 0) / 1000;
+
+      await updateMetadata({
+        title: this.currentTrack?.title || "Unknown Track",
+        artist: this.currentTrack?.artist || "Unknown Artist",
+        album: this.currentTrack?.album || "",
+        artwork: this.currentTrack?.coverArt
+          ? { uri: this.currentTrack.coverArt, width: 256, height: 256 }
+          : undefined,
+        duration: (this.currentTrack?.duration ?? status.durationMillis ?? 0) / 1000,
+        elapsedTime: positionSeconds,
+        color: "#0A7EA4",
+        colorized: true,
+      });
+
+      // This triggers the notification to show
+      await updatePlaybackState(
+        PlaybackState.PLAYING,
+        positionSeconds,
+        1.0,
+      );
+    } catch (error) {
+      console.error("Error forcing notification update:", error);
+    }
   }
 }
 

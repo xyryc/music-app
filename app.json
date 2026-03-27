@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.xyryc.qwentestapp"
+      "bundleIdentifier": "com.xyryc.qwentestapp",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +24,12 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.xyryc.qwentestapp"
+      "package": "com.xyryc.qwentestapp",
+      "permissions": [
+        "POST_NOTIFICATIONS",
+        "WAKE_LOCK",
+        "FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "output": "static",
@@ -42,7 +50,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-media-control"
     ],
     "experiments": {
       "typedRoutes": true,

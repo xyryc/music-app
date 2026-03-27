@@ -4,7 +4,13 @@ import { PlayerControls, PlayerState, RepeatMode } from "@/types/player";
 import { Track } from "@/types/track";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type PlaybackStatus = any;
+type PlaybackStatus = {
+  isLoaded: boolean;
+  isPlaying: boolean;
+  positionMillis: number;
+  durationMillis: number;
+  didJustFinish?: boolean;
+};
 
 const defaultPlayerState: PlayerState = {
   isPlaying: false,
@@ -23,16 +29,6 @@ export function usePlayer() {
   const [state, setState] = useState<PlayerState>(defaultPlayerState);
   const statusUpdateRef = useRef<number | null>(null);
   const currentTrackRef = useRef<Track | null>(null);
-
-  useEffect(() => {
-    audioService.initialize();
-    return () => {
-      audioService.unload();
-      if (statusUpdateRef.current) {
-        clearInterval(statusUpdateRef.current);
-      }
-    };
-  }, []);
 
   const handleTrackEnd = useCallback(() => {
     setState((prev) => {
@@ -56,16 +52,7 @@ export function usePlayer() {
         if (nextIndex < prev.queue.length) {
           const nextTrack = prev.queue[nextIndex];
           currentTrackRef.current = nextTrack;
-          void audioService.loadTrack(nextTrack, (status) => {
-            if (!status.isLoaded || status.didJustFinish) return;
-
-            setState((current) => ({
-              ...current,
-              isPlaying: status.isPlaying,
-              position: status.positionMillis || 0,
-              duration: status.durationMillis || 0,
-            }));
-          }, true);
+          void audioService.loadTrack(nextTrack, handleStatusUpdate, true);
           return {
             ...prev,
             currentTrack: nextTrack,
@@ -78,16 +65,7 @@ export function usePlayer() {
         if (prev.repeatMode === "all" && prev.queue.length > 0) {
           const firstTrack = prev.queue[0];
           currentTrackRef.current = firstTrack;
-          void audioService.loadTrack(firstTrack, (status) => {
-            if (!status.isLoaded || status.didJustFinish) return;
-
-            setState((current) => ({
-              ...current,
-              isPlaying: status.isPlaying,
-              position: status.positionMillis || 0,
-              duration: status.durationMillis || 0,
-            }));
-          }, true);
+          void audioService.loadTrack(firstTrack, handleStatusUpdate, true);
           return {
             ...prev,
             currentTrack: firstTrack,
@@ -126,6 +104,19 @@ export function usePlayer() {
   );
 
   useEffect(() => {
+    audioService.initialize();
+    void audioService.setOnTrackEnd(handleTrackEnd);
+
+    return () => {
+      void audioService.unload();
+      void audioService.cleanup();
+      if (statusUpdateRef.current) {
+        clearInterval(statusUpdateRef.current);
+      }
+    };
+  }, [handleTrackEnd]);
+
+  useEffect(() => {
     const id = setInterval(async () => {
       const status = await audioService.getStatus();
       if (status && status.isLoaded) {
@@ -151,15 +142,8 @@ export function usePlayer() {
     };
   }, [handleTrackEnd]);
 
-
   const play = useCallback(
     async (track?: Track, queue?: Track[]) => {
-      console.log(
-        "play() called with track:",
-        track?.title || "none",
-        "currentTrack:",
-        currentTrackRef.current?.title || "none",
-      );
       try {
         let trackToPlay = track || currentTrackRef.current;
         let queueToUse = queue || state.queue;
@@ -169,22 +153,17 @@ export function usePlayer() {
         }
 
         if (!trackToPlay) {
-          console.log("No track to play!");
           return;
         }
 
-        // If we are already playing this track, just resume
         if (currentTrackRef.current?.id === trackToPlay.id && state.isPlaying) {
-          console.log("Already playing this track");
           return;
         }
 
-        // If we are paused on this track, just play
         if (
           currentTrackRef.current?.id === trackToPlay.id &&
           !state.isPlaying
         ) {
-          console.log("Resuming current track");
           const success = await audioService.play();
           if (success) {
             setState((prev) => ({ ...prev, isPlaying: true }));
@@ -192,18 +171,14 @@ export function usePlayer() {
           return;
         }
 
-        console.log("Loading new track:", trackToPlay.title);
-
-        // Update queue if provided
         if (queue) {
           setState((prev) => ({
             ...prev,
-            queue: queue,
+            queue,
             queueIndex: queue.findIndex((t) => t.id === trackToPlay!.id),
           }));
           await storageService.saveQueue(queue);
         } else if (track && !state.queue.some((t) => t.id === track.id)) {
-          // Add single track to queue if not present
           const newQueue = [...state.queue, track];
           setState((prev) => ({
             ...prev,
@@ -216,7 +191,7 @@ export function usePlayer() {
         const loaded = await audioService.loadTrack(
           trackToPlay,
           handleStatusUpdate,
-          true, // shouldPlay
+          true,
         );
 
         if (loaded) {
@@ -228,7 +203,6 @@ export function usePlayer() {
             position: 0,
           }));
 
-          // Track analytics/count
           storageService.getLibrary().then(async (library) => {
             const updatedLibrary = library.map((t) =>
               t.id === trackToPlay!.id
@@ -242,7 +216,7 @@ export function usePlayer() {
         console.error("Error playing track:", error);
       }
     },
-    [state.queue, state.currentTrack, handleStatusUpdate],
+    [state.queue, state.isPlaying, handleStatusUpdate],
   );
 
   const pause = useCallback(async () => {
@@ -255,20 +229,9 @@ export function usePlayer() {
   }, []);
 
   const togglePlayPause = useCallback(async () => {
-    console.log(
-      "togglePlayPause called, isPlaying:",
-      state.isPlaying,
-      "currentTrack:",
-      state.currentTrack?.title,
-      "ref:",
-      currentTrackRef.current?.title,
-    );
     if (state.isPlaying) {
-      console.log("Pausing...");
       await pause();
     } else {
-      console.log("Playing...");
-      // Directly resume playback using audioService
       const success = await audioService.play();
       if (success) {
         setState((prev) => ({ ...prev, isPlaying: true }));
@@ -305,23 +268,25 @@ export function usePlayer() {
       const nextIndex = prev.queueIndex + 1;
       if (nextIndex < prev.queue.length) {
         const nextTrack = prev.queue[nextIndex];
-        audioService.loadTrack(nextTrack, handleStatusUpdate);
-        audioService.play();
+        currentTrackRef.current = nextTrack;
+        void audioService.loadTrack(nextTrack, handleStatusUpdate, true);
         return {
           ...prev,
           currentTrack: nextTrack,
           queueIndex: nextIndex,
           isPlaying: true,
+          position: 0,
         };
-      } else if (prev.repeatMode === "all") {
+      } else if (prev.repeatMode === "all" && prev.queue.length > 0) {
         const firstTrack = prev.queue[0];
-        audioService.loadTrack(firstTrack, handleStatusUpdate);
-        audioService.play();
+        currentTrackRef.current = firstTrack;
+        void audioService.loadTrack(firstTrack, handleStatusUpdate, true);
         return {
           ...prev,
           currentTrack: firstTrack,
           queueIndex: 0,
           isPlaying: true,
+          position: 0,
         };
       }
       return prev;
@@ -331,25 +296,26 @@ export function usePlayer() {
   const playPrevious = useCallback(async () => {
     setState((prev) => {
       if (prev.position > 3000) {
-        audioService.seek(0);
+        void audioService.seek(0);
         return prev;
       }
 
       const prevIndex = prev.queueIndex - 1;
       if (prevIndex >= 0) {
         const prevTrack = prev.queue[prevIndex];
-        audioService.loadTrack(prevTrack, handleStatusUpdate);
-        audioService.play();
+        currentTrackRef.current = prevTrack;
+        void audioService.loadTrack(prevTrack, handleStatusUpdate, true);
         return {
           ...prev,
           currentTrack: prevTrack,
           queueIndex: prevIndex,
           isPlaying: true,
+          position: 0,
         };
       }
       return prev;
     });
-  }, []);
+  }, [handleStatusUpdate]);
 
   const setRepeatMode = useCallback((mode: RepeatMode) => {
     setState((prev) => ({ ...prev, repeatMode: mode }));

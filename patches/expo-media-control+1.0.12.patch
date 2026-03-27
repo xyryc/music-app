@@ -1,0 +1,847 @@
+diff --git a/node_modules/expo-media-control/build/ExpoMediaControlModule.d.ts b/node_modules/expo-media-control/build/ExpoMediaControlModule.d.ts
+deleted file mode 100644
+index 12505aa..0000000
+--- a/node_modules/expo-media-control/build/ExpoMediaControlModule.d.ts
++++ /dev/null
+@@ -1,221 +0,0 @@
+-/**
+- * Base error class for media control errors
+- */
+-export declare class MediaControlError extends Error {
+-    readonly code?: string | undefined;
+-    readonly cause?: Error | undefined;
+-    constructor(message: string, code?: string | undefined, cause?: Error | undefined);
+-}
+-/**
+- * Error thrown when validation fails
+- */
+-export declare class ValidationError extends MediaControlError {
+-    readonly field?: string | undefined;
+-    constructor(message: string, field?: string | undefined);
+-}
+-/**
+- * Error thrown when native module operations fail
+- */
+-export declare class NativeError extends MediaControlError {
+-    constructor(message: string, code?: string, cause?: Error);
+-}
+-/**
+- * Error thrown when media controls are not enabled
+- */
+-export declare class NotEnabledError extends MediaControlError {
+-    constructor(message?: string);
+-}
+-/**
+- * Represents the current state of media playback
+- */
+-export declare enum PlaybackState {
+-    NONE = 0,
+-    STOPPED = 1,
+-    PLAYING = 2,
+-    PAUSED = 3,
+-    BUFFERING = 4,
+-    ERROR = 5
+-}
+-/**
+- * Represents different types of media control commands
+- */
+-export declare enum Command {
+-    PLAY = "play",
+-    PAUSE = "pause",
+-    STOP = "stop",
+-    NEXT_TRACK = "nextTrack",
+-    PREVIOUS_TRACK = "previousTrack",
+-    SKIP_FORWARD = "skipForward",
+-    SKIP_BACKWARD = "skipBackward",
+-    SEEK = "seek",
+-    SET_RATING = "setRating",
+-    VOLUME_UP = "volumeUp",
+-    VOLUME_DOWN = "volumeDown"
+-}
+-/**
+- * Rating types for media content
+- */
+-export declare enum RatingType {
+-    HEART = "heart",
+-    THUMBS_UP_DOWN = "thumbsUpDown",
+-    THREE_STARS = "threeStars",
+-    FOUR_STARS = "fourStars",
+-    FIVE_STARS = "fiveStars",
+-    PERCENTAGE = "percentage"
+-}
+-/**
+- * Represents artwork/album cover information
+- */
+-export interface MediaArtwork {
+-    uri: string;
+-    width?: number;
+-    height?: number;
+-}
+-/**
+- * Represents rating information for media content
+- */
+-export interface MediaRating {
+-    type: RatingType;
+-    value: boolean | number;
+-    maxValue?: number;
+-}
+-/**
+- * Complete media metadata information
+- */
+-export interface MediaMetadata {
+-    title?: string;
+-    artist?: string;
+-    album?: string;
+-    artwork?: MediaArtwork;
+-    duration?: number;
+-    elapsedTime?: number;
+-    genre?: string;
+-    trackNumber?: number;
+-    albumTrackCount?: number;
+-    date?: string;
+-    rating?: MediaRating;
+-    color?: string;
+-    colorized?: boolean;
+-    isLiveStream?: boolean;
+-}
+-/**
+- * Configuration options for media controls
+- *
+- * Note: Audio focus management should be handled by your media player,
+- * not by this control module.
+- */
+-export interface MediaControlOptions {
+-    capabilities?: Command[];
+-    compactCapabilities?: Command[];
+-    notification?: {
+-        icon?: string;
+-        largeIcon?: MediaArtwork;
+-        color?: string;
+-        showWhenClosed?: boolean;
+-    };
+-    ios?: {
+-        skipInterval?: number;
+-    };
+-    android?: {
+-        skipInterval?: number;
+-    };
+-}
+-/**
+- * Media control event data
+- */
+-export interface MediaControlEvent {
+-    command: Command;
+-    data?: any;
+-    timestamp: number;
+-}
+-/**
+- * Volume change information
+- */
+-export interface VolumeChange {
+-    volume: number;
+-    userInitiated: boolean;
+-}
+-export type MediaControlEventListener = (event: MediaControlEvent) => void;
+-export type VolumeChangeListener = (change: VolumeChange) => void;
+-/**
+- * Extended module class that combines native methods with simplified event handling
+- * This provides a complete interface for media control functionality
+- */
+-declare class ExtendedExpoMediaControlModule {
+-    /**
+-     * Enable media controls with specified configuration
+-     * Initializes the media session and sets up remote control handlers
+-     */
+-    enableMediaControls: (options?: MediaControlOptions) => Promise<void>;
+-    /**
+-     * Disable media controls and clean up all resources
+-     * Stops the media session and removes all handlers
+-     */
+-    disableMediaControls: () => Promise<void>;
+-    /**
+-     * Update the media metadata displayed in system controls
+-     * Updates notification, lock screen, and control center information
+-     */
+-    updateMetadata: (metadata: MediaMetadata) => Promise<void>;
+-    /**
+-     * Update the current playback state and position
+-     * Updates the system about current playback status
+-     * @param state - The playback state
+-     * @param position - The current position in seconds (optional)
+-     * @param playbackRate - The playback rate/speed (optional, defaults to 1.0 when playing, 0.0 when paused)
+-     */
+-    updatePlaybackState: (state: PlaybackState, position?: number, playbackRate?: number) => Promise<void>;
+-    /**
+-     * Reset all media control information to default state
+-     * Clears all metadata and resets playback state
+-     */
+-    resetControls: () => Promise<void>;
+-    /**
+-     * Check if media controls are currently enabled
+-     * Returns whether the media session is active
+-     */
+-    isEnabled: () => Promise<boolean>;
+-    /**
+-     * Get the current media metadata
+-     * Returns the currently set metadata information
+-     */
+-    getCurrentMetadata: () => Promise<MediaMetadata | null>;
+-    /**
+-     * Get the current playback state
+-     * Returns the current playback status
+-     */
+-    getCurrentState: () => Promise<PlaybackState>;
+-    /**
+-     * Add listener for media control events (play, pause, next, etc.)
+-     * These events are triggered when users interact with system media controls
+-     * @param listener Function to call when media control events occur
+-     * @returns Function to remove the listener
+-     */
+-    addListener: (listener: MediaControlEventListener) => (() => void);
+-    /**
+-     * Add listener for volume change events
+-     * These events are triggered when system volume changes
+-     * @param listener Function to call when volume changes
+-     * @returns Function to remove the listener
+-     */
+-    addVolumeChangeListener: (listener: VolumeChangeListener) => (() => void);
+-    /**
+-     * Remove all event listeners for all event types
+-     * Cleans up all subscribed event handlers
+-     * @returns Promise that resolves when all listeners are removed
+-     */
+-    removeAllListeners: () => Promise<void>;
+-    /**
+-     * Internal method to dispatch media control events
+-     * This will be called by the native modules when control events occur
+-     */
+-    _dispatchMediaControlEvent: (event: MediaControlEvent) => void;
+-    /**
+-     * Internal method to dispatch volume change events
+-     * This will be called by the native modules when volume changes
+-     */
+-    _dispatchVolumeChangeEvent: (change: VolumeChange) => void;
+-}
+-declare const _default: ExtendedExpoMediaControlModule;
+-export default _default;
+-//# sourceMappingURL=ExpoMediaControlModule.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/ExpoMediaControlModule.d.ts.map b/node_modules/expo-media-control/build/ExpoMediaControlModule.d.ts.map
+deleted file mode 100644
+index 4172a7c..0000000
+--- a/node_modules/expo-media-control/build/ExpoMediaControlModule.d.ts.map
++++ /dev/null
+@@ -1 +0,0 @@
+-{"version":3,"file":"ExpoMediaControlModule.d.ts","sourceRoot":"","sources":["../src/ExpoMediaControlModule.ts"],"names":[],"mappings":"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"}
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/ExpoMediaControlModule.js b/node_modules/expo-media-control/build/ExpoMediaControlModule.js
+deleted file mode 100644
+index a100d5c..0000000
+--- a/node_modules/expo-media-control/build/ExpoMediaControlModule.js
++++ /dev/null
+@@ -1,494 +0,0 @@
+-import { requireNativeModule } from "expo";
+-// =============================================
+-// CUSTOM ERROR TYPES
+-// =============================================
+-/**
+- * Base error class for media control errors
+- */
+-export class MediaControlError extends Error {
+-    code;
+-    cause;
+-    constructor(message, code, cause) {
+-        super(message);
+-        this.code = code;
+-        this.cause = cause;
+-        this.name = "MediaControlError";
+-    }
+-}
+-/**
+- * Error thrown when validation fails
+- */
+-export class ValidationError extends MediaControlError {
+-    field;
+-    constructor(message, field) {
+-        super(message, "VALIDATION_ERROR");
+-        this.field = field;
+-        this.name = "ValidationError";
+-    }
+-}
+-/**
+- * Error thrown when native module operations fail
+- */
+-export class NativeError extends MediaControlError {
+-    constructor(message, code, cause) {
+-        super(message, code, cause);
+-        this.name = "NativeError";
+-    }
+-}
+-/**
+- * Error thrown when media controls are not enabled
+- */
+-export class NotEnabledError extends MediaControlError {
+-    constructor(message = "Media controls are not enabled") {
+-        super(message, "NOT_ENABLED");
+-        this.name = "NotEnabledError";
+-    }
+-}
+-// =============================================
+-// VALIDATION UTILITIES
+-// =============================================
+-/**
+- * Validates media metadata input
+- */
+-function validateMetadata(metadata) {
+-    if (!metadata || typeof metadata !== "object") {
+-        throw new ValidationError("Metadata must be an object", "metadata");
+-    }
+-    // Validate optional string fields
+-    const stringFields = ["title", "artist", "album", "genre", "date"];
+-    for (const field of stringFields) {
+-        if (metadata[field] !== undefined && typeof metadata[field] !== "string") {
+-            throw new ValidationError(`${field} must be a string`, field);
+-        }
+-    }
+-    // Validate optional number fields
+-    const numberFields = [
+-        "duration",
+-        "elapsedTime",
+-        "trackNumber",
+-        "albumTrackCount",
+-    ];
+-    for (const field of numberFields) {
+-        if (metadata[field] !== undefined && typeof metadata[field] !== "number") {
+-            throw new ValidationError(`${field} must be a number`, field);
+-        }
+-        if (metadata[field] !== undefined && metadata[field] < 0) {
+-            throw new ValidationError(`${field} must be non-negative`, field);
+-        }
+-    }
+-    // Validate artwork
+-    if (metadata.artwork !== undefined) {
+-        if (!metadata.artwork || typeof metadata.artwork !== "object") {
+-            throw new ValidationError("artwork must be an object", "artwork");
+-        }
+-        if (typeof metadata.artwork.uri !== "string" ||
+-            metadata.artwork.uri.length === 0) {
+-            throw new ValidationError("artwork.uri must be a non-empty string", "artwork.uri");
+-        }
+-        if (metadata.artwork.width !== undefined &&
+-            typeof metadata.artwork.width !== "number") {
+-            throw new ValidationError("artwork.width must be a number", "artwork.width");
+-        }
+-        if (metadata.artwork.height !== undefined &&
+-            typeof metadata.artwork.height !== "number") {
+-            throw new ValidationError("artwork.height must be a number", "artwork.height");
+-        }
+-    }
+-    // Validate rating
+-    if (metadata.rating !== undefined) {
+-        if (!metadata.rating || typeof metadata.rating !== "object") {
+-            throw new ValidationError("rating must be an object", "rating");
+-        }
+-        if (!Object.values(RatingType).includes(metadata.rating.type)) {
+-            throw new ValidationError("rating.type must be a valid RatingType", "rating.type");
+-        }
+-        if (typeof metadata.rating.value !== "boolean" &&
+-            typeof metadata.rating.value !== "number") {
+-            throw new ValidationError("rating.value must be a boolean or number", "rating.value");
+-        }
+-    }
+-}
+-/**
+- * Validates playback state input
+- */
+-function validatePlaybackState(state) {
+-    if (typeof state !== "number") {
+-        throw new ValidationError("Playback state must be a number", "state");
+-    }
+-    if (!Object.values(PlaybackState).includes(state)) {
+-        throw new ValidationError("Invalid playback state value", "state");
+-    }
+-}
+-/**
+- * Validates position input
+- */
+-function validatePosition(position) {
+-    if (typeof position !== "number") {
+-        throw new ValidationError("Position must be a number", "position");
+-    }
+-    if (position < 0) {
+-        throw new ValidationError("Position must be non-negative", "position");
+-    }
+-    if (!isFinite(position)) {
+-        throw new ValidationError("Position must be finite", "position");
+-    }
+-}
+-/**
+- * Validates playback rate input
+- */
+-function validatePlaybackRate(rate) {
+-    if (typeof rate !== "number") {
+-        throw new ValidationError("Playback rate must be a number", "playbackRate");
+-    }
+-    if (rate < 0) {
+-        throw new ValidationError("Playback rate must be non-negative", "playbackRate");
+-    }
+-    if (rate > 10) {
+-        throw new ValidationError("Playback rate must not exceed 10", "playbackRate");
+-    }
+-    if (!isFinite(rate)) {
+-        throw new ValidationError("Playback rate must be finite", "playbackRate");
+-    }
+-}
+-/**
+- * Validates media control options
+- */
+-function validateMediaControlOptions(options) {
+-    if (!options || typeof options !== "object") {
+-        throw new ValidationError("Options must be an object", "options");
+-    }
+-    if (options.capabilities !== undefined) {
+-        if (!Array.isArray(options.capabilities)) {
+-            throw new ValidationError("capabilities must be an array", "capabilities");
+-        }
+-        for (const capability of options.capabilities) {
+-            if (!Object.values(Command).includes(capability)) {
+-                throw new ValidationError(`Invalid capability: ${capability}`, "capabilities");
+-            }
+-        }
+-    }
+-    if (options.compactCapabilities !== undefined) {
+-        if (!Array.isArray(options.compactCapabilities)) {
+-            throw new ValidationError("compactCapabilities must be an array", "compactCapabilities");
+-        }
+-        if (options.compactCapabilities.length > 3) {
+-            throw new ValidationError("compactCapabilities can have at most 3 items", "compactCapabilities");
+-        }
+-        for (const capability of options.compactCapabilities) {
+-            if (!Object.values(Command).includes(capability)) {
+-                throw new ValidationError(`Invalid compact capability: ${capability}`, "compactCapabilities");
+-            }
+-        }
+-    }
+-    if (options.notification !== undefined) {
+-        if (typeof options.notification !== "object") {
+-            throw new ValidationError("notification must be an object", "notification");
+-        }
+-    }
+-    if (options.ios !== undefined) {
+-        if (typeof options.ios !== "object") {
+-            throw new ValidationError("ios must be an object", "ios");
+-        }
+-    }
+-    if (options.android !== undefined) {
+-        if (typeof options.android !== "object") {
+-            throw new ValidationError("android must be an object", "android");
+-        }
+-    }
+-}
+-// =============================================
+-// TYPE DEFINITIONS
+-// =============================================
+-/**
+- * Represents the current state of media playback
+- */
+-export var PlaybackState;
+-(function (PlaybackState) {
+-    PlaybackState[PlaybackState["NONE"] = 0] = "NONE";
+-    PlaybackState[PlaybackState["STOPPED"] = 1] = "STOPPED";
+-    PlaybackState[PlaybackState["PLAYING"] = 2] = "PLAYING";
+-    PlaybackState[PlaybackState["PAUSED"] = 3] = "PAUSED";
+-    PlaybackState[PlaybackState["BUFFERING"] = 4] = "BUFFERING";
+-    PlaybackState[PlaybackState["ERROR"] = 5] = "ERROR";
+-})(PlaybackState || (PlaybackState = {}));
+-/**
+- * Represents different types of media control commands
+- */
+-export var Command;
+-(function (Command) {
+-    Command["PLAY"] = "play";
+-    Command["PAUSE"] = "pause";
+-    Command["STOP"] = "stop";
+-    Command["NEXT_TRACK"] = "nextTrack";
+-    Command["PREVIOUS_TRACK"] = "previousTrack";
+-    Command["SKIP_FORWARD"] = "skipForward";
+-    Command["SKIP_BACKWARD"] = "skipBackward";
+-    Command["SEEK"] = "seek";
+-    Command["SET_RATING"] = "setRating";
+-    Command["VOLUME_UP"] = "volumeUp";
+-    Command["VOLUME_DOWN"] = "volumeDown";
+-})(Command || (Command = {}));
+-/**
+- * Rating types for media content
+- */
+-export var RatingType;
+-(function (RatingType) {
+-    RatingType["HEART"] = "heart";
+-    RatingType["THUMBS_UP_DOWN"] = "thumbsUpDown";
+-    RatingType["THREE_STARS"] = "threeStars";
+-    RatingType["FOUR_STARS"] = "fourStars";
+-    RatingType["FIVE_STARS"] = "fiveStars";
+-    RatingType["PERCENTAGE"] = "percentage";
+-})(RatingType || (RatingType = {}));
+-// =============================================
+-// MODULE IMPLEMENTATION
+-// =============================================
+-// Create the native module instance
+-const nativeModule = requireNativeModule("ExpoMediaControl");
+-console.log("📱 JS: Native module loaded:", nativeModule);
+-/**
+- * Map to store event listeners for manual management
+- */
+-const eventListeners = {
+-    mediaControl: [],
+-    volumeChange: [],
+-};
+-/**
+- * Extended module class that combines native methods with simplified event handling
+- * This provides a complete interface for media control functionality
+- */
+-class ExtendedExpoMediaControlModule {
+-    // =============================================
+-    // NATIVE METHOD PROXIES
+-    // Forward calls to the native module with proper error handling
+-    // =============================================
+-    /**
+-     * Enable media controls with specified configuration
+-     * Initializes the media session and sets up remote control handlers
+-     */
+-    enableMediaControls = async (options) => {
+-        try {
+-            // Validate input
+-            if (options !== undefined) {
+-                validateMediaControlOptions(options);
+-            }
+-            await nativeModule.enableMediaControls(options);
+-            // Add native event listeners
+-            nativeModule.addListener("mediaControlEvent", this._dispatchMediaControlEvent);
+-            nativeModule.addListener("volumeChangeEvent", this._dispatchVolumeChangeEvent);
+-        }
+-        catch (error) {
+-            if (error instanceof ValidationError) {
+-                throw error;
+-            }
+-            const errorMessage = error instanceof Error ? error.message : String(error);
+-            const nativeError = new NativeError(`Failed to enable media controls: ${errorMessage}`, "ENABLE_FAILED", error instanceof Error ? error : undefined);
+-            console.error(nativeError.message);
+-            throw nativeError;
+-        }
+-    };
+-    /**
+-     * Disable media controls and clean up all resources
+-     * Stops the media session and removes all handlers
+-     */
+-    disableMediaControls = async () => {
+-        try {
+-            await nativeModule.disableMediaControls();
+-            // Remove all native event listeners
+-            nativeModule.removeAllListeners("mediaControlEvent");
+-            nativeModule.removeAllListeners("volumeChangeEvent");
+-        }
+-        catch (error) {
+-            console.error("Failed to disable media controls:", error);
+-            throw error;
+-        }
+-    };
+-    /**
+-     * Update the media metadata displayed in system controls
+-     * Updates notification, lock screen, and control center information
+-     */
+-    updateMetadata = async (metadata) => {
+-        try {
+-            console.log("📱 JS: Updating metadata:", JSON.stringify(metadata, null, 2));
+-            // Validate input
+-            validateMetadata(metadata);
+-            // Filter out undefined values to prevent native conversion errors
+-            // This ensures robust handling of optional metadata fields
+-            const cleanMetadata = Object.fromEntries(Object.entries(metadata).filter(([_, value]) => value !== undefined));
+-            console.log("📱 JS: Sending cleaned metadata to native:", JSON.stringify(cleanMetadata, null, 2));
+-            await nativeModule.updateMetadata(cleanMetadata);
+-        }
+-        catch (error) {
+-            if (error instanceof ValidationError) {
+-                throw error;
+-            }
+-            const errorMessage = error instanceof Error ? error.message : String(error);
+-            const nativeError = new NativeError(`Failed to update metadata: ${errorMessage}`, "UPDATE_METADATA_FAILED", error instanceof Error ? error : undefined);
+-            console.error(nativeError.message);
+-            throw nativeError;
+-        }
+-    };
+-    /**
+-     * Update the current playback state and position
+-     * Updates the system about current playback status
+-     * @param state - The playback state
+-     * @param position - The current position in seconds (optional)
+-     * @param playbackRate - The playback rate/speed (optional, defaults to 1.0 when playing, 0.0 when paused)
+-     */
+-    updatePlaybackState = async (state, position, playbackRate) => {
+-        try {
+-            // Validate input
+-            validatePlaybackState(state);
+-            if (position !== undefined) {
+-                validatePosition(position);
+-            }
+-            if (playbackRate !== undefined) {
+-                validatePlaybackRate(playbackRate);
+-            }
+-            await nativeModule.updatePlaybackState(state, position, playbackRate);
+-        }
+-        catch (error) {
+-            if (error instanceof ValidationError) {
+-                throw error;
+-            }
+-            const errorMessage = error instanceof Error ? error.message : String(error);
+-            const nativeError = new NativeError(`Failed to update playback state: ${errorMessage}`, "UPDATE_STATE_FAILED", error instanceof Error ? error : undefined);
+-            console.error(nativeError.message);
+-            throw nativeError;
+-        }
+-    };
+-    /**
+-     * Reset all media control information to default state
+-     * Clears all metadata and resets playback state
+-     */
+-    resetControls = async () => {
+-        try {
+-            await nativeModule.resetControls();
+-        }
+-        catch (error) {
+-            console.error("Failed to reset controls:", error);
+-            throw error;
+-        }
+-    };
+-    /**
+-     * Check if media controls are currently enabled
+-     * Returns whether the media session is active
+-     */
+-    isEnabled = async () => {
+-        try {
+-            return await nativeModule.isEnabled();
+-        }
+-        catch (error) {
+-            console.error("Failed to check if controls are enabled:", error);
+-            return false;
+-        }
+-    };
+-    /**
+-     * Get the current media metadata
+-     * Returns the currently set metadata information
+-     */
+-    getCurrentMetadata = async () => {
+-        try {
+-            return await nativeModule.getCurrentMetadata();
+-        }
+-        catch (error) {
+-            console.error("Failed to get current metadata:", error);
+-            return null;
+-        }
+-    };
+-    /**
+-     * Get the current playback state
+-     * Returns the current playback status
+-     */
+-    getCurrentState = async () => {
+-        try {
+-            return await nativeModule.getCurrentState();
+-        }
+-        catch (error) {
+-            console.error("Failed to get current state:", error);
+-            return PlaybackState.NONE;
+-        }
+-    };
+-    // =============================================
+-    // SIMPLIFIED EVENT HANDLING METHODS
+-    // Use manual listener management for better control
+-    // =============================================
+-    /**
+-     * Add listener for media control events (play, pause, next, etc.)
+-     * These events are triggered when users interact with system media controls
+-     * @param listener Function to call when media control events occur
+-     * @returns Function to remove the listener
+-     */
+-    addListener = (listener) => {
+-        console.log("📱 JS: Adding media control event listener");
+-        eventListeners.mediaControl.push(listener);
+-        // Return removal function
+-        return () => {
+-            const index = eventListeners.mediaControl.indexOf(listener);
+-            if (index > -1) {
+-                eventListeners.mediaControl.splice(index, 1);
+-            }
+-        };
+-    };
+-    /**
+-     * Add listener for volume change events
+-     * These events are triggered when system volume changes
+-     * @param listener Function to call when volume changes
+-     * @returns Function to remove the listener
+-     */
+-    addVolumeChangeListener = (listener) => {
+-        eventListeners.volumeChange.push(listener);
+-        // Return removal function
+-        return () => {
+-            const index = eventListeners.volumeChange.indexOf(listener);
+-            if (index > -1) {
+-                eventListeners.volumeChange.splice(index, 1);
+-            }
+-        };
+-    };
+-    /**
+-     * Remove all event listeners for all event types
+-     * Cleans up all subscribed event handlers
+-     * @returns Promise that resolves when all listeners are removed
+-     */
+-    removeAllListeners = async () => {
+-        eventListeners.mediaControl.length = 0;
+-        eventListeners.volumeChange.length = 0;
+-    };
+-    // =============================================
+-    // INTERNAL EVENT DISPATCH METHODS
+-    // These will be called by the native modules
+-    // =============================================
+-    /**
+-     * Internal method to dispatch media control events
+-     * This will be called by the native modules when control events occur
+-     */
+-    _dispatchMediaControlEvent = (event) => {
+-        console.log("📱 JS: Dispatching media control event:", event);
+-        eventListeners.mediaControl.forEach((listener) => {
+-            try {
+-                listener(event);
+-            }
+-            catch (error) {
+-                console.error("Error in media control event listener:", error);
+-            }
+-        });
+-    };
+-    /**
+-     * Internal method to dispatch volume change events
+-     * This will be called by the native modules when volume changes
+-     */
+-    _dispatchVolumeChangeEvent = (change) => {
+-        eventListeners.volumeChange.forEach((listener) => {
+-            try {
+-                listener(change);
+-            }
+-            catch (error) {
+-                console.error("Error in volume change event listener:", error);
+-            }
+-        });
+-    };
+-}
+-// Export the extended module instance
+-export default new ExtendedExpoMediaControlModule();
+-//# sourceMappingURL=ExpoMediaControlModule.js.map
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/ExpoMediaControlModule.js.map b/node_modules/expo-media-control/build/ExpoMediaControlModule.js.map
+deleted file mode 100644
+index 6d15297..0000000
+--- a/node_modules/expo-media-control/build/ExpoMediaControlModule.js.map
++++ /dev/null
+@@ -1 +0,0 @@
+-{"version":3,"file":"ExpoMediaControlModule.js","sourceRoot":"","sources":["../src/ExpoMediaControlModule.ts"],"names":[],"mappings":"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","sourcesContent":["import { NativeModule, requireNativeModule } from \"expo\";\n\n// =============================================\n// CUSTOM ERROR TYPES\n// =============================================\n\n/**\n * Base error class for media control errors\n */\nexport class MediaControlError extends Error {\n  constructor(\n    message: string,\n    public readonly code?: string,\n    public readonly cause?: Error,\n  ) {\n    super(message);\n    this.name = \"MediaControlError\";\n  }\n}\n\n/**\n * Error thrown when validation fails\n */\nexport class ValidationError extends MediaControlError {\n  constructor(\n    message: string,\n    public readonly field?: string,\n  ) {\n    super(message, \"VALIDATION_ERROR\");\n    this.name = \"ValidationError\";\n  }\n}\n\n/**\n * Error thrown when native module operations fail\n */\nexport class NativeError extends MediaControlError {\n  constructor(message: string, code?: string, cause?: Error) {\n    super(message, code, cause);\n    this.name = \"NativeError\";\n  }\n}\n\n/**\n * Error thrown when media controls are not enabled\n */\nexport class NotEnabledError extends MediaControlError {\n  constructor(message: string = \"Media controls are not enabled\") {\n    super(message, \"NOT_ENABLED\");\n    this.name = \"NotEnabledError\";\n  }\n}\n\n// =============================================\n// VALIDATION UTILITIES\n// =============================================\n\n/**\n * Validates media metadata input\n */\nfunction validateMetadata(metadata: any): asserts metadata is MediaMetadata {\n  if (!metadata || typeof metadata !== \"object\") {\n    throw new ValidationError(\"Metadata must be an object\", \"metadata\");\n  }\n\n  // Validate optional string fields\n  const stringFields = [\"title\", \"artist\", \"album\", \"genre\", \"date\"];\n  for (const field of stringFields) {\n    if (metadata[field] !== undefined && typeof metadata[field] !== \"string\") {\n      throw new ValidationError(`${field} must be a string`, field);\n    }\n  }\n\n  // Validate optional number fields\n  const numberFields = [\n    \"duration\",\n    \"elapsedTime\",\n    \"trackNumber\",\n    \"albumTrackCount\",\n  ];\n  for (const field of numberFields) {\n    if (metadata[field] !== undefined && typeof metadata[field] !== \"number\") {\n      throw new ValidationError(`${field} must be a number`, field);\n    }\n    if (metadata[field] !== undefined && metadata[field] < 0) {\n      throw new ValidationError(`${field} must be non-negative`, field);\n    }\n  }\n\n  // Validate artwork\n  if (metadata.artwork !== undefined) {\n    if (!metadata.artwork || typeof metadata.artwork !== \"object\") {\n      throw new ValidationError(\"artwork must be an object\", \"artwork\");\n    }\n    if (\n      typeof metadata.artwork.uri !== \"string\" ||\n      metadata.artwork.uri.length === 0\n    ) {\n      throw new ValidationError(\n        \"artwork.uri must be a non-empty string\",\n        \"artwork.uri\",\n      );\n    }\n    if (\n      metadata.artwork.width !== undefined &&\n      typeof metadata.artwork.width !== \"number\"\n    ) {\n      throw new ValidationError(\n        \"artwork.width must be a number\",\n        \"artwork.width\",\n      );\n    }\n    if (\n      metadata.artwork.height !== undefined &&\n      typeof metadata.artwork.height !== \"number\"\n    ) {\n      throw new ValidationError(\n        \"artwork.height must be a number\",\n        \"artwork.height\",\n      );\n    }\n  }\n\n  // Validate rating\n  if (metadata.rating !== undefined) {\n    if (!metadata.rating || typeof metadata.rating !== \"object\") {\n      throw new ValidationError(\"rating must be an object\", \"rating\");\n    }\n    if (!Object.values(RatingType).includes(metadata.rating.type)) {\n      throw new ValidationError(\n        \"rating.type must be a valid RatingType\",\n        \"rating.type\",\n      );\n    }\n    if (\n      typeof metadata.rating.value !== \"boolean\" &&\n      typeof metadata.rating.value !== \"number\"\n    ) {\n      throw new ValidationError(\n        \"rating.value must be a boolean or number\",\n        \"rating.value\",\n      );\n    }\n  }\n}\n\n/**\n * Validates playback state input\n */\nfunction validatePlaybackState(state: any): asserts state is PlaybackState {\n  if (typeof state !== \"number\") {\n    throw new ValidationError(\"Playback state must be a number\", \"state\");\n  }\n  if (!Object.values(PlaybackState).includes(state)) {\n    throw new ValidationError(\"Invalid playback state value\", \"state\");\n  }\n}\n\n/**\n * Validates position input\n */\nfunction validatePosition(position: any): asserts position is number {\n  if (typeof position !== \"number\") {\n    throw new ValidationError(\"Position must be a number\", \"position\");\n  }\n  if (position < 0) {\n    throw new ValidationError(\"Position must be non-negative\", \"position\");\n  }\n  if (!isFinite(position)) {\n    throw new ValidationError(\"Position must be finite\", \"position\");\n  }\n}\n\n/**\n * Validates playback rate input\n */\nfunction validatePlaybackRate(rate: any): asserts rate is number {\n  if (typeof rate !== \"number\") {\n    throw new ValidationError(\"Playback rate must be a number\", \"playbackRate\");\n  }\n  if (rate < 0) {\n    throw new ValidationError(\n      \"Playback rate must be non-negative\",\n      \"playbackRate\",\n    );\n  }\n  if (rate > 10) {\n    throw new ValidationError(\n      \"Playback rate must not exceed 10\",\n      \"playbackRate\",\n    );\n  }\n  if (!isFinite(rate)) {\n    throw new ValidationError(\"Playback rate must be finite\", \"playbackRate\");\n  }\n}\n\n/**\n * Validates media control options\n */\nfunction validateMediaControlOptions(\n  options: any,\n): asserts options is MediaControlOptions {\n  if (!options || typeof options !== \"object\") {\n    throw new ValidationError(\"Options must be an object\", \"options\");\n  }\n\n  if (options.capabilities !== undefined) {\n    if (!Array.isArray(options.capabilities)) {\n      throw new ValidationError(\n        \"capabilities must be an array\",\n        \"capabilities\",\n      );\n    }\n    for (const capability of options.capabilities) {\n      if (!Object.values(Command).includes(capability)) {\n        throw new ValidationError(\n          `Invalid capability: ${capability}`,\n          \"capabilities\",\n        );\n      }\n    }\n  }\n\n  if (options.compactCapabilities !== undefined) {\n    if (!Array.isArray(options.compactCapabilities)) {\n      throw new ValidationError(\n        \"compactCapabilities must be an array\",\n        \"compactCapabilities\",\n      );\n    }\n    if (options.compactCapabilities.length > 3) {\n      throw new ValidationError(\n        \"compactCapabilities can have at most 3 items\",\n        \"compactCapabilities\",\n      );\n    }\n    for (const capability of options.compactCapabilities) {\n      if (!Object.values(Command).includes(capability)) {\n        throw new ValidationError(\n          `Invalid compact capability: ${capability}`,\n          \"compactCapabilities\",\n        );\n      }\n    }\n  }\n\n  if (options.notification !== undefined) {\n    if (typeof options.notification !== \"object\") {\n      throw new ValidationError(\n        \"notification must be an object\",\n        \"notification\",\n      );\n    }\n  }\n\n  if (options.ios !== undefined) {\n    if (typeof options.ios !== \"object\") {\n      throw new ValidationError(\"ios must be an object\", \"ios\");\n    }\n  }\n\n  if (options.android !== undefined) {\n    if (typeof options.android !== \"object\") {\n      throw new ValidationError(\"android must be an object\", \"android\");\n    }\n  }\n}\n\n// =============================================\n// TYPE DEFINITIONS\n// =============================================\n\n/**\n * Represents the current state of media playback\n */\nexport enum PlaybackState {\n  NONE = 0,\n  STOPPED = 1,\n  PLAYING = 2,\n  PAUSED = 3,\n  BUFFERING = 4,\n  ERROR = 5,\n}\n\n/**\n * Represents different types of media control commands\n */\nexport enum Command {\n  PLAY = \"play\",\n  PAUSE = \"pause\",\n  STOP = \"stop\",\n  NEXT_TRACK = \"nextTrack\",\n  PREVIOUS_TRACK = \"previousTrack\",\n  SKIP_FORWARD = \"skipForward\",\n  SKIP_BACKWARD = \"skipBackward\",\n  SEEK = \"seek\",\n  SET_RATING = \"setRating\",\n  VOLUME_UP = \"volumeUp\",\n  VOLUME_DOWN = \"volumeDown\",\n}\n\n/**\n * Rating types for media content\n */\nexport enum RatingType {\n  HEART = \"heart\",\n  THUMBS_UP_DOWN = \"thumbsUpDown\",\n  THREE_STARS = \"threeStars\",\n  FOUR_STARS = \"fourStars\",\n  FIVE_STARS = \"fiveStars\",\n  PERCENTAGE = \"percentage\",\n}\n\n/**\n * Represents artwork/album cover information\n */\nexport interface MediaArtwork {\n  uri: string;\n  width?: number;\n  height?: number;\n}\n\n/**\n * Represents rating information for media content\n */\nexport interface MediaRating {\n  type: RatingType;\n  value: boolean | number;\n  maxValue?: number;\n}\n\n/**\n * Complete media metadata information\n */\nexport interface MediaMetadata {\n  title?: string;\n  artist?: string;\n  album?: string;\n  artwork?: MediaArtwork;\n  duration?: number;\n  elapsedTime?: number;\n  genre?: string;\n  trackNumber?: number;\n  albumTrackCount?: number;\n  date?: string;\n  rating?: MediaRating;\n  color?: string;\n  colorized?: boolean;\n  isLiveStream?: boolean;\n}\n\n/**\n * Configuration options for media controls\n *\n * Note: Audio focus management should be handled by your media player,\n * not by this control module.\n */\nexport interface MediaControlOptions {\n  capabilities?: Command[];\n  compactCapabilities?: Command[];\n  notification?: {\n    icon?: string;\n    largeIcon?: MediaArtwork;\n    color?: string;\n    showWhenClosed?: boolean;\n  };\n  ios?: {\n    skipInterval?: number;\n  };\n  android?: {\n    skipInterval?: number;\n  };\n}\n\n/**\n * Media control event data\n */\nexport interface MediaControlEvent {\n  command: Command;\n  data?: any;\n  timestamp: number;\n}\n\n/**\n * Volume change information\n */\nexport interface VolumeChange {\n  volume: number;\n  userInitiated: boolean;\n}\n\n// Event listener types\nexport type MediaControlEventListener = (event: MediaControlEvent) => void;\nexport type VolumeChangeListener = (change: VolumeChange) => void;\n\n// =============================================\n// NATIVE MODULE INTERFACE\n// =============================================\n\n/**\n * Native module interface for Expo Media Control\n * This interface defines all the methods that the native iOS and Android modules must implement\n */\ndeclare class ExpoMediaControlNativeModule extends NativeModule {\n  /**\n   * Enable media controls with specified configuration\n   * Initializes the media session and sets up remote control handlers\n   */\n  enableMediaControls(options?: MediaControlOptions): Promise<void>;\n\n  /**\n   * Disable media controls and clean up all resources\n   * Stops the media session and removes all handlers\n   */\n  disableMediaControls(): Promise<void>;\n\n  /**\n   * Update the media metadata displayed in system controls\n   * Updates notification, lock screen, and control center information\n   */\n  updateMetadata(metadata: MediaMetadata): Promise<void>;\n\n  /**\n   * Update the current playback state and position\n   * Updates the system about current playback status\n   * @param state - The playback state\n   * @param position - The current position in seconds (optional)\n   * @param playbackRate - The playback rate/speed (optional, defaults to 1.0 when playing, 0.0 when paused)\n   */\n  updatePlaybackState(\n    state: PlaybackState,\n    position?: number,\n    playbackRate?: number,\n  ): Promise<void>;\n\n  /**\n   * Reset all media control information to default state\n   * Clears all metadata and resets playback state\n   */\n  resetControls(): Promise<void>;\n\n  /**\n   * Check if media controls are currently enabled\n   * Returns whether the media session is active\n   */\n  isEnabled(): Promise<boolean>;\n\n  /**\n   * Get the current media metadata\n   * Returns the currently set metadata information\n   */\n  getCurrentMetadata(): Promise<MediaMetadata | null>;\n\n  /**\n   * Get the current playback state\n   * Returns the current playback status\n   */\n  getCurrentState(): Promise<PlaybackState>;\n}\n\n// =============================================\n// MODULE IMPLEMENTATION\n// =============================================\n\n// Create the native module instance\nconst nativeModule =\n  requireNativeModule<ExpoMediaControlNativeModule>(\"ExpoMediaControl\");\n\nconsole.log(\"📱 JS: Native module loaded:\", nativeModule);\n\n/**\n * Map to store event listeners for manual management\n */\nconst eventListeners: {\n  mediaControl: MediaControlEventListener[];\n  volumeChange: VolumeChangeListener[];\n} = {\n  mediaControl: [],\n  volumeChange: [],\n};\n\n/**\n * Extended module class that combines native methods with simplified event handling\n * This provides a complete interface for media control functionality\n */\nclass ExtendedExpoMediaControlModule {\n  // =============================================\n  // NATIVE METHOD PROXIES\n  // Forward calls to the native module with proper error handling\n  // =============================================\n\n  /**\n   * Enable media controls with specified configuration\n   * Initializes the media session and sets up remote control handlers\n   */\n  enableMediaControls = async (\n    options?: MediaControlOptions,\n  ): Promise<void> => {\n    try {\n      // Validate input\n      if (options !== undefined) {\n        validateMediaControlOptions(options);\n      }\n\n      await nativeModule.enableMediaControls(options);\n\n      // Add native event listeners\n      (nativeModule as any).addListener(\n        \"mediaControlEvent\",\n        this._dispatchMediaControlEvent,\n      );\n      (nativeModule as any).addListener(\n        \"volumeChangeEvent\",\n        this._dispatchVolumeChangeEvent,\n      );\n    } catch (error) {\n      if (error instanceof ValidationError) {\n        throw error;\n      }\n      const errorMessage =\n        error instanceof Error ? error.message : String(error);\n      const nativeError = new NativeError(\n        `Failed to enable media controls: ${errorMessage}`,\n        \"ENABLE_FAILED\",\n        error instanceof Error ? error : undefined,\n      );\n      console.error(nativeError.message);\n      throw nativeError;\n    }\n  };\n\n  /**\n   * Disable media controls and clean up all resources\n   * Stops the media session and removes all handlers\n   */\n  disableMediaControls = async (): Promise<void> => {\n    try {\n      await nativeModule.disableMediaControls();\n\n      // Remove all native event listeners\n      (nativeModule as any).removeAllListeners(\"mediaControlEvent\");\n      (nativeModule as any).removeAllListeners(\"volumeChangeEvent\");\n    } catch (error) {\n      console.error(\"Failed to disable media controls:\", error);\n      throw error;\n    }\n  };\n\n  /**\n   * Update the media metadata displayed in system controls\n   * Updates notification, lock screen, and control center information\n   */\n  updateMetadata = async (metadata: MediaMetadata): Promise<void> => {\n    try {\n      console.log(\n        \"📱 JS: Updating metadata:\",\n        JSON.stringify(metadata, null, 2),\n      );\n      // Validate input\n      validateMetadata(metadata);\n\n      // Filter out undefined values to prevent native conversion errors\n      // This ensures robust handling of optional metadata fields\n      const cleanMetadata = Object.fromEntries(\n        Object.entries(metadata).filter(([_, value]) => value !== undefined),\n      ) as MediaMetadata;\n\n      console.log(\n        \"📱 JS: Sending cleaned metadata to native:\",\n        JSON.stringify(cleanMetadata, null, 2),\n      );\n\n      await nativeModule.updateMetadata(cleanMetadata);\n    } catch (error) {\n      if (error instanceof ValidationError) {\n        throw error;\n      }\n      const errorMessage =\n        error instanceof Error ? error.message : String(error);\n      const nativeError = new NativeError(\n        `Failed to update metadata: ${errorMessage}`,\n        \"UPDATE_METADATA_FAILED\",\n        error instanceof Error ? error : undefined,\n      );\n      console.error(nativeError.message);\n      throw nativeError;\n    }\n  };\n\n  /**\n   * Update the current playback state and position\n   * Updates the system about current playback status\n   * @param state - The playback state\n   * @param position - The current position in seconds (optional)\n   * @param playbackRate - The playback rate/speed (optional, defaults to 1.0 when playing, 0.0 when paused)\n   */\n  updatePlaybackState = async (\n    state: PlaybackState,\n    position?: number,\n    playbackRate?: number,\n  ): Promise<void> => {\n    try {\n      // Validate input\n      validatePlaybackState(state);\n      if (position !== undefined) {\n        validatePosition(position);\n      }\n      if (playbackRate !== undefined) {\n        validatePlaybackRate(playbackRate);\n      }\n\n      await nativeModule.updatePlaybackState(state, position, playbackRate);\n    } catch (error) {\n      if (error instanceof ValidationError) {\n        throw error;\n      }\n      const errorMessage =\n        error instanceof Error ? error.message : String(error);\n      const nativeError = new NativeError(\n        `Failed to update playback state: ${errorMessage}`,\n        \"UPDATE_STATE_FAILED\",\n        error instanceof Error ? error : undefined,\n      );\n      console.error(nativeError.message);\n      throw nativeError;\n    }\n  };\n\n  /**\n   * Reset all media control information to default state\n   * Clears all metadata and resets playback state\n   */\n  resetControls = async (): Promise<void> => {\n    try {\n      await nativeModule.resetControls();\n    } catch (error) {\n      console.error(\"Failed to reset controls:\", error);\n      throw error;\n    }\n  };\n\n  /**\n   * Check if media controls are currently enabled\n   * Returns whether the media session is active\n   */\n  isEnabled = async (): Promise<boolean> => {\n    try {\n      return await nativeModule.isEnabled();\n    } catch (error) {\n      console.error(\"Failed to check if controls are enabled:\", error);\n      return false;\n    }\n  };\n\n  /**\n   * Get the current media metadata\n   * Returns the currently set metadata information\n   */\n  getCurrentMetadata = async (): Promise<MediaMetadata | null> => {\n    try {\n      return await nativeModule.getCurrentMetadata();\n    } catch (error) {\n      console.error(\"Failed to get current metadata:\", error);\n      return null;\n    }\n  };\n\n  /**\n   * Get the current playback state\n   * Returns the current playback status\n   */\n  getCurrentState = async (): Promise<PlaybackState> => {\n    try {\n      return await nativeModule.getCurrentState();\n    } catch (error) {\n      console.error(\"Failed to get current state:\", error);\n      return PlaybackState.NONE;\n    }\n  };\n\n  // =============================================\n  // SIMPLIFIED EVENT HANDLING METHODS\n  // Use manual listener management for better control\n  // =============================================\n\n  /**\n   * Add listener for media control events (play, pause, next, etc.)\n   * These events are triggered when users interact with system media controls\n   * @param listener Function to call when media control events occur\n   * @returns Function to remove the listener\n   */\n  addListener = (listener: MediaControlEventListener): (() => void) => {\n    console.log(\"📱 JS: Adding media control event listener\");\n    eventListeners.mediaControl.push(listener);\n\n    // Return removal function\n    return () => {\n      const index = eventListeners.mediaControl.indexOf(listener);\n      if (index > -1) {\n        eventListeners.mediaControl.splice(index, 1);\n      }\n    };\n  };\n\n  /**\n   * Add listener for volume change events\n   * These events are triggered when system volume changes\n   * @param listener Function to call when volume changes\n   * @returns Function to remove the listener\n   */\n  addVolumeChangeListener = (listener: VolumeChangeListener): (() => void) => {\n    eventListeners.volumeChange.push(listener);\n\n    // Return removal function\n    return () => {\n      const index = eventListeners.volumeChange.indexOf(listener);\n      if (index > -1) {\n        eventListeners.volumeChange.splice(index, 1);\n      }\n    };\n  };\n\n  /**\n   * Remove all event listeners for all event types\n   * Cleans up all subscribed event handlers\n   * @returns Promise that resolves when all listeners are removed\n   */\n  removeAllListeners = async (): Promise<void> => {\n    eventListeners.mediaControl.length = 0;\n    eventListeners.volumeChange.length = 0;\n  };\n\n  // =============================================\n  // INTERNAL EVENT DISPATCH METHODS\n  // These will be called by the native modules\n  // =============================================\n\n  /**\n   * Internal method to dispatch media control events\n   * This will be called by the native modules when control events occur\n   */\n  _dispatchMediaControlEvent = (event: MediaControlEvent): void => {\n    console.log(\"📱 JS: Dispatching media control event:\", event);\n\n    eventListeners.mediaControl.forEach((listener) => {\n      try {\n        listener(event);\n      } catch (error) {\n        console.error(\"Error in media control event listener:\", error);\n      }\n    });\n  };\n\n  /**\n   * Internal method to dispatch volume change events\n   * This will be called by the native modules when volume changes\n   */\n  _dispatchVolumeChangeEvent = (change: VolumeChange): void => {\n    eventListeners.volumeChange.forEach((listener) => {\n      try {\n        listener(change);\n      } catch (error) {\n        console.error(\"Error in volume change event listener:\", error);\n      }\n    });\n  };\n}\n\n// Export the extended module instance\nexport default new ExtendedExpoMediaControlModule();\n"]}
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/index.d.ts b/node_modules/expo-media-control/build/index.d.ts
+deleted file mode 100644
+index f39cbf7..0000000
+--- a/node_modules/expo-media-control/build/index.d.ts
++++ /dev/null
+@@ -1,27 +0,0 @@
+-import ExpoMediaControlModule from "./ExpoMediaControlModule";
+-export { PlaybackState, Command, RatingType, MediaArtwork, MediaRating, MediaMetadata, MediaControlOptions, MediaControlEvent, VolumeChange, MediaControlEventListener, VolumeChangeListener, MediaControlError, ValidationError, NativeError, NotEnabledError, } from "./ExpoMediaControlModule";
+-/**
+- * Main interface for the Expo Media Control module
+- * Provides methods to control media playback and handle remote control events
+- */
+-export interface ExpoMediaControlInterface {
+-    enableMediaControls: typeof ExpoMediaControlModule.enableMediaControls;
+-    disableMediaControls: typeof ExpoMediaControlModule.disableMediaControls;
+-    updateMetadata: typeof ExpoMediaControlModule.updateMetadata;
+-    updatePlaybackState: typeof ExpoMediaControlModule.updatePlaybackState;
+-    resetControls: typeof ExpoMediaControlModule.resetControls;
+-    addListener: typeof ExpoMediaControlModule.addListener;
+-    addVolumeChangeListener: typeof ExpoMediaControlModule.addVolumeChangeListener;
+-    removeAllListeners: typeof ExpoMediaControlModule.removeAllListeners;
+-    isEnabled: typeof ExpoMediaControlModule.isEnabled;
+-    getCurrentMetadata: typeof ExpoMediaControlModule.getCurrentMetadata;
+-    getCurrentState: typeof ExpoMediaControlModule.getCurrentState;
+-}
+-/**
+- * Main API object for media controls
+- * Implements the ExpoMediaControlInterface for managing media playback controls
+- */
+-export declare const MediaControl: ExpoMediaControlInterface;
+-export declare const enableMediaControls: (options?: import("./ExpoMediaControlModule").MediaControlOptions) => Promise<void>, disableMediaControls: () => Promise<void>, updateMetadata: (metadata: import("./ExpoMediaControlModule").MediaMetadata) => Promise<void>, updatePlaybackState: (state: import("./ExpoMediaControlModule").PlaybackState, position?: number, playbackRate?: number) => Promise<void>, resetControls: () => Promise<void>, addListener: (listener: import("./ExpoMediaControlModule").MediaControlEventListener) => (() => void), addVolumeChangeListener: (listener: import("./ExpoMediaControlModule").VolumeChangeListener) => (() => void), removeAllListeners: () => Promise<void>, isEnabled: () => Promise<boolean>, getCurrentMetadata: () => Promise<import("./ExpoMediaControlModule").MediaMetadata | null>, getCurrentState: () => Promise<import("./ExpoMediaControlModule").PlaybackState>;
+-export default MediaControl;
+-//# sourceMappingURL=index.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/index.d.ts.map b/node_modules/expo-media-control/build/index.d.ts.map
+deleted file mode 100644
+index adb6a08..0000000
+--- a/node_modules/expo-media-control/build/index.d.ts.map
++++ /dev/null
+@@ -1 +0,0 @@
+-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AACA,OAAO,sBAAsB,MAAM,0BAA0B,CAAC;AAE9D,OAAO,EACL,aAAa,EACb,OAAO,EACP,UAAU,EACV,YAAY,EACZ,WAAW,EACX,aAAa,EACb,mBAAmB,EACnB,iBAAiB,EACjB,YAAY,EACZ,yBAAyB,EACzB,oBAAoB,EAEpB,iBAAiB,EACjB,eAAe,EACf,WAAW,EACX,eAAe,GAChB,MAAM,0BAA0B,CAAC;AAMlC;;;GAGG;AACH,MAAM,WAAW,yBAAyB;IAExC,mBAAmB,EAAE,OAAO,sBAAsB,CAAC,mBAAmB,CAAC;IACvE,oBAAoB,EAAE,OAAO,sBAAsB,CAAC,oBAAoB,CAAC;IACzE,cAAc,EAAE,OAAO,sBAAsB,CAAC,cAAc,CAAC;IAC7D,mBAAmB,EAAE,OAAO,sBAAsB,CAAC,mBAAmB,CAAC;IACvE,aAAa,EAAE,OAAO,sBAAsB,CAAC,aAAa,CAAC;IAG3D,WAAW,EAAE,OAAO,sBAAsB,CAAC,WAAW,CAAC;IACvD,uBAAuB,EAAE,OAAO,sBAAsB,CAAC,uBAAuB,CAAC;IAC/E,kBAAkB,EAAE,OAAO,sBAAsB,CAAC,kBAAkB,CAAC;IAGrE,SAAS,EAAE,OAAO,sBAAsB,CAAC,SAAS,CAAC;IACnD,kBAAkB,EAAE,OAAO,sBAAsB,CAAC,kBAAkB,CAAC;IACrE,eAAe,EAAE,OAAO,sBAAsB,CAAC,eAAe,CAAC;CAChE;AAMD;;;GAGG;AACH,eAAO,MAAM,YAAY,EAAE,yBAY1B,CAAC;AAGF,eAAO,MACL,mBAAmB,uFACnB,oBAAoB,uBACpB,cAAc,iFACd,mBAAmB,wHACnB,aAAa,uBACb,WAAW,4FACX,uBAAuB,uFACvB,kBAAkB,uBAClB,SAAS,0BACT,kBAAkB,0EAClB,eAAe,iEACD,CAAC;AAGjB,eAAe,YAAY,CAAC"}
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/index.js b/node_modules/expo-media-control/build/index.js
+deleted file mode 100644
+index 2e3fa7c..0000000
+--- a/node_modules/expo-media-control/build/index.js
++++ /dev/null
+@@ -1,30 +0,0 @@
+-// Re-export types and enums from ExpoMediaControlModule
+-import ExpoMediaControlModule from "./ExpoMediaControlModule";
+-export { PlaybackState, Command, RatingType, 
+-// Error types
+-MediaControlError, ValidationError, NativeError, NotEnabledError, } from "./ExpoMediaControlModule";
+-// =============================================
+-// EXPORTED API
+-// =============================================
+-/**
+- * Main API object for media controls
+- * Implements the ExpoMediaControlInterface for managing media playback controls
+- */
+-export const MediaControl = {
+-    enableMediaControls: ExpoMediaControlModule.enableMediaControls,
+-    disableMediaControls: ExpoMediaControlModule.disableMediaControls,
+-    updateMetadata: ExpoMediaControlModule.updateMetadata,
+-    updatePlaybackState: ExpoMediaControlModule.updatePlaybackState,
+-    resetControls: ExpoMediaControlModule.resetControls,
+-    addListener: ExpoMediaControlModule.addListener,
+-    addVolumeChangeListener: ExpoMediaControlModule.addVolumeChangeListener,
+-    removeAllListeners: ExpoMediaControlModule.removeAllListeners,
+-    isEnabled: ExpoMediaControlModule.isEnabled,
+-    getCurrentMetadata: ExpoMediaControlModule.getCurrentMetadata,
+-    getCurrentState: ExpoMediaControlModule.getCurrentState,
+-};
+-// Export individual functions for backward compatibility
+-export const { enableMediaControls, disableMediaControls, updateMetadata, updatePlaybackState, resetControls, addListener, addVolumeChangeListener, removeAllListeners, isEnabled, getCurrentMetadata, getCurrentState, } = MediaControl;
+-// Export everything for convenience
+-export default MediaControl;
+-//# sourceMappingURL=index.js.map
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/build/index.js.map b/node_modules/expo-media-control/build/index.js.map
+deleted file mode 100644
+index eb871ae..0000000
+--- a/node_modules/expo-media-control/build/index.js.map
++++ /dev/null
+@@ -1 +0,0 @@
+-{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AAAA,wDAAwD;AACxD,OAAO,sBAAsB,MAAM,0BAA0B,CAAC;AAE9D,OAAO,EACL,aAAa,EACb,OAAO,EACP,UAAU;AASV,cAAc;AACd,iBAAiB,EACjB,eAAe,EACf,WAAW,EACX,eAAe,GAChB,MAAM,0BAA0B,CAAC;AA6BlC,gDAAgD;AAChD,eAAe;AACf,gDAAgD;AAEhD;;;GAGG;AACH,MAAM,CAAC,MAAM,YAAY,GAA8B;IACrD,mBAAmB,EAAE,sBAAsB,CAAC,mBAAmB;IAC/D,oBAAoB,EAAE,sBAAsB,CAAC,oBAAoB;IACjE,cAAc,EAAE,sBAAsB,CAAC,cAAc;IACrD,mBAAmB,EAAE,sBAAsB,CAAC,mBAAmB;IAC/D,aAAa,EAAE,sBAAsB,CAAC,aAAa;IACnD,WAAW,EAAE,sBAAsB,CAAC,WAAW;IAC/C,uBAAuB,EAAE,sBAAsB,CAAC,uBAAuB;IACvE,kBAAkB,EAAE,sBAAsB,CAAC,kBAAkB;IAC7D,SAAS,EAAE,sBAAsB,CAAC,SAAS;IAC3C,kBAAkB,EAAE,sBAAsB,CAAC,kBAAkB;IAC7D,eAAe,EAAE,sBAAsB,CAAC,eAAe;CACxD,CAAC;AAEF,yDAAyD;AACzD,MAAM,CAAC,MAAM,EACX,mBAAmB,EACnB,oBAAoB,EACpB,cAAc,EACd,mBAAmB,EACnB,aAAa,EACb,WAAW,EACX,uBAAuB,EACvB,kBAAkB,EAClB,SAAS,EACT,kBAAkB,EAClB,eAAe,GAChB,GAAG,YAAY,CAAC;AAEjB,oCAAoC;AACpC,eAAe,YAAY,CAAC","sourcesContent":["// Re-export types and enums from ExpoMediaControlModule\nimport ExpoMediaControlModule from \"./ExpoMediaControlModule\";\n\nexport {\n  PlaybackState,\n  Command,\n  RatingType,\n  MediaArtwork,\n  MediaRating,\n  MediaMetadata,\n  MediaControlOptions,\n  MediaControlEvent,\n  VolumeChange,\n  MediaControlEventListener,\n  VolumeChangeListener,\n  // Error types\n  MediaControlError,\n  ValidationError,\n  NativeError,\n  NotEnabledError,\n} from \"./ExpoMediaControlModule\";\n\n// =============================================\n// MAIN API INTERFACE\n// =============================================\n\n/**\n * Main interface for the Expo Media Control module\n * Provides methods to control media playback and handle remote control events\n */\nexport interface ExpoMediaControlInterface {\n  // Media control methods\n  enableMediaControls: typeof ExpoMediaControlModule.enableMediaControls;\n  disableMediaControls: typeof ExpoMediaControlModule.disableMediaControls;\n  updateMetadata: typeof ExpoMediaControlModule.updateMetadata;\n  updatePlaybackState: typeof ExpoMediaControlModule.updatePlaybackState;\n  resetControls: typeof ExpoMediaControlModule.resetControls;\n\n  // Event handling methods\n  addListener: typeof ExpoMediaControlModule.addListener;\n  addVolumeChangeListener: typeof ExpoMediaControlModule.addVolumeChangeListener;\n  removeAllListeners: typeof ExpoMediaControlModule.removeAllListeners;\n\n  // Utility methods\n  isEnabled: typeof ExpoMediaControlModule.isEnabled;\n  getCurrentMetadata: typeof ExpoMediaControlModule.getCurrentMetadata;\n  getCurrentState: typeof ExpoMediaControlModule.getCurrentState;\n}\n\n// =============================================\n// EXPORTED API\n// =============================================\n\n/**\n * Main API object for media controls\n * Implements the ExpoMediaControlInterface for managing media playback controls\n */\nexport const MediaControl: ExpoMediaControlInterface = {\n  enableMediaControls: ExpoMediaControlModule.enableMediaControls,\n  disableMediaControls: ExpoMediaControlModule.disableMediaControls,\n  updateMetadata: ExpoMediaControlModule.updateMetadata,\n  updatePlaybackState: ExpoMediaControlModule.updatePlaybackState,\n  resetControls: ExpoMediaControlModule.resetControls,\n  addListener: ExpoMediaControlModule.addListener,\n  addVolumeChangeListener: ExpoMediaControlModule.addVolumeChangeListener,\n  removeAllListeners: ExpoMediaControlModule.removeAllListeners,\n  isEnabled: ExpoMediaControlModule.isEnabled,\n  getCurrentMetadata: ExpoMediaControlModule.getCurrentMetadata,\n  getCurrentState: ExpoMediaControlModule.getCurrentState,\n};\n\n// Export individual functions for backward compatibility\nexport const {\n  enableMediaControls,\n  disableMediaControls,\n  updateMetadata,\n  updatePlaybackState,\n  resetControls,\n  addListener,\n  addVolumeChangeListener,\n  removeAllListeners,\n  isEnabled,\n  getCurrentMetadata,\n  getCurrentState,\n} = MediaControl;\n\n// Export everything for convenience\nexport default MediaControl;\n"]}
+\ No newline at end of file
+diff --git a/node_modules/expo-media-control/src/ExpoMediaControlModule.ts b/node_modules/expo-media-control/src/ExpoMediaControlModule.ts
+index b679044..cce3a9d 100644
+--- a/node_modules/expo-media-control/src/ExpoMediaControlModule.ts
++++ b/node_modules/expo-media-control/src/ExpoMediaControlModule.ts
+@@ -566,10 +566,6 @@ class ExtendedExpoMediaControlModule {
+         Object.entries(metadata).filter(([_, value]) => value !== undefined),
+       ) as MediaMetadata;
+ 
+-      console.log(
+-        "📱 JS: Sending cleaned metadata to native:",
+-        JSON.stringify(cleanMetadata, null, 2),
+-      );
+ 
+       await nativeModule.updateMetadata(cleanMetadata);
+     } catch (error) {
