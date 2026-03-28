@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Alert, FlatList } from "react-native";
+import { View, TouchableOpacity, Alert, FlatList, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
 import { CoverArtResult, CoverArtService } from "@/services/cover-art";
-import { ChevronLeft, Image as ImageIcon, X } from "lucide-react-native";
+import { ChevronLeft, Image as ImageIcon } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image } from "react-native";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCoverArt } from "@/contexts/cover-art-context";
 
 export default function CoverArtSearchScreen() {
@@ -154,46 +154,45 @@ export default function CoverArtSearchScreen() {
       colors={["#1f2937", "#111827", "#000000"]}
       className="flex-1"
     >
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-4 border-b border-gray-700">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2">
-          <ChevronLeft size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <View className="items-center flex-1">
-          <StyledText weight="semibold" className="text-white text-lg" numberOfLines={1}>
-            {trackObj?.title || ""}
-          </StyledText>
-          <StyledText variant="caption" className="text-gray-400" numberOfLines={1}>
-            {trackObj?.artist || "Unknown Artist"}
-          </StyledText>
+      <SafeAreaView edges={["top"]} className="flex-1">
+        {/* Header */}
+        <View className="flex-row items-center px-4 pt-2 pb-4 border-b border-gray-700">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 mr-2">
+            <ChevronLeft size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <View className="flex-1">
+            <StyledText weight="semibold" className="text-white text-lg" numberOfLines={1}>
+              {trackObj?.title || ""}
+            </StyledText>
+            <StyledText variant="caption" className="text-gray-400" numberOfLines={1}>
+              {trackObj?.artist || "Unknown Artist"}
+            </StyledText>
+          </View>
         </View>
-        <TouchableOpacity onPress={() => loadCoverArt(trackObj)} disabled={isLoading} className="p-2">
-          <X size={24} color={isLoading ? "#6B7280" : "#FFFFFF"} />
-        </TouchableOpacity>
-      </View>
 
-      {/* Content */}
-      {isLoading ? renderLoading() :
-       error ? renderError() :
-       searchResults && searchResults.length > 0 ? (
-         <FlatList
-           data={searchResults}
-           renderItem={renderCoverItem}
-           keyExtractor={(item) => item.id}
-           numColumns={2}
-           contentContainerStyle={{ padding: 8 }}
-           ListHeaderComponent={
-             <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-700">
-               <StyledText weight="semibold" className="text-white text-lg">
-                 Cover Art Options
-               </StyledText>
-               <StyledText variant="caption" className="text-gray-400">
-                 {searchResults.length} found
-               </StyledText>
-             </View>
-           }
-         />
-       ) : renderEmpty()}
+        {/* Content */}
+        {isLoading ? renderLoading() :
+         error ? renderError() :
+         searchResults && searchResults.length > 0 ? (
+           <FlatList
+             data={searchResults}
+             renderItem={renderCoverItem}
+             keyExtractor={(item) => item.id}
+             numColumns={2}
+             contentContainerStyle={{ padding: 8 }}
+             ListHeaderComponent={
+               <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-700">
+                 <StyledText weight="semibold" className="text-white text-lg">
+                   Cover Art Options
+                 </StyledText>
+                 <StyledText variant="caption" className="text-gray-400">
+                   {searchResults.length} found
+                 </StyledText>
+               </View>
+             }
+           />
+         ) : renderEmpty()}
+      </SafeAreaView>
     </LinearGradient>
   );
 }

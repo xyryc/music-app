@@ -1,3 +1,4 @@
+import { ScreenGradient } from "@/components/screen-gradient";
 import { StyledText } from "@/components/styled-text";
 import { AppSettings, storageService } from "@/services/storage";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
@@ -105,7 +106,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
+    <ScreenGradient>
       <View className="px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <StyledText variant="title" weight="bold">
           Settings
@@ -239,6 +240,6 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </ScreenGradient>
   );
 }

@@ -1,4 +1,6 @@
+import { ScreenGradient } from "@/components/screen-gradient";
 import { StyledText } from "@/components/styled-text";
+import { parseFilenameMetadata } from "@/services/track-metadata";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
 import { Audio } from "expo-av";
@@ -33,9 +35,9 @@ export default function ImportScreen() {
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri },
-        { 
+        {
           shouldPlay: false,
-          androidImplementation: 'MediaPlayer',
+          androidImplementation: "MediaPlayer",
         },
       );
       const status = await sound.getStatusAsync();
@@ -67,7 +69,6 @@ export default function ImportScreen() {
       }
 
       for (const asset of result.assets) {
-        // Verify source file exists
         const assetInfo = await getInfoAsync(asset.uri);
         if (!assetInfo.exists) {
           console.error("Source file does not exist:", asset.uri);
@@ -78,28 +79,30 @@ export default function ImportScreen() {
         const fileName = `${generateId()}.${fileExt}`;
         const permanentUri = `${tracksDir}${fileName}`;
 
-        // Copy from cache to permanent storage
         await copyAsync({
           from: asset.uri,
           to: permanentUri,
         });
 
-        // Verify copied file
         const checkInfo = await getInfoAsync(permanentUri);
         if (!checkInfo.exists || checkInfo.size === 0) {
           console.error("Failed to copy file or file is empty:", permanentUri);
           continue;
         }
 
-        // Use the permanent URI to get duration and for playback
         const duration = await getDurationFromUri(permanentUri);
+        const filenameMetadata = parseFilenameMetadata(asset.name);
 
         const track: Track = {
           id: generateId(),
-          title: asset.name.replace(/\.[^/.]+$/, "") || "Unknown Track",
+          title:
+            filenameMetadata.title ||
+            asset.name.replace(/\.[^/.]+$/, "") ||
+            "Unknown Track",
+          artist: filenameMetadata.artist,
           uri: permanentUri,
           source: "local",
-          duration: duration,
+          duration,
           dateAdded: Date.now(),
           playCount: 0,
         };
@@ -139,12 +142,16 @@ export default function ImportScreen() {
         return;
       }
 
+      const urlName = url.split("/").pop() || "Imported Track";
+      const parsedUrlMetadata = parseFilenameMetadata(urlName);
+
       const track: Track = {
         id: generateId(),
-        title: url.split("/").pop() || "Imported Track",
+        title: parsedUrlMetadata.title || urlName,
+        artist: parsedUrlMetadata.artist,
         uri: url,
         source: "url",
-        duration: duration,
+        duration,
         dateAdded: Date.now(),
         playCount: 0,
       };
@@ -165,8 +172,7 @@ export default function ImportScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
-      {/* Header */}
+    <ScreenGradient>
       <View className="flex-row items-center px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
           <X size={24} color="#9CA3AF" />
@@ -177,7 +183,6 @@ export default function ImportScreen() {
       </View>
 
       <ScrollView className="flex-1 p-4">
-        {/* Import from File */}
         <View className="bg-white dark:bg-gray-900 rounded-xl p-6 mb-4 shadow-sm">
           <View className="flex-row items-center mb-4">
             <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mr-4">
@@ -203,7 +208,6 @@ export default function ImportScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Import from URL */}
         <View className="bg-white dark:bg-gray-900 rounded-xl p-6 mb-4 shadow-sm">
           <View className="flex-row items-center mb-4">
             <View className="w-12 h-12 rounded-full bg-purple-100 items-center justify-center mr-4">
@@ -243,7 +247,6 @@ export default function ImportScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Info Card */}
         <View className="bg-amber-50 rounded-xl p-4 border border-amber-200">
           <View className="flex-row items-start">
             <Music size={20} color="#F59E0B" className="mt-0.5 mr-3" />
@@ -259,6 +262,6 @@ export default function ImportScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </ScreenGradient>
   );
 }

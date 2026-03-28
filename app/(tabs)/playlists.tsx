@@ -1,3 +1,4 @@
+import { ScreenGradient } from "@/components/screen-gradient";
 import { StyledText } from "@/components/styled-text";
 import { storageService } from "@/services/storage";
 import { Playlist } from "@/types/playlist";
@@ -65,7 +66,7 @@ export default function PlaylistsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
+    <ScreenGradient>
       <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <StyledText variant="title" weight="bold">
           Playlists
@@ -121,6 +122,6 @@ export default function PlaylistsScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </ScreenGradient>
   );
 }

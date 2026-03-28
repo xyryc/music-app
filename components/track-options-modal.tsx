@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
-import { TouchableOpacity, View } from "react-native";
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
-import { Download, Heart, Pencil, Share2, X } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import { LinearGradient } from "expo-linear-gradient";
+import { Download, Heart, Pencil, Share2, X } from "lucide-react-native";
+import React, { useEffect, useRef } from "react";
+import { TouchableOpacity, View } from "react-native";
 
 const placeholderOptions = [
   {
@@ -54,7 +54,10 @@ function OptionRow({
       </View>
       <View className="flex-1">
         <StyledText weight="medium">{title}</StyledText>
-        <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
+        <StyledText
+          variant="caption"
+          className="text-gray-500 dark:text-gray-400"
+        >
           {description}
         </StyledText>
       </View>
@@ -107,13 +110,24 @@ export function TrackOptionsModal({
       backgroundColor="#111827"
     >
       <View className="bg-white dark:bg-gray-800 overflow-hidden">
-        <LinearGradient colors={["#3B82F6", "#9333EA"]} className="px-5 pb-4 pt-3">
+        <LinearGradient
+          colors={["#3B82F6", "#9333EA"]}
+          className="px-5 pb-4 pt-8"
+        >
           <View className="flex-row items-start justify-between">
             <View className="flex-1 mr-3">
-              <StyledText weight="semibold" className="text-white text-lg" numberOfLines={1}>
+              <StyledText
+                weight="semibold"
+                className="text-white text-lg"
+                numberOfLines={1}
+              >
                 {track.title}
               </StyledText>
-              <StyledText variant="caption" className="text-white/80" numberOfLines={1}>
+              <StyledText
+                variant="caption"
+                className="text-white/80"
+                numberOfLines={1}
+              >
                 {track.artist || "Unknown Artist"}
               </StyledText>
             </View>
@@ -140,7 +154,10 @@ export function TrackOptionsModal({
             }}
           />
 
-          <View className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4" style={{ height: 1 }} />
+          <View
+            className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4"
+            style={{ height: 1 }}
+          />
 
           {placeholderOptions.map((option, index) => (
             <React.Fragment key={option.key}>
@@ -151,7 +168,10 @@ export function TrackOptionsModal({
                 disabled
               />
               {index !== placeholderOptions.length - 1 && (
-                <View className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4" style={{ height: 1 }} />
+                <View
+                  className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4"
+                  style={{ height: 1 }}
+                />
               )}
             </React.Fragment>
           ))}
