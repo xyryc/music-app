@@ -33,6 +33,14 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
+              name="cover-art-search"
+              options={{
+                headerShown: false,
+                presentation: "card",
+                animation: "slide_from_right",
+              }}
+            />
+            <Stack.Screen
               name="player"
               options={{
                 headerShown: false,

@@ -27,18 +27,25 @@ export default function CoverArtSearchScreen() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    loadCoverArt();
-  }, []);
+    setSearchResults(null);
+    setError(null);
 
-  const loadCoverArt = async () => {
-    if (!trackObj) return;
+    if (!trackObj) {
+      return;
+    }
+
+    loadCoverArt(trackObj);
+  }, [track]);
+
+  const loadCoverArt = async (currentTrack?: Track | null) => {
+    if (!currentTrack) return;
 
     setIsLoading(true);
     setError(null);
     setSearchResults(null);
 
     try {
-      const result = await coverArtService.searchCoverArt(trackObj);
+      const result = await coverArtService.searchCoverArt(currentTrack);
 
       if (result && result.images.length > 0) {
         setSearchResults(result.images);
@@ -125,7 +132,7 @@ export default function CoverArtSearchScreen() {
         {error}
       </StyledText>
       <TouchableOpacity
-        onPress={loadCoverArt}
+        onPress={() => loadCoverArt(trackObj)}
         className="bg-blue-600 px-6 py-2 rounded-full mt-6"
       >
         <StyledText className="text-white">Try Again</StyledText>
@@ -160,7 +167,7 @@ export default function CoverArtSearchScreen() {
             {trackObj?.artist || "Unknown Artist"}
           </StyledText>
         </View>
-        <TouchableOpacity onPress={loadCoverArt} disabled={isLoading} className="p-2">
+        <TouchableOpacity onPress={() => loadCoverArt(trackObj)} disabled={isLoading} className="p-2">
           <X size={24} color={isLoading ? "#6B7280" : "#FFFFFF"} />
         </TouchableOpacity>
       </View>

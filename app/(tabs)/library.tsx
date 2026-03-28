@@ -88,15 +88,13 @@ export default function LibraryScreen() {
     setOptionsModalVisible(true);
   };
 
-  const handleSearchCoverArt = () => {
-    if (selectedTrackForOptions) {
-      router.push({
-        pathname: "/(tabs)/cover-art-search",
-        params: {
-          track: JSON.stringify(selectedTrackForOptions)
-        }
-      });
-    }
+  const handleSearchCoverArt = (track: Track) => {
+    router.push({
+      pathname: "/cover-art-search",
+      params: {
+        track: JSON.stringify(track),
+      },
+    });
   };
 
   if (library.length === 0) {

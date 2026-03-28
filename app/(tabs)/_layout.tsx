@@ -41,12 +41,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="cover-art-search"
-        options={{
-          href: null,
-        }}
-      />
     </Tabs>
   );
 }

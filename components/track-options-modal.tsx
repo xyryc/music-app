@@ -66,7 +66,7 @@ interface TrackOptionsModalProps {
   isVisible: boolean;
   track: Track | null;
   onClose: () => void;
-  onSearchCoverArt: () => void;
+  onSearchCoverArt: (track: Track) => void;
 }
 
 export function TrackOptionsModal({
@@ -134,8 +134,9 @@ export function TrackOptionsModal({
             description="Find and apply cover art for this track"
             icon={Download}
             onPress={async () => {
+              const currentTrack = track;
               await sheetRef.current?.dismiss();
-              onSearchCoverArt();
+              onSearchCoverArt(currentTrack);
             }}
           />
 
