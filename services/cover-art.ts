@@ -22,6 +22,20 @@ export interface CoverArtSearchResult {
   images: CoverArtResult[];
 }
 
+interface ITunesTrackResult {
+  trackId?: number;
+  collectionId?: number;
+  artistName?: string;
+  trackName?: string;
+  collectionName?: string;
+  artworkUrl100?: string;
+}
+
+interface ITunesSearchResponse {
+  resultCount: number;
+  results: ITunesTrackResult[];
+}
+
 export class CoverArtService {
   private static instance: CoverArtService;
 
@@ -32,31 +46,18 @@ export class CoverArtService {
     return CoverArtService.instance;
   }
 
-  /**
-   * Search for cover art using MusicBrainz and Cover Art Archive
-   */
   async searchCoverArt(track: Track): Promise<CoverArtSearchResult | null> {
     try {
-      // Step 1: Search MusicBrainz for the release
-      const releaseId = await this.findReleaseId(track);
-      if (!releaseId) {
-        return null;
-      }
-
-      // Add small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Step 2: Get cover art from Cover Art Archive
-      const coverArt = await this.getCoverArtFromArchive(releaseId);
-      if (!coverArt || coverArt.images.length === 0) {
+      const images = await this.searchITunesCoverArt(track);
+      if (images.length === 0) {
         return null;
       }
 
       return {
-        releaseId,
+        releaseId: track.id,
         artist: track.artist || "Unknown Artist",
         title: track.title,
-        images: coverArt.images
+        images,
       };
     } catch (error) {
       console.error("Cover art search failed:", error);
@@ -64,117 +65,90 @@ export class CoverArtService {
     }
   }
 
-  /**
-   * Find the release ID from MusicBrainz
-   */
-  private async findReleaseId(track: Track): Promise<string | null> {
-    try {
-      console.log('Searching MusicBrainz for:', track.artist, '-', track.title);
+  private async searchITunesCoverArt(track: Track): Promise<CoverArtResult[]> {
+    const artist = track.artist?.trim();
+    const title = track.title.trim();
+    const searchTerm = artist ? `${artist} ${title}` : title;
 
-      const response = await fetch(
-        `https://musicbrainz.org/ws/2/release?artist=${encodeURIComponent(track.artist || "")}&title=${encodeURIComponent(track.title)}&fmt=json`,
-        {
-          headers: {
-            'User-Agent': 'QwenMusicPlayer/1.0 (https://github.com/example/qwen-music-player; contact@example.com)',
-            'Accept': 'application/json'
-          }
-        }
-      );
+    const response = await fetch(
+      `https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&entity=song&limit=12`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      },
+    );
 
-      console.log('MusicBrainz response status:', response.status);
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          console.warn('MusicBrainz rate limit reached, using fallback');
-          return null;
-        }
-        throw new Error(`MusicBrainz API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.releases && data.releases.length > 0) {
-        // Return the first (most relevant) release
-        return data.releases[0].id;
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Failed to search MusicBrainz:", error);
-      return null;
+    if (!response.ok) {
+      throw new Error(`iTunes API error: ${response.status}`);
     }
+
+    const data = (await response.json()) as ITunesSearchResponse;
+
+    if (!data.results?.length) {
+      return [];
+    }
+
+    const uniqueUrls = new Set<string>();
+
+    return data.results
+      .filter((item) => item.artworkUrl100)
+      .map((item, index) => {
+        const url100 = item.artworkUrl100 as string;
+        const highResUrl = this.upgradeArtworkUrl(url100);
+        const dimensions = this.extractArtworkSize(highResUrl);
+        return {
+          id: String(item.trackId || item.collectionId || index),
+          url: highResUrl,
+          width: dimensions.width,
+          height: dimensions.height,
+          comment: item.collectionName || "",
+          front: true,
+          back: false,
+          type: ["Front"],
+        };
+      })
+      .filter((item) => {
+        if (uniqueUrls.has(item.url)) {
+          return false;
+        }
+        uniqueUrls.add(item.url);
+        return true;
+      });
   }
 
-  /**
-   * Get cover art from Cover Art Archive
-   */
-  private async getCoverArtFromArchive(releaseId: string): Promise<{ images: CoverArtResult[] } | null> {
-    try {
-      const response = await fetch(`https://coverartarchive.org/release/${releaseId}`);
-
-      if (!response.ok) {
-        // Cover art not found
-        if (response.status === 404) {
-          return null;
-        }
-        throw new Error(`Cover Art Archive API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.images && data.images.length > 0) {
-        // Process and filter cover art images
-        const processedImages = data.images
-          .filter((image: any) => image.image) // Only include images with URLs
-          .map((image: any) => ({
-            id: image.id,
-            url: image.image,
-            width: image.width || 0,
-            height: image.height || 0,
-            comment: image.comment || "",
-            front: image.front || false,
-            back: image.back || false,
-            type: image.types || []
-          }))
-          .sort((a: CoverArtResult, b: CoverArtResult) => {
-            // Sort by size (largest first)
-            const sizeA = a.width * a.height;
-            const sizeB = b.width * b.height;
-            return sizeB - sizeA;
-          });
-
-        return { images: processedImages };
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Failed to fetch cover art:", error);
-      return null;
-    }
+  private upgradeArtworkUrl(url: string): string {
+    return url
+      .replace(/100x100bb/g, "1200x1200bb")
+      .replace(/100x100-75\.jpg/g, "1200x1200-75.jpg");
   }
 
-  /**
-   * Download and cache a cover art image locally
-   */
+  private extractArtworkSize(url: string): { width: number; height: number } {
+    const match = url.match(/\/(\d+)x(\d+)(?:bb|-75\.jpg)/);
+    if (!match) {
+      return { width: 1200, height: 1200 };
+    }
+
+    return {
+      width: Number(match[1]),
+      height: Number(match[2]),
+    };
+  }
+
   async downloadCoverArt(url: string, track: Track): Promise<string | null> {
     try {
-      // Download the image as base64
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-      // Create a filename based on track info
       const filename = `${encodeURIComponent(track.artist || "unknown")}_${encodeURIComponent(track.title)}_cover.jpg`;
 
-      // Use the correct FileSystem API
       if (!documentDirectory) {
         console.error("FileSystem documentDirectory not available");
         return null;
       }
 
       const localPath = `${documentDirectory}${filename}`;
-
-      // Save to local storage using correct API
       await writeAsStringAsync(localPath, base64);
 
       return localPath;
@@ -184,9 +158,6 @@ export class CoverArtService {
     }
   }
 
-  /**
-   * Check if cover art is available for a track
-   */
   async hasCoverArt(track: Track): Promise<boolean> {
     const result = await this.searchCoverArt(track);
     return result !== null && result.images.length > 0;

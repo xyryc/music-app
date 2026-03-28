@@ -1,9 +1,66 @@
-import React from "react";
-import { Modal, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { TouchableOpacity, View } from "react-native";
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
-import { Download, X } from "lucide-react-native";
+import { Download, Heart, Pencil, Share2, X } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+
+const placeholderOptions = [
+  {
+    key: "add-to-favorites",
+    title: "Add to favorites",
+    description: "Placeholder for a future track action",
+    icon: Heart,
+  },
+  {
+    key: "edit-metadata",
+    title: "Edit metadata",
+    description: "Placeholder for title, artist, and album edits",
+    icon: Pencil,
+  },
+  {
+    key: "share-track",
+    title: "Share track",
+    description: "Placeholder for sharing this track",
+    icon: Share2,
+  },
+];
+
+interface OptionRowProps {
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  onPress?: () => void;
+  disabled?: boolean;
+}
+
+function OptionRow({
+  title,
+  description,
+  icon: Icon,
+  onPress,
+  disabled = false,
+}: OptionRowProps) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      className="flex-row items-center px-5 py-4"
+      style={{ opacity: disabled ? 0.55 : 1 }}
+    >
+      <View className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 items-center justify-center mr-4">
+        <Icon size={18} color={disabled ? "#9CA3AF" : "#0A7EA4"} />
+      </View>
+      <View className="flex-1">
+        <StyledText weight="medium">{title}</StyledText>
+        <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
+          {description}
+        </StyledText>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 interface TrackOptionsModalProps {
   isVisible: boolean;
@@ -12,85 +69,97 @@ interface TrackOptionsModalProps {
   onSearchCoverArt: () => void;
 }
 
-export function TrackOptionsModal({ isVisible, track, onClose, onSearchCoverArt }: TrackOptionsModalProps) {
+export function TrackOptionsModal({
+  isVisible,
+  track,
+  onClose,
+  onSearchCoverArt,
+}: TrackOptionsModalProps) {
+  const sheetRef = useRef<TrueSheet>(null);
+
+  useEffect(() => {
+    const syncSheet = async () => {
+      if (!sheetRef.current || !track) {
+        return;
+      }
+
+      if (isVisible) {
+        await sheetRef.current.present();
+      } else {
+        await sheetRef.current.dismiss();
+      }
+    };
+
+    syncSheet();
+  }, [isVisible, track]);
+
   if (!track) return null;
 
   return (
-    <Modal
-      visible={isVisible}
-      transparent={true}
-      animationType="fade"
+    <TrueSheet
+      ref={sheetRef}
+      detents={["auto"]}
+      cornerRadius={24}
+      grabber
+      dismissible
+      dimmed
+      onDidDismiss={onClose}
+      backgroundColor="#111827"
     >
-      <TouchableOpacity
-        className="flex-1 justify-center items-center bg-black/50"
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <TouchableOpacity
-          className="bg-white dark:bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl"
-          activeOpacity={1}
-        >
-          {/* Header */}
-          <LinearGradient
-            colors={["#3B82F6", "#9333EA"]}
-            className="p-4"
-          >
-            <View className="flex-row items-center justify-between">
-              <View>
-                <StyledText weight="semibold" className="text-white text-lg">
-                  {track.title}
-                </StyledText>
-                <StyledText variant="caption" className="text-white/80">
-                  {track.artist || "Unknown Artist"}
-                </StyledText>
-              </View>
-              <TouchableOpacity onPress={onClose} className="p-1">
-                <X size={24} color="#FFFFFF" />
-              </TouchableOpacity>
+      <View className="bg-white dark:bg-gray-800 overflow-hidden">
+        <LinearGradient colors={["#3B82F6", "#9333EA"]} className="px-5 pb-4 pt-3">
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1 mr-3">
+              <StyledText weight="semibold" className="text-white text-lg" numberOfLines={1}>
+                {track.title}
+              </StyledText>
+              <StyledText variant="caption" className="text-white/80" numberOfLines={1}>
+                {track.artist || "Unknown Artist"}
+              </StyledText>
             </View>
-          </LinearGradient>
-
-          {/* Options */}
-          <View className="p-4">
             <TouchableOpacity
-              onPress={() => {
-                onClose();
-                onSearchCoverArt();
+              onPress={async () => {
+                await sheetRef.current?.dismiss();
               }}
-              className="flex-row items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-xl mb-3"
+              className="p-1.5"
             >
-              <View className="w-10 h-10 bg-blue-500 rounded-lg items-center justify-center mr-4">
-                <Download size={20} color="#FFFFFF" />
-              </View>
-              <View>
-                <StyledText weight="medium">Search track cover art</StyledText>
-                <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
-                  Find and apply cover art for this track
-                </StyledText>
-              </View>
+              <X size={22} color="#FFFFFF" />
             </TouchableOpacity>
-
-            {/* Add more options here in the future */}
-            {/* <TouchableOpacity
-              onPress={() => {
-                onClose();
-                // Handle other action
-              }}
-              className="flex-row items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-xl"
-            >
-              <View className="w-10 h-10 bg-gray-400 rounded-lg items-center justify-center mr-4">
-                <MoreIcon size={20} color="#FFFFFF" />
-              </View>
-              <View>
-                <StyledText weight="medium">Other Option</StyledText>
-                <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
-                  Description of other action
-                </StyledText>
-              </View>
-            </TouchableOpacity> */}
           </View>
-        </TouchableOpacity>
-      </TouchableOpacity>
-    </Modal>
+        </LinearGradient>
+
+        <View className="pt-1">
+          <OptionRow
+            title="Search track cover art"
+            description="Find and apply cover art for this track"
+            icon={Download}
+            onPress={async () => {
+              await sheetRef.current?.dismiss();
+              onSearchCoverArt();
+            }}
+          />
+
+          <View className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4" style={{ height: 1 }} />
+
+          {placeholderOptions.map((option, index) => (
+            <React.Fragment key={option.key}>
+              <OptionRow
+                title={option.title}
+                description={option.description}
+                icon={option.icon}
+                disabled
+              />
+              {index !== placeholderOptions.length - 1 && (
+                <View className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4" style={{ height: 1 }} />
+              )}
+            </React.Fragment>
+          ))}
+        </View>
+
+        <View className="pb-6">
+          <View style={{ height: 8 }} />
+        </View>
+      </View>
+    </TrueSheet>
   );
 }

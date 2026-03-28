@@ -180,7 +180,10 @@ export default function LibraryScreen() {
       <TrackOptionsModal
         isVisible={optionsModalVisible}
         track={selectedTrackForOptions}
-        onClose={() => setOptionsModalVisible(false)}
+        onClose={() => {
+          setOptionsModalVisible(false);
+          setSelectedTrackForOptions(null);
+        }}
         onSearchCoverArt={handleSearchCoverArt}
       />
     </View>
