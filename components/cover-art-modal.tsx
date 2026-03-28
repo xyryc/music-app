@@ -126,29 +126,29 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
   const renderLoading = () => (
     <View className="flex-1 items-center justify-center">
       <View className="w-16 h-16 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
-      <StyledText className="text-gray-400 mt-4">Searching for cover art...</StyledText>
+      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4" : "text-gray-600 mt-4"}>Searching for cover art...</StyledText>
     </View>
   );
 
   const renderError = () => (
     <View className="flex-1 items-center justify-center">
-      <ImageIcon size={64} color="#6B7280" />
-      <StyledText className="text-gray-400 mt-4 text-center px-8">
+      <ImageIcon size={64} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
+      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
         {error}
       </StyledText>
       <TouchableOpacity
         onPress={loadCoverArt}
         className="bg-blue-600 px-6 py-2 rounded-full mt-6"
       >
-        <StyledText className="text-white">Try Again</StyledText>
+        <StyledText className={colorScheme === "dark" ? "text-white" : "text-black"}>Try Again</StyledText>
       </TouchableOpacity>
     </View>
   );
 
   const renderEmpty = () => (
     <View className="flex-1 items-center justify-center">
-      <ImageIcon size={64} color="#6B7280" />
-      <StyledText className="text-gray-400 mt-4 text-center px-8">
+      <ImageIcon size={64} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
+      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
         No cover art found for this track. Try searching with a different title or artist.
       </StyledText>
     </View>
@@ -164,24 +164,28 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
       presentationStyle="fullScreen"
     >
       <LinearGradient
-        colors={["#1f2937", "#111827", "#000000"]}
+        colors={
+          colorScheme === "dark"
+            ? ["#1f2937", "#111827", "#000000"]
+            : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+        }
         className="flex-1"
       >
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-4 border-b border-gray-700">
           <TouchableOpacity onPress={onClose} className="p-2">
-            <X size={24} color="#FFFFFF" />
+            <X size={24} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
           <View className="items-center">
-            <StyledText weight="semibold" className="text-white text-lg">
+            <StyledText weight="semibold" className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"}>
               {track.title}
             </StyledText>
-            <StyledText variant="caption" className="text-gray-400">
+            <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
               {track.artist || "Unknown Artist"}
             </StyledText>
           </View>
           <TouchableOpacity onPress={loadCoverArt} disabled={isLoading} className="p-2">
-            <Download size={24} color={isLoading ? "#6B7280" : "#FFFFFF"} />
+            <Download size={24} color={isLoading ? (colorScheme === "dark" ? "#6B7280" : "#9CA3AF") : (colorScheme === "dark" ? "#FFFFFF" : "#000000")} />
           </TouchableOpacity>
         </View>
 

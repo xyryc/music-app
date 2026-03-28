@@ -173,9 +173,9 @@ export default function ImportScreen() {
 
   return (
     <ScreenGradient>
-      <View className="flex-row items-center px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <View className="flex-row items-center px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
         <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
-          <X size={24} color="#9CA3AF" />
+          <X size={24} color={colorScheme === "dark" ? "#9CA3AF" : "#6B7280"} />
         </TouchableOpacity>
         <StyledText variant="title" weight="bold">
           Import Music
@@ -185,14 +185,14 @@ export default function ImportScreen() {
       <ScrollView className="flex-1 p-4">
         <View className="bg-white dark:bg-gray-900 rounded-xl p-6 mb-4 shadow-sm">
           <View className="flex-row items-center mb-4">
-            <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mr-4">
-              <Upload size={24} color="#0A7EA4" />
+            <View className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 items-center justify-center mr-4">
+              <Upload size={24} color={colorScheme === "dark" ? "#38BDF8" : "#0A7EA4"} />
             </View>
             <View className="flex-1">
               <StyledText weight="semibold" className="text-lg">
                 Import from Device
               </StyledText>
-              <StyledText variant="caption" className="text-gray-500">
+              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Select audio files from your file manager
               </StyledText>
             </View>
@@ -210,14 +210,14 @@ export default function ImportScreen() {
 
         <View className="bg-white dark:bg-gray-900 rounded-xl p-6 mb-4 shadow-sm">
           <View className="flex-row items-center mb-4">
-            <View className="w-12 h-12 rounded-full bg-purple-100 items-center justify-center mr-4">
-              <Link size={24} color="#7C3AED" />
+            <View className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 items-center justify-center mr-4">
+              <Link size={24} color={colorScheme === "dark" ? "#A78BFA" : "#7C3AED"} />
             </View>
             <View className="flex-1">
               <StyledText weight="semibold" className="text-lg">
                 Import from URL
               </StyledText>
-              <StyledText variant="caption" className="text-gray-500">
+              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Add a direct link to an audio file
               </StyledText>
             </View>
@@ -227,7 +227,7 @@ export default function ImportScreen() {
             value={url}
             onChangeText={setUrl}
             placeholder="https://example.com/song.mp3"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colorScheme === "dark" ? "#9CA3AF" : "#6B7280"}
             className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 mb-3 text-base text-gray-900 dark:text-gray-100"
             autoCapitalize="none"
             autoCorrect={false}
@@ -251,10 +251,10 @@ export default function ImportScreen() {
           <View className="flex-row items-start">
             <Music size={20} color="#F59E0B" className="mt-0.5 mr-3" />
             <View className="flex-1">
-              <StyledText weight="semibold" className="text-amber-800 mb-1">
+              <StyledText weight="semibold" className={colorScheme === "dark" ? "text-amber-300 mb-1" : "text-amber-800 mb-1"}>
                 Supported Formats
               </StyledText>
-              <StyledText variant="caption" className="text-amber-700">
+              <StyledText variant="caption" className={colorScheme === "dark" ? "text-amber-200" : "text-amber-700"}>
                 MP3, WAV, AAC, M4A, and other common audio formats. For URL
                 imports, the link must point directly to an audio file.
               </StyledText>

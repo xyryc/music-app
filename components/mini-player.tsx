@@ -1,8 +1,10 @@
 import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/contexts/player-provider";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music, Pause, Play } from "lucide-react-native";
-import { Image, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import { useColorScheme } from "nativewind";
 
 interface MiniPlayerProps {
   onPress: () => void;
@@ -10,6 +12,7 @@ interface MiniPlayerProps {
 
 export function MiniPlayer({ onPress }: MiniPlayerProps) {
   const { state, controls } = usePlayer();
+  const { colorScheme } = useColorScheme();
 
   if (!state.currentTrack) return null;
 
@@ -24,8 +27,10 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
         {state.currentTrack.coverArt ? (
           <Image
             source={{ uri: state.currentTrack.coverArt }}
+            placeholder={state.currentTrack.coverArtBlurhash}
             className="w-12 h-12 rounded-lg mr-4"
-            resizeMode="cover"
+            contentFit="cover"
+            transition={200}
           />
         ) : (
           <LinearGradient
@@ -34,7 +39,7 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
             end={{ x: 1, y: 1 }}
             className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
           >
-            <Music size={20} color="#FFFFFF" />
+            <Music size={20} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </LinearGradient>
         )}
 
@@ -61,9 +66,9 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           className="w-10 h-10 items-center justify-center"
         >
           {state.isPlaying ? (
-            <Pause size={24} color="#0A7EA4" />
+            <Pause size={24} color={colorScheme === "dark" ? "#0A7EA4" : "#000000"} />
           ) : (
-            <Play size={24} color="#0A7EA4" style={{ marginLeft: 4 }} />
+            <Play size={24} color={colorScheme === "dark" ? "#0A7EA4" : "#000000"} style={{ marginLeft: 4 }} />
           )}
         </TouchableOpacity>
       </View>

@@ -9,6 +9,7 @@ export interface Track {
   uri: string;
   source: TrackSource;
   coverArt?: string;
+  coverArtBlurhash?: string;
   dateAdded: number;
   playCount: number;
   lastPlayed?: number;
@@ -21,5 +22,6 @@ export interface TrackInput {
   uri: string;
   source: TrackSource;
   coverArt?: string;
+  coverArtBlurhash?: string;
   duration?: number;
 }

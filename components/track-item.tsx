@@ -1,8 +1,10 @@
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "lucide-react-native";
-import { Image, TouchableOpacity, View, GestureResponderEvent } from "react-native";
+import { TouchableOpacity, View, GestureResponderEvent } from "react-native";
+import { useColorScheme } from "nativewind";
 
 interface TrackItemProps {
   track: Track;
@@ -17,6 +19,7 @@ export function TrackItem({
   onLongPress,
   isPlaying,
 }: TrackItemProps) {
+  const { colorScheme } = useColorScheme();
   const formatDuration = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -34,17 +37,23 @@ export function TrackItem({
       {track.coverArt ? (
         <Image
           source={{ uri: track.coverArt }}
+          placeholder={track.coverArtBlurhash}
           className="w-12 h-12 rounded-lg mr-4"
-          resizeMode="cover"
+          contentFit="cover"
+          transition={200}
         />
       ) : (
         <LinearGradient
-          colors={["#1f2937", "#111827", "#000000"]}
+          colors={
+            colorScheme === "dark"
+              ? ["#1f2937", "#111827", "#000000"]
+              : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+          }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
         >
-          <Music size={20} color="#FFFFFF" />
+          <Music size={20} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
         </LinearGradient>
       )}
 
@@ -64,7 +73,7 @@ export function TrackItem({
 
       {/* Duration */}
       <View className="items-center mr-3">
-        <StyledText variant="caption" className="text-gray-400 dark:text-gray-500">
+        <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400 dark:text-gray-500" : "text-gray-600"}>
           {formatDuration(track.duration)}
         </StyledText>
       </View>

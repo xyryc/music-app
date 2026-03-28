@@ -4,6 +4,7 @@ import { AppSettings, storageService } from "@/services/storage";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { useColorScheme } from "nativewind";
+import React from "react";
 import {
   Alert,
   ScrollView,
@@ -13,7 +14,7 @@ import {
 } from "react-native";
 
 export default function SettingsScreen() {
-  const { setColorScheme } = useColorScheme();
+  const { setColorScheme, colorScheme } = useColorScheme();
   const [settings, setSettings] = useState<AppSettings>({
     theme: "system",
     skipSilence: false,
@@ -118,18 +119,18 @@ export default function SettingsScreen() {
         <View className="bg-white dark:bg-gray-900 mt-4 px-4">
           <StyledText
             variant="caption"
-            className="text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4"
+            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
           >
             Appearance
           </StyledText>
           <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800">
             <View className="flex-row items-center flex-1">
               <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center mr-4">
-                <Smartphone size={20} color="#6B7280" />
+                <Smartphone size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
               </View>
               <View className="flex-1">
                 <StyledText weight="medium">Theme</StyledText>
-                <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
+                <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}>
                   {settings.theme === "system"
                     ? "Follow system"
                     : settings.theme === "light"
@@ -171,19 +172,19 @@ export default function SettingsScreen() {
         <View className="bg-white dark:bg-gray-900 mt-4 px-4">
           <StyledText
             variant="caption"
-            className="text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4"
+            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
           >
             Playback
           </StyledText>
           <SettingItem
-            icon={<Music size={20} color="#6B7280" />}
+            icon={<Music size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />}
             title="Skip Silence"
             description="Automatically skip silent parts"
             value={settings.skipSilence}
             onValueChange={(value) => updateSetting("skipSilence", value)}
           />
           <SettingItem
-            icon={<Music size={20} color="#6B7280" />}
+            icon={<Music size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />}
             title="Equalizer"
             description="Enable audio equalizer"
             value={settings.equalizerEnabled}
@@ -195,7 +196,7 @@ export default function SettingsScreen() {
         <View className="bg-white dark:bg-gray-900 mt-4 px-4">
           <StyledText
             variant="caption"
-            className="text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4"
+            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
           >
             Data
           </StyledText>
@@ -205,13 +206,13 @@ export default function SettingsScreen() {
           >
             <View className="flex-row items-center flex-1">
               <View className="w-10 h-10 rounded-lg bg-red-50 items-center justify-center mr-4">
-                <Trash2 size={20} color="#EF4444" />
+                <Trash2 size={20} color={colorScheme === "dark" ? "#EF4444" : "#DC2626"} />
               </View>
               <View className="flex-1">
-                <StyledText weight="medium" className="text-red-600">
+                <StyledText weight="medium" className={colorScheme === "dark" ? "text-red-600" : "text-red-600"}>
                   Clear Library
                 </StyledText>
-                <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
+                <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}>
                   Remove all tracks and playlists
                 </StyledText>
               </View>
@@ -223,17 +224,17 @@ export default function SettingsScreen() {
         <View className="bg-white dark:bg-gray-900 mt-4 px-4 mb-8">
           <StyledText
             variant="caption"
-            className="text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4"
+            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
           >
             About
           </StyledText>
           <View className="flex-row items-center py-4">
             <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center mr-4">
-              <Info size={20} color="#6B7280" />
+              <Info size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
             </View>
             <View className="flex-1">
               <StyledText weight="medium">Version</StyledText>
-              <StyledText variant="caption" className="text-gray-500 dark:text-gray-400">
+              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}>
                 1.0.0
               </StyledText>
             </View>

@@ -1,8 +1,10 @@
 import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/contexts/player-provider";
 import { RepeatMode } from "@/types/player";
+import { useColorScheme } from "nativewind";
 import { Track } from "@/types/track";
 import Slider from "@react-native-community/slider";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   ChevronDown,
@@ -16,7 +18,7 @@ import {
   Volume2,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Image, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 interface NowPlayingScreenProps {
   onMinimize: () => void;
@@ -28,6 +30,7 @@ export function NowPlayingScreen({
   initialTrack,
 }: NowPlayingScreenProps) {
   const { state, controls } = usePlayer();
+  const { colorScheme } = useColorScheme();
   const currentTrack = state.currentTrack || initialTrack;
 
   const formatTime = (ms: number) => {
@@ -62,27 +65,35 @@ export function NowPlayingScreen({
 
   return (
     <LinearGradient
-      colors={["#1f2937", "#111827", "#000000"]}
+      colors={
+        colorScheme === "dark"
+          ? ["#1f2937", "#111827", "#000000"]
+          : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+      }
       style={{ flex: 1 }}
     >
       <View style={{ flex: 1 }}>
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-4 mt-8">
           <TouchableOpacity onPress={onMinimize} className="p-2">
-            <ChevronDown size={28} color="#FFFFFF" />
+            <ChevronDown size={28} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
           <StyledText weight="semibold" className="text-white text-sm">
             NOW PLAYING
           </StyledText>
           <TouchableOpacity className="p-2">
-            <ListMusic size={24} color="#FFFFFF" />
+            <ListMusic size={24} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
         </View>
 
         {/* Album Art */}
         <View className="flex-1 items-center justify-center px-8">
           <LinearGradient
-            colors={["#1f2937", "#111827", "#000000"]}
+            colors={
+              colorScheme === "dark"
+                ? ["#1f2937", "#111827", "#000000"]
+                : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="w-72 h-72 rounded-3xl items-center justify-center shadow-2xl overflow-hidden"
@@ -90,12 +101,14 @@ export function NowPlayingScreen({
             {currentTrack.coverArt ? (
               <Image
                 source={{ uri: currentTrack.coverArt }}
+                placeholder={currentTrack.coverArtBlurhash}
                 className="w-full h-full"
-                resizeMode="cover"
+                contentFit="cover"
+                transition={200}
               />
             ) : (
               <View className="items-center justify-center">
-                <Volume2 size={80} color="#FFFFFF" opacity={0.5} />
+                <Volume2 size={80} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} opacity={0.5} />
               </View>
             )}
           </LinearGradient>
@@ -107,7 +120,7 @@ export function NowPlayingScreen({
             <StyledText
               variant="title"
               weight="bold"
-              className="text-white text-2xl mb-2"
+              className={colorScheme === "dark" ? "text-white text-2xl mb-2" : "text-black text-2xl mb-2"}
               numberOfLines={1}
             >
               {currentTrack.title}
@@ -130,10 +143,10 @@ export function NowPlayingScreen({
               className="h-10"
             />
             <View className="flex-row justify-between mt-1">
-              <StyledText variant="caption" className="text-gray-500 font-medium">
+              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 font-medium" : "text-gray-700 font-medium"}>
                 {formatTime(state.position)}
               </StyledText>
-              <StyledText variant="caption" className="text-gray-500 font-medium">
+              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 font-medium" : "text-gray-700 font-medium"}>
                 {formatTime(state.duration)}
               </StyledText>
             </View>
@@ -149,7 +162,7 @@ export function NowPlayingScreen({
             </TouchableOpacity>
 
             <TouchableOpacity onPress={controls.playPrevious}>
-              <SkipBack size={36} color="#FFFFFF" />
+              <SkipBack size={36} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -164,7 +177,7 @@ export function NowPlayingScreen({
             </TouchableOpacity>
 
             <TouchableOpacity onPress={controls.playNext}>
-              <SkipForward size={36} color="#FFFFFF" />
+              <SkipForward size={36} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleRepeatPress}>

@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Download, Heart, Pencil, Share2 } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import { TouchableOpacity, View } from "react-native";
+import { useColorScheme } from "nativewind";
 
 const placeholderOptions = [
   {
@@ -56,7 +57,7 @@ function OptionRow({
         <StyledText weight="medium">{title}</StyledText>
         <StyledText
           variant="caption"
-          className="text-gray-500 dark:text-gray-400"
+          className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}
         >
           {description}
         </StyledText>
@@ -79,6 +80,7 @@ export function TrackOptionsSheet({
   onSearchCoverArt,
 }: TrackOptionsSheetProps) {
   const sheetRef = useRef<TrueSheet>(null);
+  const { colorScheme } = useColorScheme();
 
   useEffect(() => {
     const syncSheet = async () => {
@@ -107,25 +109,29 @@ export function TrackOptionsSheet({
       dismissible
       dimmed
       onDidDismiss={onClose}
-      backgroundColor="#111827"
+      backgroundColor={colorScheme === "dark" ? "#111827" : "#FFFFFF"}
     >
       <View className="bg-white dark:bg-gray-800 overflow-hidden">
         <LinearGradient
-          colors={["#1f2937", "#111827", "#000000"]}
+          colors={
+            colorScheme === "dark"
+              ? ["#1f2937", "#111827", "#000000"]
+              : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+          }
           className="px-5 pb-4 pt-8"
         >
           <View className="flex-row items-start justify-between">
             <View className="flex-1 mr-3">
               <StyledText
                 weight="semibold"
-                className="text-white text-lg"
+                className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"}
                 numberOfLines={1}
               >
                 {track.title}
               </StyledText>
               <StyledText
                 variant="caption"
-                className="text-white/80"
+                className={colorScheme === "dark" ? "text-white/80" : "text-black/80"}
                 numberOfLines={1}
               >
                 {track.artist || "Unknown Artist"}
@@ -147,7 +153,7 @@ export function TrackOptionsSheet({
           />
 
           <View
-            className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4"
+            className="bg-gray-300 dark:bg-gray-700 ml-[68px] mr-4"
             style={{ height: 1 }}
           />
 
@@ -161,7 +167,7 @@ export function TrackOptionsSheet({
               />
               {index !== placeholderOptions.length - 1 && (
                 <View
-                  className="bg-gray-200 dark:bg-gray-700 ml-[68px] mr-4"
+                  className="bg-gray-300 dark:bg-gray-700 ml-[68px] mr-4"
                   style={{ height: 1 }}
                 />
               )}
