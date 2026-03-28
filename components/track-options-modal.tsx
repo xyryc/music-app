@@ -43,6 +43,7 @@ function OptionRow({
   onPress,
   disabled = false,
 }: OptionRowProps) {
+  const { colorScheme } = useColorScheme();
   return (
     <TouchableOpacity
       onPress={onPress}

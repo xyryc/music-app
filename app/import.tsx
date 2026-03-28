@@ -21,11 +21,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useColorScheme } from "nativewind";
 
 export default function ImportScreen() {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const { colorScheme } = useColorScheme();
 
   const generateId = () => {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

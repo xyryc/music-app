@@ -5,6 +5,7 @@ import { Track } from "@/types/track";
 import { CoverArtResult, CoverArtService } from "@/services/cover-art";
 import { ChevronLeft, Download, Image as ImageIcon, X } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useColorScheme } from "nativewind";
 
 interface CoverArtModalProps {
   isVisible: boolean;
@@ -17,6 +18,7 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
   const [searchResults, setSearchResults] = useState<CoverArtResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { colorScheme } = useColorScheme();
 
   const coverArtService = CoverArtService.getInstance();
 

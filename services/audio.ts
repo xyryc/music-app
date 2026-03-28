@@ -248,7 +248,10 @@ class AudioService {
       }
       return true;
     } catch (error) {
-      console.error("Error unloading:", error);
+      // Only log the error if it's not the "Player does not exist" error
+      if (!error?.message?.includes("Player does not exist")) {
+        console.error("Error unloading:", error);
+      }
       return false;
     }
   }
