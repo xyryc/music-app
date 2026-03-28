@@ -66,6 +66,15 @@ class StorageService {
     return library.find((t) => t.id === trackId) || null;
   }
 
+  async updateTrack(track: Track): Promise<void> {
+    const library = await this.getLibrary();
+    const index = library.findIndex((t) => t.id === track.id);
+    if (index !== -1) {
+      library[index] = track;
+      await this.saveLibrary(library);
+    }
+  }
+
   // Playlists
   async getPlaylists(): Promise<Playlist[]> {
     try {

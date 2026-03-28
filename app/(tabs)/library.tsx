@@ -1,18 +1,23 @@
 import { MiniPlayer } from "@/components/mini-player";
+import { TrackOptionsModal } from "@/components/track-options-modal";
 import { StyledText } from "@/components/styled-text";
 import { TrackItem } from "@/components/track-item";
 import { usePlayer } from "@/contexts/player-provider";
+import { useCoverArt } from "@/contexts/cover-art-context";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 
 export default function LibraryScreen() {
   const router = useRouter();
   const { state, controls } = usePlayer();
+  const { selectedCover, clearCoverSelection } = useCoverArt();
   const [library, setLibrary] = useState<Track[]>([]);
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+  const [selectedTrackForOptions, setSelectedTrackForOptions] = useState<Track | null>(null);
 
   const loadLibrary = useCallback(async () => {
     const tracks = await storageService.getLibrary();
@@ -24,6 +29,18 @@ export default function LibraryScreen() {
       loadLibrary();
     }, [loadLibrary]),
   );
+
+  // Listen for cover art selection from the search screen
+  useEffect(() => {
+    if (selectedCover) {
+      const { trackId, coverUrl } = selectedCover;
+      const track = library.find(t => t.id === trackId);
+      if (track) {
+        handleUpdateTrackCover(track, coverUrl);
+        clearCoverSelection();
+      }
+    }
+  }, [selectedCover, library, clearCoverSelection]);
 
   const handlePlayTrack = async (track: Track) => {
     await controls.play(track, library);
@@ -47,6 +64,39 @@ export default function LibraryScreen() {
 
   const openPlayer = () => {
     router.push("/player");
+  };
+
+  const handleUpdateTrackCover = async (track: Track, coverUrl: string) => {
+    try {
+      const updatedTrack = { ...track, coverArt: coverUrl };
+      await storageService.updateTrack(updatedTrack);
+
+      // Update the library state
+      const updatedLibrary = library.map((t) =>
+        t.id === track.id ? updatedTrack : t
+      );
+      setLibrary(updatedLibrary);
+
+      console.log("Track cover updated successfully");
+    } catch (error) {
+      console.error("Failed to update track cover:", error);
+    }
+  };
+
+  const handleShowOptionsModal = (track: Track) => {
+    setSelectedTrackForOptions(track);
+    setOptionsModalVisible(true);
+  };
+
+  const handleSearchCoverArt = () => {
+    if (selectedTrackForOptions) {
+      router.push({
+        pathname: "/(tabs)/cover-art-search",
+        params: {
+          track: JSON.stringify(selectedTrackForOptions)
+        }
+      });
+    }
   };
 
   if (library.length === 0) {
@@ -119,12 +169,20 @@ export default function LibraryScreen() {
             key={track.id}
             track={track}
             onPress={() => handlePlayTrack(track)}
+            onLongPress={() => handleShowOptionsModal(track)}
             isPlaying={state.currentTrack?.id === track.id}
           />
         ))}
       </ScrollView>
 
       {state.currentTrack && <MiniPlayer onPress={openPlayer} />}
+
+      <TrackOptionsModal
+        isVisible={optionsModalVisible}
+        track={selectedTrackForOptions}
+        onClose={() => setOptionsModalVisible(false)}
+        onSearchCoverArt={handleSearchCoverArt}
+      />
     </View>
   );
 }

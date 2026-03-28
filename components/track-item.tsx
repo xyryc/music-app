@@ -1,20 +1,20 @@
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
 import { LinearGradient } from "expo-linear-gradient";
-import { MoreVertical, Music } from "lucide-react-native";
-import { Image, TouchableOpacity, View } from "react-native";
+import { Music } from "lucide-react-native";
+import { Image, TouchableOpacity, View, GestureResponderEvent } from "react-native";
 
 interface TrackItemProps {
   track: Track;
   onPress: () => void;
-  onMorePress?: () => void;
+  onLongPress?: (event: GestureResponderEvent) => void;
   isPlaying?: boolean;
 }
 
 export function TrackItem({
   track,
   onPress,
-  onMorePress,
+  onLongPress,
   isPlaying,
 }: TrackItemProps) {
   const formatDuration = (ms: number) => {
@@ -26,6 +26,7 @@ export function TrackItem({
   return (
     <TouchableOpacity
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.7}
       className="flex-row items-center px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800"
     >
@@ -67,13 +68,6 @@ export function TrackItem({
           {formatDuration(track.duration)}
         </StyledText>
       </View>
-
-      {/* More Button */}
-      {onMorePress && (
-        <TouchableOpacity onPress={onMorePress} className="p-2">
-          <MoreVertical size={20} color="#9CA3AF" />
-        </TouchableOpacity>
-      )}
     </TouchableOpacity>
   );
 }
