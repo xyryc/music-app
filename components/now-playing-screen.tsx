@@ -82,7 +82,7 @@ export function NowPlayingScreen({
         {/* Album Art */}
         <View className="flex-1 items-center justify-center px-8">
           <LinearGradient
-            colors={["#3b82f6", "#9333ea"]}
+            colors={["#1f2937", "#111827", "#000000"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="w-72 h-72 rounded-3xl items-center justify-center shadow-2xl overflow-hidden"

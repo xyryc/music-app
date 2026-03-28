@@ -39,7 +39,7 @@ export function TrackItem({
         />
       ) : (
         <LinearGradient
-          colors={["#3B82F6", "#9333EA"]}
+          colors={["#1f2937", "#111827", "#000000"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="w-12 h-12 rounded-lg mr-4 items-center justify-center"

@@ -8,9 +8,15 @@ import { useCoverArt } from "@/contexts/cover-art-context";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Music, Plus } from "lucide-react-native";
+import { Music, Plus, Trash2 } from "lucide-react-native";
 import { useCallback, useState, useEffect } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import SwipeableFlatList from "react-native-swipeable-list";
+
+type SwipeableRenderInfo<T> = {
+  item: T;
+  index: number;
+};
 
 export default function LibraryScreen() {
   const router = useRouter();
@@ -85,6 +91,48 @@ export default function LibraryScreen() {
     });
   };
 
+  const handleRemoveTrack = useCallback(async (track: Track) => {
+    try {
+      await storageService.removeFromLibrary(track.id);
+      setLibrary((prevLibrary) => prevLibrary.filter((item) => item.id !== track.id));
+
+      if (selectedTrackForOptions?.id === track.id) {
+        setOptionsModalVisible(false);
+        setSelectedTrackForOptions(null);
+      }
+
+      if (state.currentTrack?.id === track.id) {
+        await controls.stop();
+      }
+    } catch (error) {
+      console.error("Failed to remove track:", error);
+    }
+  }, [controls, selectedTrackForOptions?.id, state.currentTrack?.id]);
+
+  const renderQuickActions = ({ item }: SwipeableRenderInfo<Track>) => (
+    <View className="flex-1 items-end justify-center px-4 bg-red-500">
+      <TouchableOpacity
+        onPress={() => handleRemoveTrack(item)}
+        className="w-12 h-12 rounded-full bg-red-600 items-center justify-center"
+      >
+        <Trash2 size={20} color="#FFFFFF" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderTrackItem = ({ item }: SwipeableRenderInfo<Track>) => (
+    <TrackItem
+      track={item}
+      onPress={() => handlePlayTrack(item)}
+      onLongPress={() => handleShowOptionsModal(item)}
+      isPlaying={state.currentTrack?.id === item.id}
+    />
+  );
+
+  const keyExtractor = (item: Track) => item.id;
+
+  const maxSwipeDistance = () => 88;
+
   if (library.length === 0) {
     return (
       <ScreenGradient>
@@ -152,17 +200,16 @@ export default function LibraryScreen() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 pb-20">
-          {library.map((track) => (
-            <TrackItem
-              key={track.id}
-              track={track}
-              onPress={() => handlePlayTrack(track)}
-              onLongPress={() => handleShowOptionsModal(track)}
-              isPlaying={state.currentTrack?.id === track.id}
-            />
-          ))}
-        </ScrollView>
+        <SwipeableFlatList
+          data={library}
+          keyExtractor={keyExtractor}
+          renderItem={renderTrackItem}
+          renderQuickActions={renderQuickActions}
+          maxSwipeDistance={maxSwipeDistance}
+          bounceFirstRowOnMount={false}
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: 80 }}
+        />
 
         {state.currentTrack && <MiniPlayer onPress={openPlayer} />}
 

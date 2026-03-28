@@ -2,7 +2,7 @@ import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { LinearGradient } from "expo-linear-gradient";
-import { Download, Heart, Pencil, Share2, X } from "lucide-react-native";
+import { Download, Heart, Pencil, Share2 } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import { TouchableOpacity, View } from "react-native";
 
@@ -65,19 +65,19 @@ function OptionRow({
   );
 }
 
-interface TrackOptionsModalProps {
+interface TrackOptionsSheetProps {
   isVisible: boolean;
   track: Track | null;
   onClose: () => void;
   onSearchCoverArt: (track: Track) => void;
 }
 
-export function TrackOptionsModal({
+export function TrackOptionsSheet({
   isVisible,
   track,
   onClose,
   onSearchCoverArt,
-}: TrackOptionsModalProps) {
+}: TrackOptionsSheetProps) {
   const sheetRef = useRef<TrueSheet>(null);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function TrackOptionsModal({
     >
       <View className="bg-white dark:bg-gray-800 overflow-hidden">
         <LinearGradient
-          colors={["#3B82F6", "#9333EA"]}
+          colors={["#1f2937", "#111827", "#000000"]}
           className="px-5 pb-4 pt-8"
         >
           <View className="flex-row items-start justify-between">
@@ -131,14 +131,6 @@ export function TrackOptionsModal({
                 {track.artist || "Unknown Artist"}
               </StyledText>
             </View>
-            <TouchableOpacity
-              onPress={async () => {
-                await sheetRef.current?.dismiss();
-              }}
-              className="p-1.5"
-            >
-              <X size={22} color="#FFFFFF" />
-            </TouchableOpacity>
           </View>
         </LinearGradient>
 
