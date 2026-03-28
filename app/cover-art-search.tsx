@@ -35,6 +35,7 @@ export default function CoverArtSearchScreen() {
     }
 
     loadCoverArt(trackObj);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track]);
 
   const loadCoverArt = async (currentTrack?: Track | null) => {

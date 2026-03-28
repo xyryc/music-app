@@ -1,6 +1,6 @@
 import { MiniPlayer } from "@/components/mini-player";
 import { ScreenGradient } from "@/components/screen-gradient";
-import { TrackOptionsModal } from "@/components/track-options-modal";
+import { TrackOptionsSheet } from "@/components/track-options-modal";
 import { StyledText } from "@/components/styled-text";
 import { TrackItem } from "@/components/track-item";
 import { usePlayer } from "@/contexts/player-provider";
@@ -31,17 +31,31 @@ export default function LibraryScreen() {
     }, [loadLibrary]),
   );
 
-  // Listen for cover art selection from the search screen
+  const handleUpdateTrackCover = useCallback(async (track: Track, coverUrl: string) => {
+    try {
+      const updatedTrack = { ...track, coverArt: coverUrl };
+      await storageService.updateTrack(updatedTrack);
+
+      setLibrary((prevLibrary) =>
+        prevLibrary.map((item) =>
+          item.id === track.id ? updatedTrack : item
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update track cover:", error);
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedCover) {
       const { trackId, coverUrl } = selectedCover;
-      const track = library.find(t => t.id === trackId);
+      const track = library.find((t) => t.id === trackId);
       if (track) {
         handleUpdateTrackCover(track, coverUrl);
         clearCoverSelection();
       }
     }
-  }, [selectedCover, library, clearCoverSelection]);
+  }, [selectedCover, library, clearCoverSelection, handleUpdateTrackCover]);
 
   const handlePlayTrack = async (track: Track) => {
     await controls.play(track, library);
@@ -56,22 +70,6 @@ export default function LibraryScreen() {
     router.push("/player");
   };
 
-  const handleUpdateTrackCover = async (track: Track, coverUrl: string) => {
-    try {
-      const updatedTrack = { ...track, coverArt: coverUrl };
-      await storageService.updateTrack(updatedTrack);
-
-      // Update the library state
-      const updatedLibrary = library.map((t) =>
-        t.id === track.id ? updatedTrack : t
-      );
-      setLibrary(updatedLibrary);
-
-      console.log("Track cover updated successfully");
-    } catch (error) {
-      console.error("Failed to update track cover:", error);
-    }
-  };
 
   const handleShowOptionsModal = (track: Track) => {
     setSelectedTrackForOptions(track);
@@ -168,7 +166,7 @@ export default function LibraryScreen() {
 
         {state.currentTrack && <MiniPlayer onPress={openPlayer} />}
 
-        <TrackOptionsModal
+        <TrackOptionsSheet
           isVisible={optionsModalVisible}
           track={selectedTrackForOptions}
           onClose={() => {
