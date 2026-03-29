@@ -1,14 +1,6 @@
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { Redirect } from "expo-router";
 
+// Default route - immediately redirect to the library tab
 export default function Index() {
-  const router = useRouter();
-
-  useEffect(() => {
-    // Immediately redirect to library
-    router.replace("/(tabs)/library");
-  }, [router]);
-
-  // Show a minimal loading indicator while redirecting
-  return null;
+  return <Redirect href="/(tabs)/library" />;
 }
