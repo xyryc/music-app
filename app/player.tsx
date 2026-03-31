@@ -1,12 +1,66 @@
 import { NowPlayingScreen } from "@/components/now-playing-screen";
 import { StyledText } from "@/components/styled-text";
+<<<<<<< HEAD
 import { usePlayer } from "@/contexts/player-provider";
 import { useRouter } from "expo-router";
+=======
+import { usePlayer } from "@/hooks/use-player";
+import { Track } from "@/types/track";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+>>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
 import { StyleSheet, View } from "react-native";
 
 export default function PlayerScreen() {
   const router = useRouter();
+<<<<<<< HEAD
   const { state } = usePlayer();
+=======
+  const params = useLocalSearchParams();
+  const { state, controls } = usePlayer();
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const playInitiatedRef = useRef(false);
+
+  useEffect(() => {
+    // Handle track from navigation params
+    if (params.trackUri && !playInitiatedRef.current) {
+      const track: Track = {
+        id: params.trackId as string,
+        title: params.trackTitle as string,
+        uri: params.trackUri as string,
+        artist: (params.trackArtist as string) || "Unknown Artist",
+        duration: parseInt(params.trackDuration as string) || 0,
+        source: "local",
+        dateAdded: Date.now(),
+        playCount: 0,
+      };
+
+      // Set local state and trigger playback
+      setCurrentTrack(track);
+      setIsLoading(false);
+      playInitiatedRef.current = true;
+
+      // Start playback - pass the track directly so it loads and plays
+      controls.play(track);
+    }
+    // Sync with global state - use state.currentTrack as the source of truth
+    else if (state.currentTrack) {
+      setCurrentTrack(state.currentTrack);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+    }
+  }, [
+    params.trackUri,
+    params.trackId,
+    params.trackTitle,
+    params.trackArtist,
+    params.trackDuration,
+    state.currentTrack?.id,
+    state.currentTrack?.title,
+  ]);
+>>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
 
   const handleMinimize = () => {
     router.back();

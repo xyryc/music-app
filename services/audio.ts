@@ -173,9 +173,17 @@ class AudioService {
       this.currentTrack = track;
       this.onStatusUpdate = onStatusUpdate || null;
 
+<<<<<<< HEAD
       if (track.source === "local" || track.uri.startsWith("file://")) {
         const fileInfo = await getInfoAsync(track.uri);
         if (!fileInfo.exists) {
+=======
+      // Check if file exists if it's a local file
+      if (track.source === "local" || track.uri.startsWith("file://")) {
+        const fileInfo = await getInfoAsync(track.uri);
+        if (!fileInfo.exists) {
+          console.error("Audio file not found at URI:", track.uri);
+>>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
           throw new Error("Audio file not found. Please re-import the track.");
         }
       }
@@ -185,7 +193,11 @@ class AudioService {
         {
           shouldPlay: shouldPlay,
           isLooping: false,
+<<<<<<< HEAD
           volume: 1,
+=======
+          volume: 1.0,
+>>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
           androidImplementation: "MediaPlayer",
         },
         this.handleExpoStatus,
@@ -195,6 +207,10 @@ class AudioService {
       return true;
     } catch (error) {
       console.error("Error loading track:", error);
+<<<<<<< HEAD
+=======
+      console.error("URI was:", track.uri);
+>>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
       return false;
     }
   }
@@ -203,12 +219,15 @@ class AudioService {
     try {
       if (this.sound) {
         await this.sound.playAsync();
+<<<<<<< HEAD
         await this.syncMediaControls();
+=======
+>>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
         return true;
       }
       return false;
     } catch (error) {
-      console.error("audioService.play() error:", error);
+      console.error("Error playing:", error);
       return false;
     }
   }
