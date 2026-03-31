@@ -17,7 +17,7 @@ export interface AppSettings {
 }
 
 const defaultSettings: AppSettings = {
-  theme: "system",
+  theme: "dark",
   skipSilence: false,
   equalizerEnabled: false,
   showLyrics: false,
