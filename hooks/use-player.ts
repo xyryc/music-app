@@ -105,17 +105,10 @@ export function usePlayer() {
 
   useEffect(() => {
     audioService.initialize();
-<<<<<<< HEAD
     void audioService.setOnTrackEnd(handleTrackEnd);
 
-    return () => {
-      void audioService.unload();
-      void audioService.cleanup();
-=======
     // Don't unload on unmount - keep audio playing across navigation
     return () => {
-      // audioService.unload(); // ← Commented out to keep audio playing
->>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
       if (statusUpdateRef.current) {
         clearInterval(statusUpdateRef.current);
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Modal, TouchableOpacity, Alert, Image } from "react-native";
+import { View, Modal, TouchableOpacity, Alert } from "react-native";
+import { Image } from "expo-image";
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
 import { CoverArtResult, CoverArtService } from "@/services/cover-art";
@@ -97,8 +98,9 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
                   <View className="aspect-square relative">
                     <Image
                       source={{ uri: cover.url }}
-                      className="w-full h-full"
-                      resizeMode="cover"
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                      transition={200}
                     />
                     <LinearGradient
                       colors={["transparent", "rgba(0,0,0,0.8)"]}

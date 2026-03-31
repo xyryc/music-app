@@ -102,7 +102,7 @@ export function NowPlayingScreen({
               <Image
                 source={{ uri: currentTrack.coverArt }}
                 placeholder={currentTrack.coverArtBlurhash}
-                className="w-full h-full"
+                style={{ width: "100%", height: "100%" }}
                 contentFit="cover"
                 transition={200}
               />

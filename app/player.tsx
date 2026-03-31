@@ -1,21 +1,13 @@
 import { NowPlayingScreen } from "@/components/now-playing-screen";
 import { StyledText } from "@/components/styled-text";
-<<<<<<< HEAD
 import { usePlayer } from "@/contexts/player-provider";
-import { useRouter } from "expo-router";
-=======
-import { usePlayer } from "@/hooks/use-player";
 import { Track } from "@/types/track";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
->>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
 import { StyleSheet, View } from "react-native";
 
 export default function PlayerScreen() {
   const router = useRouter();
-<<<<<<< HEAD
-  const { state } = usePlayer();
-=======
   const params = useLocalSearchParams();
   const { state, controls } = usePlayer();
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -60,7 +52,6 @@ export default function PlayerScreen() {
     state.currentTrack?.id,
     state.currentTrack?.title,
   ]);
->>>>>>> 74355d9 (fix: audio continues playing when minimizing player)
 
   const handleMinimize = () => {
     router.back();

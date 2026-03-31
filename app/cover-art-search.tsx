@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Alert, FlatList, Image } from "react-native";
+import { View, TouchableOpacity, Alert, FlatList } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
@@ -99,8 +100,9 @@ export default function CoverArtSearchScreen() {
       <View className="aspect-square relative">
         <Image
           source={{ uri: item.url }}
-          className="w-full h-full"
-          resizeMode="cover"
+          style={{ width: "100%", height: "100%" }}
+          contentFit="cover"
+          transition={200}
         />
         <LinearGradient
           colors={["transparent", "rgba(0,0,0,0.8)"]}

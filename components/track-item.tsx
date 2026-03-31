@@ -3,8 +3,8 @@ import { Track } from "@/types/track";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "lucide-react-native";
-import { TouchableOpacity, View, GestureResponderEvent } from "react-native";
 import { useColorScheme } from "nativewind";
+import { GestureResponderEvent, TouchableOpacity, View } from "react-native";
 
 interface TrackItemProps {
   track: Track;
@@ -38,7 +38,7 @@ export function TrackItem({
         <Image
           source={{ uri: track.coverArt }}
           placeholder={track.coverArtBlurhash}
-          className="w-12 h-12 rounded-lg mr-4"
+          style={{ width: 48, height: 48, borderRadius: 8, marginRight: 16 }}
           contentFit="cover"
           transition={200}
         />
@@ -51,9 +51,13 @@ export function TrackItem({
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
+          className="items-center justify-center"
+          style={{ width: 48, height: 48, borderRadius: 8, marginRight: 16 }}
         >
-          <Music size={20} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
+          <Music
+            size={20}
+            color={colorScheme === "dark" ? "#FFFFFF" : "#000000"}
+          />
         </LinearGradient>
       )}
 
@@ -73,7 +77,14 @@ export function TrackItem({
 
       {/* Duration */}
       <View className="items-center mr-3">
-        <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400 dark:text-gray-500" : "text-gray-600"}>
+        <StyledText
+          variant="caption"
+          className={
+            colorScheme === "dark"
+              ? "text-gray-400 dark:text-gray-500"
+              : "text-gray-600"
+          }
+        >
           {formatDuration(track.duration)}
         </StyledText>
       </View>

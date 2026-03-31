@@ -28,13 +28,17 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           <Image
             source={{ uri: state.currentTrack.coverArt }}
             placeholder={state.currentTrack.coverArtBlurhash}
-            className="w-12 h-12 rounded-lg mr-4"
+            style={{ width: 48, height: 48, borderRadius: 8, marginRight: 16 }}
             contentFit="cover"
             transition={200}
           />
         ) : (
           <LinearGradient
-            colors={["#3B82F6", "#9333EA"]}
+            colors={
+              colorScheme === "dark"
+                ? ["#1f2937", "#111827", "#000000"]
+                : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="w-12 h-12 rounded-lg mr-4 items-center justify-center"
