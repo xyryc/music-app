@@ -14,14 +14,9 @@ import {
 import { useRouter } from "expo-router";
 import { Link, Music, Upload, X } from "lucide-react-native";
 import { useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
+import { showError, showSuccess } from "@/utils/alert";
 
 export default function ImportScreen() {
   const router = useRouter();
@@ -113,23 +108,23 @@ export default function ImportScreen() {
       }
 
       setIsImporting(false);
-      Alert.alert("Success", "Track(s) imported successfully!");
+      showSuccess("Success", "Track(s) imported successfully!");
       router.back();
     } catch (error) {
       console.error("Error importing file:", error);
       setIsImporting(false);
-      Alert.alert("Error", "Failed to import track. Please try again.");
+      showError("Error", "Failed to import track. Please try again.");
     }
   };
 
   const handleImportFromUrl = async () => {
     if (!url.trim()) {
-      Alert.alert("Error", "Please enter a valid URL");
+      showError("Error", "Please enter a valid URL");
       return;
     }
 
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      Alert.alert("Error", "URL must start with http:// or https://");
+      showError("Error", "URL must start with http:// or https://");
       return;
     }
 
@@ -139,7 +134,7 @@ export default function ImportScreen() {
       const duration = await getDurationFromUri(url);
 
       if (duration === 0) {
-        Alert.alert("Error", "Could not load audio from this URL");
+        showError("Error", "Could not load audio from this URL");
         setIsImporting(false);
         return;
       }
@@ -161,12 +156,12 @@ export default function ImportScreen() {
       await storageService.addToLibrary(track);
       setUrl("");
       setIsImporting(false);
-      Alert.alert("Success", "Track imported successfully!");
+      showSuccess("Success", "Track imported successfully!");
       router.back();
     } catch (error) {
       console.error("Error importing URL:", error);
       setIsImporting(false);
-      Alert.alert(
+      showError(
         "Error",
         "Failed to import from URL. Make sure it's a direct audio file link.",
       );

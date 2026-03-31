@@ -1,17 +1,11 @@
 import { ScreenGradient } from "@/components/screen-gradient";
 import { StyledText } from "@/components/styled-text";
 import { AppSettings, storageService } from "@/services/storage";
+import { showError, showSuccess } from "@/utils/alert";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useColorScheme } from "nativewind";
-import React from "react";
-import {
-  Alert,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ScrollView, Switch, TouchableOpacity, View } from "react-native";
 
 export default function SettingsScreen() {
   const { setColorScheme, colorScheme } = useColorScheme();
@@ -60,10 +54,15 @@ export default function SettingsScreen() {
           text: "Clear All",
           style: "destructive",
           onPress: async () => {
-            await storageService.clearAll();
-            setSettings(resetSettings);
-            setColorScheme(resetSettings.theme);
-            Alert.alert("Success", "Library cleared successfully");
+            try {
+              await storageService.clearAll();
+              setSettings(resetSettings);
+              setColorScheme(resetSettings.theme);
+              showSuccess("Success", "Library cleared successfully");
+            } catch (error) {
+              console.error("Failed to clear library:", error);
+              showError("Error", "Failed to clear library");
+            }
           },
         },
       ],
