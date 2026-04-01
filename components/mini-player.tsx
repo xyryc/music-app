@@ -68,7 +68,7 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
         <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="flex-1">
           <Text
             numberOfLines={1}
-            className="text-base font-semibold"
+            className="text-base font-semibold text-gray-900 dark:text-white"
           >
             {state.currentTrack.title}
           </Text>

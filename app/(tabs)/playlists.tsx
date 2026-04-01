@@ -67,7 +67,7 @@ export default function PlaylistsScreen() {
   return (
     <ScreenGradient>
       <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <Text className="text-2xl font-bold">Playlists</Text>
+        <Text className="text-2xl font-bold text-gray-900 dark:text-white">Playlists</Text>
         <TouchableOpacity
           onPress={handleCreatePlaylist}
           className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"
@@ -83,7 +83,7 @@ export default function PlaylistsScreen() {
             <View className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 items-center justify-center mb-4">
               <Music size={32} color="#9CA3AF" />
             </View>
-            <Text className="font-semibold mb-2">No playlists yet</Text>
+            <Text className="font-semibold mb-2 text-gray-900 dark:text-white">No playlists yet</Text>
             <Text variant="caption" className="text-gray-500 dark:text-gray-400 text-center">
               Create your first playlist to organize your music
             </Text>
@@ -99,7 +99,7 @@ export default function PlaylistsScreen() {
                   <Music size={24} color="#FFFFFF" />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold" numberOfLines={1}>
+                  <Text className="font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
                     {playlist.name}
                   </Text>
                   <Text variant="caption" className="text-gray-500">

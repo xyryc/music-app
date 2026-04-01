@@ -96,7 +96,7 @@ export default function LibraryScreen() {
       <ScreenGradient>
         <View className="flex-1">
           <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-            <Text className="text-2xl font-bold">Library</Text>
+            <Text className="text-2xl font-bold text-gray-900 dark:text-white">Library</Text>
             <TouchableOpacity
               onPress={handleImport}
               className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"
@@ -138,7 +138,7 @@ export default function LibraryScreen() {
     <ScreenGradient>
       <View className="flex-1">
         <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <Text className="text-2xl font-bold">Library</Text>
+          <Text className="text-2xl font-bold text-gray-900 dark:text-white">Library</Text>
           <TouchableOpacity
             onPress={handleImport}
             className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"

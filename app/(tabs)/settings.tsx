@@ -87,9 +87,9 @@ export default function SettingsScreen() {
           {icon}
         </View>
         <View className="flex-1">
-          <Text className="font-medium">{title}</Text>
+          <Text className="font-medium text-gray-900 dark:text-white">{title}</Text>
           {description && (
-            <Text className="text-sm text-gray-500">{description}</Text>
+            <Text className="text-sm text-gray-600 dark:text-gray-300">{description}</Text>
           )}
         </View>
       </View>
@@ -105,7 +105,7 @@ export default function SettingsScreen() {
   return (
     <ScreenGradient>
       <View className="px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <Text className="text-2xl font-bold">Settings</Text>
+        <Text className="text-2xl font-bold text-gray-900 dark:text-white">Settings</Text>
       </View>
 
       <ScrollView className="flex-1">
