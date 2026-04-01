@@ -1,10 +1,9 @@
 import { ScreenGradient } from "@/components/screen-gradient";
-import { StyledText } from "@/components/styled-text";
 import { storageService } from "@/services/storage";
 import { Playlist } from "@/types/playlist";
 import { Music, Plus, Trash2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function PlaylistsScreen() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -68,15 +67,13 @@ export default function PlaylistsScreen() {
   return (
     <ScreenGradient>
       <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <StyledText variant="title" weight="bold">
-          Playlists
-        </StyledText>
+        <Text className="text-2xl font-bold">Playlists</Text>
         <TouchableOpacity
           onPress={handleCreatePlaylist}
           className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"
         >
           <Plus size={20} color="#FFFFFF" />
-          <StyledText className="text-white font-semibold ml-2">New</StyledText>
+          <Text className="text-white font-semibold ml-2">New</Text>
         </TouchableOpacity>
       </View>
 
@@ -86,12 +83,10 @@ export default function PlaylistsScreen() {
             <View className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 items-center justify-center mb-4">
               <Music size={32} color="#9CA3AF" />
             </View>
-            <StyledText weight="semibold" className="mb-2">
-              No playlists yet
-            </StyledText>
-            <StyledText variant="caption" className="text-gray-500 dark:text-gray-400 text-center">
+            <Text className="font-semibold mb-2">No playlists yet</Text>
+            <Text variant="caption" className="text-gray-500 dark:text-gray-400 text-center">
               Create your first playlist to organize your music
-            </StyledText>
+            </Text>
           </View>
         ) : (
           <View className="gap-3">
@@ -104,12 +99,12 @@ export default function PlaylistsScreen() {
                   <Music size={24} color="#FFFFFF" />
                 </View>
                 <View className="flex-1">
-                  <StyledText weight="semibold" numberOfLines={1}>
+                  <Text className="font-semibold" numberOfLines={1}>
                     {playlist.name}
-                  </StyledText>
-                  <StyledText variant="caption" className="text-gray-500">
+                  </Text>
+                  <Text variant="caption" className="text-gray-500">
                     {playlist.trackIds.length} tracks
-                  </StyledText>
+                  </Text>
                 </View>
                 <TouchableOpacity
                   onPress={() => handleDeletePlaylist(playlist)}

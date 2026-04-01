@@ -1,4 +1,4 @@
-import { StyledText } from "@/components/styled-text";
+import { Text } from "react-native";
 import { Track } from "@/types/track";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -63,30 +63,34 @@ export function TrackItem({
 
       {/* Track Info */}
       <View className="flex-1">
-        <StyledText
-          weight={isPlaying ? "semibold" : "medium"}
-          className={isPlaying ? "text-blue-500" : ""}
+        <Text
           numberOfLines={1}
+          className={isPlaying
+            ? "text-base font-semibold text-blue-500"
+            : "text-base font-medium"
+          }
         >
           {track.title}
-        </StyledText>
-        <StyledText variant="caption" numberOfLines={1}>
+        </Text>
+        <Text
+          numberOfLines={1}
+          className="text-sm text-gray-500 dark:text-gray-400"
+        >
           {track.artist || "Unknown Artist"}
-        </StyledText>
+        </Text>
       </View>
 
       {/* Duration */}
       <View className="items-center mr-3">
-        <StyledText
-          variant="caption"
+        <Text
           className={
             colorScheme === "dark"
-              ? "text-gray-400 dark:text-gray-500"
-              : "text-gray-600"
+              ? "text-sm text-gray-300"
+              : "text-sm text-gray-600"
           }
         >
           {formatDuration(track.duration)}
-        </StyledText>
+        </Text>
       </View>
     </TouchableOpacity>
   );

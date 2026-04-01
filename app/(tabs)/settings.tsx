@@ -1,11 +1,10 @@
 import { ScreenGradient } from "@/components/screen-gradient";
-import { StyledText } from "@/components/styled-text";
 import { AppSettings, storageService } from "@/services/storage";
 import { showError, showSuccess } from "@/utils/alert";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useColorScheme } from "nativewind";
-import { Alert, ScrollView, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 
 export default function SettingsScreen() {
   const { setColorScheme, colorScheme } = useColorScheme();
@@ -88,11 +87,9 @@ export default function SettingsScreen() {
           {icon}
         </View>
         <View className="flex-1">
-          <StyledText weight="medium">{title}</StyledText>
+          <Text className="font-medium">{title}</Text>
           {description && (
-            <StyledText variant="caption" className="text-gray-500">
-              {description}
-            </StyledText>
+            <Text className="text-sm text-gray-500">{description}</Text>
           )}
         </View>
       </View>
@@ -108,34 +105,31 @@ export default function SettingsScreen() {
   return (
     <ScreenGradient>
       <View className="px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <StyledText variant="title" weight="bold">
-          Settings
-        </StyledText>
+        <Text className="text-2xl font-bold">Settings</Text>
       </View>
 
       <ScrollView className="flex-1">
         {/* Theme Settings */}
         <View className="bg-white dark:bg-gray-900 mt-4 px-4">
-          <StyledText
-            variant="caption"
-            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
+          <Text
+            className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-sm text-gray-600 uppercase mb-2 mt-4"}
           >
             Appearance
-          </StyledText>
+          </Text>
           <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800">
             <View className="flex-row items-center flex-1">
               <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center mr-4">
                 <Smartphone size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
               </View>
               <View className="flex-1">
-                <StyledText weight="medium">Theme</StyledText>
-                <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}>
+                <Text className="font-medium">Theme</Text>
+                <Text className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400" : "text-sm text-gray-600"}>
                   {settings.theme === "system"
                     ? "Follow system"
                     : settings.theme === "light"
                       ? "Light mode"
                       : "Dark mode"}
-                </StyledText>
+                </Text>
               </View>
             </View>
             <View className="flex-row gap-2">
@@ -149,7 +143,7 @@ export default function SettingsScreen() {
                       : "bg-gray-100 dark:bg-gray-800"
                   }`}
                 >
-                  <StyledText
+                  <Text
                     className={
                       settings.theme === theme
                         ? "text-white"
@@ -160,7 +154,7 @@ export default function SettingsScreen() {
                     {theme === "system"
                       ? "Auto"
                       : theme.charAt(0).toUpperCase() + theme.slice(1)}
-                  </StyledText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -169,12 +163,11 @@ export default function SettingsScreen() {
 
         {/* Playback Settings */}
         <View className="bg-white dark:bg-gray-900 mt-4 px-4">
-          <StyledText
-            variant="caption"
-            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
+          <Text
+            className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-sm text-gray-600 uppercase mb-2 mt-4"}
           >
             Playback
-          </StyledText>
+          </Text>
           <SettingItem
             icon={<Music size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />}
             title="Skip Silence"
@@ -193,12 +186,11 @@ export default function SettingsScreen() {
 
         {/* Data Management */}
         <View className="bg-white dark:bg-gray-900 mt-4 px-4">
-          <StyledText
-            variant="caption"
-            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
+          <Text
+            className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-sm text-gray-600 uppercase mb-2 mt-4"}
           >
             Data
-          </StyledText>
+          </Text>
           <TouchableOpacity
             onPress={handleClearLibrary}
             className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800"
@@ -208,12 +200,12 @@ export default function SettingsScreen() {
                 <Trash2 size={20} color={colorScheme === "dark" ? "#EF4444" : "#DC2626"} />
               </View>
               <View className="flex-1">
-                <StyledText weight="medium" className={colorScheme === "dark" ? "text-red-600" : "text-red-600"}>
+                <Text className={colorScheme === "dark" ? "font-medium text-red-600" : "font-medium text-red-600"}>
                   Clear Library
-                </StyledText>
-                <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}>
+                </Text>
+                <Text className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400" : "text-sm text-gray-600"}>
                   Remove all tracks and playlists
-                </StyledText>
+                </Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -221,21 +213,20 @@ export default function SettingsScreen() {
 
         {/* About */}
         <View className="bg-white dark:bg-gray-900 mt-4 px-4 mb-8">
-          <StyledText
-            variant="caption"
-            className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-gray-600 uppercase mb-2 mt-4"}
+          <Text
+            className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400 uppercase mb-2 mt-4" : "text-sm text-gray-600 uppercase mb-2 mt-4"}
           >
             About
-          </StyledText>
+          </Text>
           <View className="flex-row items-center py-4">
             <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center mr-4">
               <Info size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
             </View>
             <View className="flex-1">
-              <StyledText weight="medium">Version</StyledText>
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}>
+              <Text className="font-medium">Version</Text>
+              <Text className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400" : "text-sm text-gray-600"}>
                 1.0.0
-              </StyledText>
+              </Text>
             </View>
           </View>
         </View>

@@ -1,20 +1,20 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
 
-interface StyledTextProps extends TextProps {
+interface TextProps extends TextProps {
   variant?: 'default' | 'title' | 'subtitle' | 'caption' | 'body';
   weight?: 'regular' | 'medium' | 'semibold' | 'bold';
   children: React.ReactNode;
 }
 
-export function StyledText({
+export function Text({
   variant = 'default',
   weight = 'regular',
   className = '',
   style,
   children,
   ...props
-}: StyledTextProps) {
+}: TextProps) {
   // Check if a text color class is already provided in className
   const hasColorClass = className.includes('text-');
 

@@ -1,5 +1,4 @@
 import { ScreenGradient } from "@/components/screen-gradient";
-import { StyledText } from "@/components/styled-text";
 import { parseFilenameMetadata } from "@/services/track-metadata";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
@@ -14,7 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { Link, Music, Upload, X } from "lucide-react-native";
 import { useState } from "react";
-import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
 import { showError, showSuccess } from "@/utils/alert";
 
@@ -174,9 +173,7 @@ export default function ImportScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
           <X size={24} color={colorScheme === "dark" ? "#9CA3AF" : "#6B7280"} />
         </TouchableOpacity>
-        <StyledText variant="title" weight="bold">
-          Import Music
-        </StyledText>
+        <Text className="text-2xl font-bold">Import Music</Text>
       </View>
 
       <ScrollView className="flex-1 p-4">
@@ -186,12 +183,10 @@ export default function ImportScreen() {
               <Upload size={24} color={colorScheme === "dark" ? "#38BDF8" : "#0A7EA4"} />
             </View>
             <View className="flex-1">
-              <StyledText weight="semibold" className="text-lg">
-                Import from Device
-              </StyledText>
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+              <Text className="text-lg font-semibold">Import from Device</Text>
+              <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Select audio files from your file manager
-              </StyledText>
+              </Text>
             </View>
           </View>
           <TouchableOpacity
@@ -199,9 +194,9 @@ export default function ImportScreen() {
             disabled={isImporting}
             className="bg-blue-500 py-3 rounded-lg items-center"
           >
-            <StyledText className="text-white font-semibold">
+            <Text className="text-white font-semibold">
               {isImporting ? "Importing..." : "Choose Files"}
-            </StyledText>
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -211,12 +206,10 @@ export default function ImportScreen() {
               <Link size={24} color={colorScheme === "dark" ? "#A78BFA" : "#7C3AED"} />
             </View>
             <View className="flex-1">
-              <StyledText weight="semibold" className="text-lg">
-                Import from URL
-              </StyledText>
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+              <Text className="text-lg font-semibold">Import from URL</Text>
+              <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Add a direct link to an audio file
-              </StyledText>
+              </Text>
             </View>
           </View>
 
@@ -238,9 +231,9 @@ export default function ImportScreen() {
               isImporting || !url.trim() ? "bg-gray-300" : "bg-purple-500"
             }`}
           >
-            <StyledText className="text-white font-semibold">
+            <Text className="text-white font-semibold">
               {isImporting ? "Importing..." : "Import from URL"}
-            </StyledText>
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -248,13 +241,13 @@ export default function ImportScreen() {
           <View className="flex-row items-start">
             <Music size={20} color="#F59E0B" className="mt-0.5 mr-3" />
             <View className="flex-1">
-              <StyledText weight="semibold" className={colorScheme === "dark" ? "text-amber-300 mb-1" : "text-amber-800 mb-1"}>
+              <Text className={colorScheme === "dark" ? "font-semibold text-amber-300 mb-1" : "font-semibold text-amber-800 mb-1"}>
                 Supported Formats
-              </StyledText>
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-amber-200" : "text-amber-700"}>
+              </Text>
+              <Text variant="caption" className={colorScheme === "dark" ? "text-amber-200" : "text-amber-700"}>
                 MP3, WAV, AAC, M4A, and other common audio formats. For URL
                 imports, the link must point directly to an audio file.
-              </StyledText>
+              </Text>
             </View>
           </View>
         </View>

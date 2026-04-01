@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Alert, FlatList } from "react-native";
+import { View, TouchableOpacity, Alert, FlatList, Text } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyledText } from "@/components/styled-text";
 import { Track } from "@/types/track";
 import { CoverArtResult, CoverArtService } from "@/services/cover-art";
 import { ChevronLeft, Image as ImageIcon } from "lucide-react-native";
@@ -109,13 +108,13 @@ export default function CoverArtSearchScreen() {
           className="absolute bottom-0 left-0 right-0 p-2"
         >
           <View className="flex-row items-center justify-between">
-            <StyledText variant="caption" className="text-white text-xs" numberOfLines={1}>
+            <Text variant="caption" className="text-white text-xs" numberOfLines={1}>
               {item.width}x{item.height}
-            </StyledText>
+            </Text>
             {item.front && (
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-blue-400 text-xs bg-blue-900 px-1 rounded" : "text-blue-600 text-xs bg-blue-100 px-1 rounded"}>
+              <Text variant="caption" className={colorScheme === "dark" ? "text-blue-400 text-xs bg-blue-900 px-1 rounded" : "text-blue-600 text-xs bg-blue-100 px-1 rounded"}>
                 Front
-              </StyledText>
+              </Text>
             )}
           </View>
         </LinearGradient>
@@ -126,21 +125,21 @@ export default function CoverArtSearchScreen() {
   const renderLoading = () => (
     <View className="flex-1 items-center justify-center">
       <View className="w-16 h-16 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
-      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4" : "text-gray-600 mt-4"}>Searching for cover art...</StyledText>
+      <Text className={colorScheme === "dark" ? "text-gray-400 mt-4" : "text-gray-600 mt-4"}>Searching for cover art...</Text>
     </View>
   );
 
   const renderError = () => (
     <View className="flex-1 items-center justify-center">
       <ImageIcon size={64} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
-      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
+      <Text className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
         {error}
-      </StyledText>
+      </Text>
       <TouchableOpacity
         onPress={() => loadCoverArt(trackObj)}
         className="bg-blue-600 px-6 py-2 rounded-full mt-6"
       >
-        <StyledText className={colorScheme === "dark" ? "text-white" : "text-black"}>Try Again</StyledText>
+        <Text className={colorScheme === "dark" ? "text-white" : "text-black"}>Try Again</Text>
       </TouchableOpacity>
     </View>
   );
@@ -148,9 +147,9 @@ export default function CoverArtSearchScreen() {
   const renderEmpty = () => (
     <View className="flex-1 items-center justify-center">
       <ImageIcon size={64} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
-      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
+      <Text className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
         No cover art found for this track. Try searching with a different title or artist.
-      </StyledText>
+      </Text>
     </View>
   );
 
@@ -170,12 +169,12 @@ export default function CoverArtSearchScreen() {
             <ChevronLeft size={24} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
           <View className="flex-1">
-            <StyledText weight="semibold" className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"} numberOfLines={1}>
+            <Text className={colorScheme === "dark" ? "text-white text-lg font-semibold" : "text-black text-lg font-semibold"} numberOfLines={1}>
               {trackObj?.title || ""}
-            </StyledText>
-            <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"} numberOfLines={1}>
+            </Text>
+            <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"} numberOfLines={1}>
               {trackObj?.artist || "Unknown Artist"}
-            </StyledText>
+            </Text>
           </View>
         </View>
 
@@ -191,12 +190,12 @@ export default function CoverArtSearchScreen() {
              contentContainerStyle={{ padding: 8 }}
              ListHeaderComponent={
                <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-300 dark:border-gray-700">
-                 <StyledText weight="semibold" className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"}>
+                 <Text className={colorScheme === "dark" ? "text-white text-lg font-semibold" : "text-black text-lg font-semibold"}>
                    Cover Art Options
-                 </StyledText>
-                 <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+                 </Text>
+                 <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                    {searchResults.length} found
-                 </StyledText>
+                 </Text>
                </View>
              }
            />

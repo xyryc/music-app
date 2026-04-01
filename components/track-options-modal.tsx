@@ -1,4 +1,4 @@
-import { StyledText } from "@/components/styled-text";
+import { Text } from "react-native";
 import { Track } from "@/types/track";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { LinearGradient } from "expo-linear-gradient";
@@ -55,13 +55,13 @@ function OptionRow({
         <Icon size={18} color={disabled ? "#9CA3AF" : "#0A7EA4"} />
       </View>
       <View className="flex-1">
-        <StyledText weight="medium">{title}</StyledText>
-        <StyledText
+        <Text className="font-medium">{title}</Text>
+        <Text
           variant="caption"
           className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}
         >
           {description}
-        </StyledText>
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -123,20 +123,20 @@ export function TrackOptionsSheet({
         >
           <View className="flex-row items-start justify-between">
             <View className="flex-1 mr-3">
-              <StyledText
+              <Text
                 weight="semibold"
                 className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"}
                 numberOfLines={1}
               >
                 {track.title}
-              </StyledText>
-              <StyledText
+              </Text>
+              <Text
                 variant="caption"
                 className={colorScheme === "dark" ? "text-white/80" : "text-black/80"}
                 numberOfLines={1}
               >
                 {track.artist || "Unknown Artist"}
-              </StyledText>
+              </Text>
             </View>
           </View>
         </LinearGradient>

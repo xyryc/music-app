@@ -1,4 +1,4 @@
-import { StyledText } from "@/components/styled-text";
+import { Text } from "react-native";
 import { usePlayer } from "@/contexts/player-provider";
 import { RepeatMode } from "@/types/player";
 import { useColorScheme } from "nativewind";
@@ -58,7 +58,7 @@ export function NowPlayingScreen({
   if (!currentTrack) {
     return (
       <View style={{ flex: 1, backgroundColor: "#111827" }} className="items-center justify-center">
-        <StyledText className="text-white text-lg">No track playing</StyledText>
+        <Text className="text-white text-lg">No track playing</Text>
       </View>
     );
   }
@@ -78,9 +78,7 @@ export function NowPlayingScreen({
           <TouchableOpacity onPress={onMinimize} className="p-2">
             <ChevronDown size={28} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
-          <StyledText weight="semibold" className="text-white text-sm">
-            NOW PLAYING
-          </StyledText>
+          <Text className="text-white text-sm font-semibold">NOW PLAYING</Text>
           <TouchableOpacity className="p-2">
             <ListMusic size={24} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
@@ -117,17 +115,17 @@ export function NowPlayingScreen({
         {/* Track Info */}
         <View className="px-8 mb-10">
           <View className="mb-8">
-            <StyledText
+            <Text
               variant="title"
               weight="bold"
               className={colorScheme === "dark" ? "text-white text-2xl mb-2" : "text-black text-2xl mb-2"}
               numberOfLines={1}
             >
               {currentTrack.title}
-            </StyledText>
-            <StyledText className="text-gray-400 text-lg" numberOfLines={1}>
+            </Text>
+            <Text className="text-gray-400 text-lg" numberOfLines={1}>
               {currentTrack.artist || "Unknown Artist"}
-            </StyledText>
+            </Text>
           </View>
 
           {/* Progress Bar */}
@@ -143,12 +141,12 @@ export function NowPlayingScreen({
               className="h-10"
             />
             <View className="flex-row justify-between mt-1">
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 font-medium" : "text-gray-700 font-medium"}>
+              <Text variant="caption" className={colorScheme === "dark" ? "text-gray-500 font-medium" : "text-gray-700 font-medium"}>
                 {formatTime(state.position)}
-              </StyledText>
-              <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-500 font-medium" : "text-gray-700 font-medium"}>
+              </Text>
+              <Text variant="caption" className={colorScheme === "dark" ? "text-gray-500 font-medium" : "text-gray-700 font-medium"}>
                 {formatTime(state.duration)}
-              </StyledText>
+              </Text>
             </View>
           </View>
 

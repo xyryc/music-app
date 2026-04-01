@@ -1,10 +1,9 @@
 import { NowPlayingScreen } from "@/components/now-playing-screen";
-import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/contexts/player-provider";
 import { Track } from "@/types/track";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function PlayerScreen() {
   const router = useRouter();
@@ -60,7 +59,7 @@ export default function PlayerScreen() {
   if (!state.currentTrack) {
     return (
       <View style={styles.container}>
-        <StyledText className="text-white text-lg">No track playing</StyledText>
+        <Text className="text-white text-lg">No track playing</Text>
       </View>
     );
   }

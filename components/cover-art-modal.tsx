@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Modal, TouchableOpacity, Alert } from "react-native";
 import { Image } from "expo-image";
-import { StyledText } from "@/components/styled-text";
+import { Text } from "react-native";
 import { Track } from "@/types/track";
 import { CoverArtResult, CoverArtService } from "@/services/cover-art";
 import { ChevronLeft, Download, Image as ImageIcon, X } from "lucide-react-native";
@@ -78,12 +78,12 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
     return (
       <View className="flex-1">
         <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-700">
-          <StyledText weight="semibold" className="text-white text-lg">
+          <Text className="text-white text-lg font-semibold">
             Cover Art Options
-          </StyledText>
-          <StyledText variant="caption" className="text-gray-400">
+          </Text>
+          <Text variant="caption" className="text-gray-400">
             {searchResults.length} found
-          </StyledText>
+          </Text>
         </View>
 
         <View className="flex-1 p-4">
@@ -107,13 +107,13 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
                       className="absolute bottom-0 left-0 right-0 p-2"
                     >
                       <View className="flex-row items-center justify-between">
-                        <StyledText variant="caption" className="text-white text-xs" numberOfLines={1}>
+                        <Text variant="caption" className="text-white text-xs" numberOfLines={1}>
                           {cover.width}x{cover.height}
-                        </StyledText>
+                        </Text>
                         {cover.front && (
-                          <StyledText variant="caption" className="text-blue-400 text-xs bg-blue-900 px-1 rounded">
+                          <Text variant="caption" className="text-blue-400 text-xs bg-blue-900 px-1 rounded">
                             Front
-                          </StyledText>
+                          </Text>
                         )}
                       </View>
                     </LinearGradient>
@@ -130,21 +130,21 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
   const renderLoading = () => (
     <View className="flex-1 items-center justify-center">
       <View className="w-16 h-16 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
-      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4" : "text-gray-600 mt-4"}>Searching for cover art...</StyledText>
+      <Text className={colorScheme === "dark" ? "text-gray-400 mt-4" : "text-gray-600 mt-4"}>Searching for cover art...</Text>
     </View>
   );
 
   const renderError = () => (
     <View className="flex-1 items-center justify-center">
       <ImageIcon size={64} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
-      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
+      <Text className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
         {error}
-      </StyledText>
+      </Text>
       <TouchableOpacity
         onPress={loadCoverArt}
         className="bg-blue-600 px-6 py-2 rounded-full mt-6"
       >
-        <StyledText className={colorScheme === "dark" ? "text-white" : "text-black"}>Try Again</StyledText>
+        <Text className={colorScheme === "dark" ? "text-white" : "text-black"}>Try Again</Text>
       </TouchableOpacity>
     </View>
   );
@@ -152,9 +152,9 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
   const renderEmpty = () => (
     <View className="flex-1 items-center justify-center">
       <ImageIcon size={64} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
-      <StyledText className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
+      <Text className={colorScheme === "dark" ? "text-gray-400 mt-4 text-center px-8" : "text-gray-600 mt-4 text-center px-8"}>
         No cover art found for this track. Try searching with a different title or artist.
-      </StyledText>
+      </Text>
     </View>
   );
 
@@ -181,12 +181,12 @@ export function CoverArtModal({ isVisible, track, onClose, onCoverSelected }: Co
             <X size={24} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
           <View className="items-center">
-            <StyledText weight="semibold" className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"}>
+            <Text className={colorScheme === "dark" ? "text-white text-lg font-semibold" : "text-black text-lg font-semibold"}>
               {track.title}
-            </StyledText>
-            <StyledText variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+            </Text>
+            <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
               {track.artist || "Unknown Artist"}
-            </StyledText>
+            </Text>
           </View>
           <TouchableOpacity onPress={loadCoverArt} disabled={isLoading} className="p-2">
             <Download size={24} color={isLoading ? (colorScheme === "dark" ? "#6B7280" : "#9CA3AF") : (colorScheme === "dark" ? "#FFFFFF" : "#000000")} />

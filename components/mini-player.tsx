@@ -1,9 +1,8 @@
-import { StyledText } from "@/components/styled-text";
 import { usePlayer } from "@/contexts/player-provider";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music, Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
-import { TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
 
 interface MiniPlayerProps {
@@ -67,16 +66,21 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="flex-1">
-          <StyledText weight="semibold" numberOfLines={1} className="text-base">
-            {state.currentTrack.title}
-          </StyledText>
-          <StyledText
-            variant="caption"
-            className="text-gray-500 dark:text-gray-400"
+          <Text
             numberOfLines={1}
+            className="text-base font-semibold"
+          >
+            {state.currentTrack.title}
+          </Text>
+          <Text
+            numberOfLines={1}
+            className={colorScheme === "dark"
+              ? "text-sm text-gray-300"
+              : "text-sm text-gray-600"
+            }
           >
             {state.currentTrack.artist || "Unknown Artist"}
-          </StyledText>
+          </Text>
         </TouchableOpacity>
 
         <View className="flex-row items-center ml-2">
@@ -117,12 +121,18 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
       </View>
 
       <View className="flex-row justify-between px-4 pb-2">
-        <StyledText variant="caption" className="text-gray-400">
+        <Text className={colorScheme === "dark"
+          ? "text-sm text-gray-300"
+          : "text-sm text-gray-600"
+        }>
           {formatTime(state.position)}
-        </StyledText>
-        <StyledText variant="caption" className="text-gray-400">
+        </Text>
+        <Text className={colorScheme === "dark"
+          ? "text-sm text-gray-300"
+          : "text-sm text-gray-600"
+        }>
           {formatTime(state.duration)}
-        </StyledText>
+        </Text>
       </View>
     </TouchableOpacity>
   );
