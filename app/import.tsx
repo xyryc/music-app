@@ -173,7 +173,7 @@ export default function ImportScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
           <X size={24} color={colorScheme === "dark" ? "#9CA3AF" : "#6B7280"} />
         </TouchableOpacity>
-        <Text className="text-2xl font-bold">Import Music</Text>
+        <Text className="text-2xl font-bold text-gray-900 dark:text-white">Import Music</Text>
       </View>
 
       <ScrollView className="flex-1 p-4">
@@ -183,8 +183,8 @@ export default function ImportScreen() {
               <Upload size={24} color={colorScheme === "dark" ? "#38BDF8" : "#0A7EA4"} />
             </View>
             <View className="flex-1">
-              <Text className="text-lg font-semibold">Import from Device</Text>
-              <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+              <Text className="text-lg font-semibold text-gray-900 dark:text-white">Import from Device</Text>
+              <Text className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Select audio files from your file manager
               </Text>
             </View>
@@ -206,8 +206,8 @@ export default function ImportScreen() {
               <Link size={24} color={colorScheme === "dark" ? "#A78BFA" : "#7C3AED"} />
             </View>
             <View className="flex-1">
-              <Text className="text-lg font-semibold">Import from URL</Text>
-              <Text variant="caption" className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
+              <Text className="text-lg font-semibold text-gray-900 dark:text-white">Import from URL</Text>
+              <Text className={colorScheme === "dark" ? "text-gray-400" : "text-gray-600"}>
                 Add a direct link to an audio file
               </Text>
             </View>
@@ -244,7 +244,7 @@ export default function ImportScreen() {
               <Text className={colorScheme === "dark" ? "font-semibold text-amber-300 mb-1" : "font-semibold text-amber-800 mb-1"}>
                 Supported Formats
               </Text>
-              <Text variant="caption" className={colorScheme === "dark" ? "text-amber-200" : "text-amber-700"}>
+              <Text className={colorScheme === "dark" ? "text-amber-200" : "text-amber-700"}>
                 MP3, WAV, AAC, M4A, and other common audio formats. For URL
                 imports, the link must point directly to an audio file.
               </Text>

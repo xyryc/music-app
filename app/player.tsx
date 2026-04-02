@@ -2,7 +2,7 @@ import { NowPlayingScreen } from "@/components/now-playing-screen";
 import { usePlayer } from "@/contexts/player-provider";
 import { Track } from "@/types/track";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function PlayerScreen() {
@@ -13,41 +13,66 @@ export default function PlayerScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const playInitiatedRef = useRef(false);
 
-  useEffect(() => {
-    // Handle track from navigation params
-    if (params.trackUri && !playInitiatedRef.current) {
-      const track: Track = {
-        id: params.trackId as string,
-        title: params.trackTitle as string,
-        uri: params.trackUri as string,
-        artist: (params.trackArtist as string) || "Unknown Artist",
-        duration: parseInt(params.trackDuration as string) || 0,
-        source: "local",
-        dateAdded: Date.now(),
-        playCount: 0,
-      };
-
-      // Set local state and trigger playback
-      setCurrentTrack(track);
-      setIsLoading(false);
-      playInitiatedRef.current = true;
-
-      // Start playback - pass the track directly so it loads and plays
-      controls.play(track);
+  const queueFromParams = useMemo(() => {
+    if (typeof params.queue !== "string") {
+      return null;
     }
-    // Sync with global state - use state.currentTrack as the source of truth
-    else if (state.currentTrack) {
-      setCurrentTrack(state.currentTrack);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
+
+    try {
+      const parsed = JSON.parse(params.queue);
+      return Array.isArray(parsed) ? (parsed as Track[]) : null;
+    } catch {
+      return null;
     }
+  }, [params.queue]);
+
+  const trackFromParams = useMemo(() => {
+    if (!params.trackUri) {
+      return null;
+    }
+
+    return {
+      id: params.trackId as string,
+      title: params.trackTitle as string,
+      uri: params.trackUri as string,
+      artist: (params.trackArtist as string) || "Unknown Artist",
+      duration: parseInt(params.trackDuration as string) || 0,
+      source: "local",
+      dateAdded: Date.now(),
+      playCount: 0,
+    } satisfies Track;
   }, [
     params.trackUri,
     params.trackId,
     params.trackTitle,
     params.trackArtist,
     params.trackDuration,
+  ]);
+
+  const playbackQueue = useMemo(() => {
+    if (queueFromParams && queueFromParams.length > 0) {
+      return queueFromParams;
+    }
+
+    return trackFromParams ? [trackFromParams] : undefined;
+  }, [queueFromParams, trackFromParams]);
+
+  useEffect(() => {
+    if (trackFromParams && !playInitiatedRef.current) {
+      setCurrentTrack(trackFromParams);
+      setIsLoading(false);
+      playInitiatedRef.current = true;
+
+      void controls.play(trackFromParams, playbackQueue);
+    } else if (state.currentTrack) {
+      setCurrentTrack(state.currentTrack);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+    }
+  }, [
+    trackFromParams,
+    playbackQueue,
     state.currentTrack?.id,
     state.currentTrack?.title,
   ]);

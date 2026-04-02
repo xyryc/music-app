@@ -67,7 +67,7 @@ export function TrackItem({
           numberOfLines={1}
           className={isPlaying
             ? "text-base font-semibold text-blue-500"
-            : "text-base font-medium"
+            : "text-base font-medium text-gray-900 dark:text-white"
           }
         >
           {track.title}

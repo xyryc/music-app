@@ -159,7 +159,7 @@ export function NowPlayingScreen({
               />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={controls.playPrevious}>
+            <TouchableOpacity onPress={() => { void controls.playPrevious(); }}>
               <SkipBack size={36} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
             </TouchableOpacity>
 
@@ -174,7 +174,7 @@ export function NowPlayingScreen({
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={controls.playNext}>
+            <TouchableOpacity onPress={() => { void controls.playNext(); }}>
               <SkipForward size={36} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
             </TouchableOpacity>
 

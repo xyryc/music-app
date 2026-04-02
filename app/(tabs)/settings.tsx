@@ -122,7 +122,7 @@ export default function SettingsScreen() {
                 <Smartphone size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
               </View>
               <View className="flex-1">
-                <Text className="font-medium">Theme</Text>
+                <Text className="font-medium text-gray-900 dark:text-white">Theme</Text>
                 <Text className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400" : "text-sm text-gray-600"}>
                   {settings.theme === "system"
                     ? "Follow system"
@@ -146,10 +146,9 @@ export default function SettingsScreen() {
                   <Text
                     className={
                       settings.theme === theme
-                        ? "text-white"
-                        : "text-gray-600 dark:text-gray-300"
+                        ? "text-white font-medium"
+                        : "text-gray-600 dark:text-gray-300 font-medium"
                     }
-                    weight="medium"
                   >
                     {theme === "system"
                       ? "Auto"
@@ -223,7 +222,7 @@ export default function SettingsScreen() {
               <Info size={20} color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"} />
             </View>
             <View className="flex-1">
-              <Text className="font-medium">Version</Text>
+              <Text className="font-medium text-gray-900 dark:text-white">Version</Text>
               <Text className={colorScheme === "dark" ? "text-sm text-gray-500 dark:text-gray-400" : "text-sm text-gray-600"}>
                 1.0.0
               </Text>
