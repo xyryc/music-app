@@ -8,14 +8,16 @@ import { PlayerProvider } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
 import { setAlertFunction } from "@/utils/alert";
 import { useColorScheme } from "nativewind";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import DropdownAlert from "react-native-dropdownalert";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "react-native";
 
 export default function RootLayout() {
   const { colorScheme, setColorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
+  const [isThemeReady, setIsThemeReady] = useState(false);
 
   const dropdownAlertStyle = {
     paddingTop: insets.top + 8,
@@ -25,10 +27,25 @@ export default function RootLayout() {
 
 
   useEffect(() => {
+    let isMounted = true;
+
     storageService.getSettings().then((settings) => {
+      if (!isMounted) {
+        return;
+      }
+
       setColorScheme(settings.theme);
+      setIsThemeReady(true);
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, [setColorScheme]);
+
+  if (!isThemeReady) {
+    return <View style={{ flex: 1, backgroundColor: "#111827" }} />;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -264,55 +264,52 @@ export function usePlayer() {
 
   const playNext = useCallback(async (): Promise<void> => {
     setState((prev) => {
-      const nextIndex = prev.queueIndex + 1;
-      if (nextIndex < prev.queue.length) {
-        const nextTrack = prev.queue[nextIndex];
-        currentTrackRef.current = nextTrack;
-        void audioService.loadTrack(nextTrack, handleStatusUpdate, true);
-        return {
-          ...prev,
-          currentTrack: nextTrack,
-          queueIndex: nextIndex,
-          isPlaying: true,
-          position: 0,
-        };
-      } else if (prev.repeatMode === "all" && prev.queue.length > 0) {
-        const firstTrack = prev.queue[0];
-        currentTrackRef.current = firstTrack;
-        void audioService.loadTrack(firstTrack, handleStatusUpdate, true);
-        return {
-          ...prev,
-          currentTrack: firstTrack,
-          queueIndex: 0,
-          isPlaying: true,
-          position: 0,
-        };
+      if (prev.queue.length === 0) {
+        return prev;
       }
-      return prev;
+
+      const nextIndex = prev.queueIndex + 1;
+      const targetIndex = nextIndex < prev.queue.length ? nextIndex : 0;
+      const nextTrack = prev.queue[targetIndex];
+
+      currentTrackRef.current = nextTrack;
+      void audioService.loadTrack(nextTrack, handleStatusUpdate, true);
+
+      return {
+        ...prev,
+        currentTrack: nextTrack,
+        queueIndex: targetIndex,
+        isPlaying: true,
+        position: 0,
+      };
     });
   }, [handleStatusUpdate]);
 
   const playPrevious = useCallback(async () => {
     setState((prev) => {
+      if (prev.queue.length === 0) {
+        return prev;
+      }
+
       if (prev.position > 3000) {
         void audioService.seek(0);
         return prev;
       }
 
       const prevIndex = prev.queueIndex - 1;
-      if (prevIndex >= 0) {
-        const prevTrack = prev.queue[prevIndex];
-        currentTrackRef.current = prevTrack;
-        void audioService.loadTrack(prevTrack, handleStatusUpdate, true);
-        return {
-          ...prev,
-          currentTrack: prevTrack,
-          queueIndex: prevIndex,
-          isPlaying: true,
-          position: 0,
-        };
-      }
-      return prev;
+      const targetIndex = prevIndex >= 0 ? prevIndex : prev.queue.length - 1;
+      const prevTrack = prev.queue[targetIndex];
+
+      currentTrackRef.current = prevTrack;
+      void audioService.loadTrack(prevTrack, handleStatusUpdate, true);
+
+      return {
+        ...prev,
+        currentTrack: prevTrack,
+        queueIndex: targetIndex,
+        isPlaying: true,
+        position: 0,
+      };
     });
   }, [handleStatusUpdate]);
 
