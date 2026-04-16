@@ -6,25 +6,19 @@ import "../global.css";
 import { CoverArtProvider } from "@/contexts/cover-art-context";
 import { PlayerProvider } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
-import { setAlertFunction } from "@/utils/alert";
+import { configureAlert } from "@/utils/alert";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
-import DropdownAlert from "react-native-dropdownalert";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "react-native";
 
 export default function RootLayout() {
   const { colorScheme, setColorScheme } = useColorScheme();
-  const insets = useSafeAreaInsets();
   const [isThemeReady, setIsThemeReady] = useState(false);
 
-  const dropdownAlertStyle = {
-    paddingTop: insets.top + 8,
-    paddingHorizontal: 8,
-    paddingBottom: 8,
-  };
-
+  useEffect(() => {
+    configureAlert();
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -78,15 +72,6 @@ export default function RootLayout() {
             />
           </Stack>
           <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-          <DropdownAlert
-            alert={setAlertFunction}
-            dismissInterval={3000}
-            updateStatusBar={false}
-            showCancel={false}
-            zIndex={1000}
-            elevation={1000}
-            alertViewStyle={dropdownAlertStyle}
-          />
         </CoverArtProvider>
       </PlayerProvider>
     </GestureHandlerRootView>
