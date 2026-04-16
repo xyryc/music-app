@@ -55,7 +55,7 @@ function OptionRow({
         <Icon size={18} color={disabled ? "#9CA3AF" : "#0A7EA4"} />
       </View>
       <View className="flex-1">
-        <Text className="font-medium">{title}</Text>
+        <Text className="font-medium text-gray-900 dark:text-white">{title}</Text>
         <Text
           variant="caption"
           className={colorScheme === "dark" ? "text-gray-500 dark:text-gray-400" : "text-gray-600"}
@@ -125,14 +125,14 @@ export function TrackOptionsSheet({
             <View className="flex-1 mr-3">
               <Text
                 weight="semibold"
-                className={colorScheme === "dark" ? "text-white text-lg" : "text-black text-lg"}
+                className={colorScheme === "dark" ? "text-white text-lg" : "text-gray-900 text-lg"}
                 numberOfLines={1}
               >
                 {track.title}
               </Text>
               <Text
                 variant="caption"
-                className={colorScheme === "dark" ? "text-white/80" : "text-black/80"}
+                className={colorScheme === "dark" ? "text-white/80" : "text-gray-900/80"}
                 numberOfLines={1}
               >
                 {track.artist || "Unknown Artist"}
