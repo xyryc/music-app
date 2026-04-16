@@ -15,7 +15,7 @@ import { Link, Music, Upload, X } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
-import { showError, showSuccess } from "@/utils/alert";
+import { toast } from "@baronha/ting";
 
 export default function ImportScreen() {
   const router = useRouter();
@@ -107,23 +107,39 @@ export default function ImportScreen() {
       }
 
       setIsImporting(false);
-      showSuccess("Success", "Track(s) imported successfully!");
+      toast({
+        title: "Success",
+        message: "Track(s) imported successfully!",
+        preset: "done",
+      });
       router.back();
     } catch (error) {
       console.error("Error importing file:", error);
       setIsImporting(false);
-      showError("Error", "Failed to import track. Please try again.");
+      toast({
+        title: "Error",
+        message: "Failed to import track. Please try again.",
+        preset: "error",
+      });
     }
   };
 
   const handleImportFromUrl = async () => {
     if (!url.trim()) {
-      showError("Error", "Please enter a valid URL");
+      toast({
+        title: "Error",
+        message: "Please enter a valid URL",
+        preset: "error",
+      });
       return;
     }
 
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      showError("Error", "URL must start with http:// or https://");
+      toast({
+        title: "Error",
+        message: "URL must start with http:// or https://",
+        preset: "error",
+      });
       return;
     }
 
@@ -133,7 +149,11 @@ export default function ImportScreen() {
       const duration = await getDurationFromUri(url);
 
       if (duration === 0) {
-        showError("Error", "Could not load audio from this URL");
+        toast({
+        title: "Error",
+        message: "Could not load audio from this URL",
+        preset: "error",
+      });
         setIsImporting(false);
         return;
       }
@@ -155,15 +175,20 @@ export default function ImportScreen() {
       await storageService.addToLibrary(track);
       setUrl("");
       setIsImporting(false);
-      showSuccess("Success", "Track imported successfully!");
+      toast({
+        title: "Success",
+        message: "Track imported successfully!",
+        preset: "done",
+      });
       router.back();
     } catch (error) {
       console.error("Error importing URL:", error);
       setIsImporting(false);
-      showError(
-        "Error",
-        "Failed to import from URL. Make sure it's a direct audio file link.",
-      );
+      toast({
+        title: "Error",
+        message: "Failed to import from URL. Make sure it's a direct audio file link.",
+        preset: "error",
+      });
     }
   };
 

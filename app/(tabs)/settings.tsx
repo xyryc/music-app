@@ -1,6 +1,6 @@
 import { ScreenGradient } from "@/components/screen-gradient";
 import { AppSettings, storageService } from "@/services/storage";
-import { showError, showSuccess } from "@/utils/alert";
+import { toast } from "@baronha/ting";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useColorScheme } from "nativewind";
@@ -57,10 +57,18 @@ export default function SettingsScreen() {
               await storageService.clearAll();
               setSettings(resetSettings);
               setColorScheme(resetSettings.theme);
-              showSuccess("Success", "Library cleared successfully");
+              toast({
+        title: "Success",
+        message: "Library cleared successfully",
+        preset: "done",
+      });
             } catch (error) {
               console.error("Failed to clear library:", error);
-              showError("Error", "Failed to clear library");
+              toast({
+        title: "Error",
+        message: "Failed to clear library",
+        preset: "error",
+      });
             }
           },
         },
