@@ -1,16 +1,17 @@
 import { MiniPlayer } from "@/components/mini-player";
 import { ScreenGradient } from "@/components/screen-gradient";
-import { TrackOptionsSheet } from "@/components/track-options-modal";
 import { TrackItem } from "@/components/track-item";
-import { usePlayer } from "@/contexts/player-provider";
+import { TrackOptionsSheet } from "@/components/track-options-modal";
 import { useCoverArt } from "@/contexts/cover-art-context";
+import { usePlayer } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
+import { alert } from "@baronha/ting";
 import { Image as ExpoImage } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";
-import { useCallback, useState, useEffect } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function LibraryScreen() {
   const router = useRouter();
@@ -18,7 +19,8 @@ export default function LibraryScreen() {
   const { selectedCover, clearCoverSelection } = useCoverArt();
   const [library, setLibrary] = useState<Track[]>([]);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const [selectedTrackForOptions, setSelectedTrackForOptions] = useState<Track | null>(null);
+  const [selectedTrackForOptions, setSelectedTrackForOptions] =
+    useState<Track | null>(null);
   const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
 
   const loadLibrary = useCallback(async () => {
@@ -32,25 +34,31 @@ export default function LibraryScreen() {
     }, [loadLibrary]),
   );
 
-  const handleUpdateTrackCover = useCallback(async (track: Track, coverUrl: string) => {
-    try {
-      const coverArtBlurhash = await ExpoImage.generateBlurhashAsync(coverUrl, [4, 3]);
-      const updatedTrack = {
-        ...track,
-        coverArt: coverUrl,
-        coverArtBlurhash: coverArtBlurhash || undefined,
-      };
-      await storageService.updateTrack(updatedTrack);
+  const handleUpdateTrackCover = useCallback(
+    async (track: Track, coverUrl: string) => {
+      try {
+        const coverArtBlurhash = await ExpoImage.generateBlurhashAsync(
+          coverUrl,
+          [4, 3],
+        );
+        const updatedTrack = {
+          ...track,
+          coverArt: coverUrl,
+          coverArtBlurhash: coverArtBlurhash || undefined,
+        };
+        await storageService.updateTrack(updatedTrack);
 
-      setLibrary((prevLibrary) =>
-        prevLibrary.map((item) =>
-          item.id === track.id ? updatedTrack : item
-        )
-      );
-    } catch (error) {
-      console.error("Failed to update track cover:", error);
-    }
-  }, []);
+        setLibrary((prevLibrary) =>
+          prevLibrary.map((item) =>
+            item.id === track.id ? updatedTrack : item,
+          ),
+        );
+      } catch (error) {
+        console.error("Failed to update track cover:", error);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (selectedCover) {
@@ -76,7 +84,6 @@ export default function LibraryScreen() {
     router.push("/player");
   };
 
-
   const handleShowOptionsModal = (track: Track) => {
     setSelectedTrackForOptions(track);
     setOptionsModalVisible(true);
@@ -97,13 +104,28 @@ export default function LibraryScreen() {
       const { added } = await storageService.addTrackToFavorites(track.id);
 
       if (added) {
-        Alert.alert("Added to Favorites", `"${track.title}" was added.`);
+        alert({
+          title: "Added to Favorites",
+          message: `"${track.title}" was added.`,
+          preset: "done",
+          borderRadius: 24,
+        });
       } else {
-        Alert.alert("Already in Favorites", `"${track.title}" is already saved.`);
+        alert({
+          title: "Already in Favorites",
+          message: `"${track.title}" is already saved.`,
+          icon: { uri: require("../../assets/images/icon.png"), size: 50 },
+          borderRadius: 24,
+        });
       }
     } catch (error) {
       console.error("Failed to add to favorites:", error);
-      Alert.alert("Error", "Could not add track to Favorites.");
+      alert({
+        title: "Error",
+        message: "Could not add track to Favorites.",
+        preset: "error",
+        borderRadius: 24,
+      });
     } finally {
       setIsAddingToFavorites(false);
     }
@@ -114,7 +136,9 @@ export default function LibraryScreen() {
       <ScreenGradient>
         <View className="flex-1">
           <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-            <Text className="text-2xl font-bold text-gray-900 dark:text-white">Library</Text>
+            <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+              Library
+            </Text>
             <TouchableOpacity
               onPress={handleImport}
               className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"
@@ -128,11 +152,7 @@ export default function LibraryScreen() {
             <View className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-800 items-center justify-center mb-4">
               <Music size={40} color="#9CA3AF" />
             </View>
-            <Text
-              variant="title"
-              weight="semibold"
-              className="text-center mb-2"
-            >
+            <Text className="text-center mb-2 text-xl font-semibold text-gray-900 dark:text-white">
               Your library is empty
             </Text>
             <Text className="text-center text-gray-500 dark:text-gray-400 text-base leading-relaxed mb-6">
@@ -156,15 +176,15 @@ export default function LibraryScreen() {
     <ScreenGradient>
       <View className="flex-1">
         <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <Text className="text-2xl font-bold text-gray-900 dark:text-white">Library</Text>
+          <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+            Library
+          </Text>
           <TouchableOpacity
             onPress={handleImport}
             className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"
           >
             <Plus size={20} color="#FFFFFF" />
-            <Text className="text-white font-semibold ml-2">
-              Import
-            </Text>
+            <Text className="text-white font-semibold ml-2">Import</Text>
           </TouchableOpacity>
         </View>
 
