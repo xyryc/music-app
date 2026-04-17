@@ -1,19 +1,22 @@
 {
   "expo": {
-    "name": "qwen-test-app",
-    "slug": "qwen-test-app",
+    "name": "vyb",
+    "slug": "vyb",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "qwentestapp",
+    "scheme": "vyb",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.xyryc.qwentestapp",
+      "bundleIdentifier": "com.xyryc.vyb",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
-      }
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      },
+      "appleTeamId": "3KZ7XWRYB7"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,8 +26,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.xyryc.qwentestapp",
+      "predictiveBackGestureEnabled": true,
+      "package": "com.xyryc.vyb",
       "permissions": [
         "POST_NOTIFICATIONS",
         "WAKE_LOCK",
