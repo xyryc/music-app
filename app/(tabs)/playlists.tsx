@@ -1,15 +1,20 @@
 import { ScreenGradient } from "@/components/screen-gradient";
+import { usePlayer } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
 import { Playlist } from "@/types/playlist";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus, Trash2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+
+import { Track } from "@/types/track";
 
 const FAVORITES_PLAYLIST_ID = "favorites";
 const FAVORITES_PLAYLIST_NAME = "favorites";
 
 export default function PlaylistsScreen() {
+  const router = useRouter();
+  const { controls } = usePlayer();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   const loadPlaylists = useCallback(async () => {
@@ -70,6 +75,24 @@ export default function PlaylistsScreen() {
     );
   };
 
+  const handleOpenPlaylist = useCallback(
+    async (playlist: Playlist) => {
+      const library = await storageService.getLibrary();
+      const playlistTracks: Track[] = library.filter((track) =>
+        playlist.trackIds.includes(track.id),
+      );
+
+      if (playlistTracks.length === 0) {
+        Alert.alert("No tracks", `"${playlist.name}" is empty.`);
+        return;
+      }
+
+      await controls.play(playlistTracks[0], playlistTracks);
+      router.push("/player");
+    },
+    [controls, router],
+  );
+
   return (
     <ScreenGradient>
       <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
@@ -97,9 +120,11 @@ export default function PlaylistsScreen() {
         ) : (
           <View className="gap-3">
             {playlists.map((playlist) => (
-              <View
+              <TouchableOpacity
                 key={playlist.id}
+                onPress={() => handleOpenPlaylist(playlist)}
                 className="bg-white dark:bg-gray-900 rounded-xl p-4 flex-row items-center"
+                activeOpacity={0.7}
               >
                 <View className="w-14 h-14 rounded-lg bg-purple-500 items-center justify-center mr-4">
                   <Music size={24} color="#FFFFFF" />
@@ -115,13 +140,16 @@ export default function PlaylistsScreen() {
                 {playlist.id !== FAVORITES_PLAYLIST_ID &&
                   playlist.name.trim().toLowerCase() !== FAVORITES_PLAYLIST_NAME && (
                     <TouchableOpacity
-                      onPress={() => handleDeletePlaylist(playlist)}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        handleDeletePlaylist(playlist);
+                      }}
                       className="p-2"
                     >
                       <Trash2 size={20} color="#EF4444" />
                     </TouchableOpacity>
                   )}
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
