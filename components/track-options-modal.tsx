@@ -9,12 +9,6 @@ import { useColorScheme } from "nativewind";
 
 const placeholderOptions = [
   {
-    key: "add-to-favorites",
-    title: "Add to favorites",
-    description: "Placeholder for a future track action",
-    icon: Heart,
-  },
-  {
     key: "edit-metadata",
     title: "Edit metadata",
     description: "Placeholder for title, artist, and album edits",
@@ -27,7 +21,6 @@ const placeholderOptions = [
     icon: Share2,
   },
 ];
-
 interface OptionRowProps {
   title: string;
   description: string;
@@ -72,6 +65,8 @@ interface TrackOptionsSheetProps {
   track: Track | null;
   onClose: () => void;
   onSearchCoverArt: (track: Track) => void;
+  onAddToFavorites: (track: Track) => Promise<void> | void;
+  isAddingToFavorites?: boolean;
 }
 
 export function TrackOptionsSheet({
@@ -79,6 +74,8 @@ export function TrackOptionsSheet({
   track,
   onClose,
   onSearchCoverArt,
+  onAddToFavorites,
+  isAddingToFavorites = false,
 }: TrackOptionsSheetProps) {
   const sheetRef = useRef<TrueSheet>(null);
   const { colorScheme } = useColorScheme();
@@ -150,6 +147,23 @@ export function TrackOptionsSheet({
               const currentTrack = track;
               await sheetRef.current?.dismiss();
               onSearchCoverArt(currentTrack);
+            }}
+          />
+
+          <View
+            className="bg-gray-300 dark:bg-gray-700 ml-[68px] mr-4"
+            style={{ height: 1 }}
+          />
+
+          <OptionRow
+            title="Add to favorites"
+            description="Save this track to your Favorites playlist"
+            icon={Heart}
+            disabled={isAddingToFavorites}
+            onPress={async () => {
+              const currentTrack = track;
+              await sheetRef.current?.dismiss();
+              await onAddToFavorites(currentTrack);
             }}
           />
 

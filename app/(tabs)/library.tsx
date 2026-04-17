@@ -10,7 +10,7 @@ import { Image as ExpoImage } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";
 import { useCallback, useState, useEffect } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function LibraryScreen() {
   const router = useRouter();
@@ -19,6 +19,7 @@ export default function LibraryScreen() {
   const [library, setLibrary] = useState<Track[]>([]);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [selectedTrackForOptions, setSelectedTrackForOptions] = useState<Track | null>(null);
+  const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
 
   const loadLibrary = useCallback(async () => {
     const tracks = await storageService.getLibrary();
@@ -90,6 +91,23 @@ export default function LibraryScreen() {
     });
   };
 
+  const handleAddToFavorites = useCallback(async (track: Track) => {
+    try {
+      setIsAddingToFavorites(true);
+      const { added } = await storageService.addTrackToFavorites(track.id);
+
+      if (added) {
+        Alert.alert("Added to Favorites", `"${track.title}" was added.`);
+      } else {
+        Alert.alert("Already in Favorites", `"${track.title}" is already saved.`);
+      }
+    } catch (error) {
+      console.error("Failed to add to favorites:", error);
+      Alert.alert("Error", "Could not add track to Favorites.");
+    } finally {
+      setIsAddingToFavorites(false);
+    }
+  }, []);
 
   if (library.length === 0) {
     return (
@@ -172,6 +190,8 @@ export default function LibraryScreen() {
             setSelectedTrackForOptions(null);
           }}
           onSearchCoverArt={handleSearchCoverArt}
+          onAddToFavorites={handleAddToFavorites}
+          isAddingToFavorites={isAddingToFavorites}
         />
       </View>
     </ScreenGradient>

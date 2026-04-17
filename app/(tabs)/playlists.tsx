@@ -1,9 +1,13 @@
 import { ScreenGradient } from "@/components/screen-gradient";
 import { storageService } from "@/services/storage";
 import { Playlist } from "@/types/playlist";
+import { useFocusEffect } from "expo-router";
 import { Music, Plus, Trash2 } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+
+const FAVORITES_PLAYLIST_ID = "favorites";
+const FAVORITES_PLAYLIST_NAME = "favorites";
 
 export default function PlaylistsScreen() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -13,9 +17,11 @@ export default function PlaylistsScreen() {
     setPlaylists(data);
   }, []);
 
-  useState(() => {
-    loadPlaylists();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      loadPlaylists();
+    }, [loadPlaylists]),
+  );
 
   const handleCreatePlaylist = () => {
     Alert.prompt(
@@ -106,12 +112,15 @@ export default function PlaylistsScreen() {
                     {playlist.trackIds.length} tracks
                   </Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleDeletePlaylist(playlist)}
-                  className="p-2"
-                >
-                  <Trash2 size={20} color="#EF4444" />
-                </TouchableOpacity>
+                {playlist.id !== FAVORITES_PLAYLIST_ID &&
+                  playlist.name.trim().toLowerCase() !== FAVORITES_PLAYLIST_NAME && (
+                    <TouchableOpacity
+                      onPress={() => handleDeletePlaylist(playlist)}
+                      className="p-2"
+                    >
+                      <Trash2 size={20} color="#EF4444" />
+                    </TouchableOpacity>
+                  )}
               </View>
             ))}
           </View>

@@ -9,6 +9,9 @@ const STORAGE_KEYS = {
   QUEUE: "music_player_queue",
 };
 
+const FAVORITES_PLAYLIST_ID = "favorites";
+const FAVORITES_PLAYLIST_NAME = "Favorites";
+
 export interface AppSettings {
   theme: "light" | "dark" | "system";
   skipSilence: boolean;
@@ -121,6 +124,50 @@ class StorageService {
   async getPlaylist(playlistId: string): Promise<Playlist | null> {
     const playlists = await this.getPlaylists();
     return playlists.find((p) => p.id === playlistId) || null;
+  }
+
+  async getFavoritesPlaylist(): Promise<Playlist | null> {
+    const playlists = await this.getPlaylists();
+    return (
+      playlists.find((p) => p.id === FAVORITES_PLAYLIST_ID) ||
+      playlists.find(
+        (p) => p.name.trim().toLowerCase() === FAVORITES_PLAYLIST_NAME.toLowerCase(),
+      ) ||
+      null
+    );
+  }
+
+  async ensureFavoritesPlaylist(): Promise<Playlist> {
+    const existing = await this.getFavoritesPlaylist();
+    if (existing) return existing;
+
+    const now = Date.now();
+    const favorites: Playlist = {
+      id: FAVORITES_PLAYLIST_ID,
+      name: FAVORITES_PLAYLIST_NAME,
+      trackIds: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await this.createPlaylist(favorites);
+    return favorites;
+  }
+
+  async addTrackToFavorites(trackId: string): Promise<{ added: boolean }> {
+    const favorites = await this.ensureFavoritesPlaylist();
+    if (favorites.trackIds.includes(trackId)) {
+      return { added: false };
+    }
+
+    const updatedFavorites: Playlist = {
+      ...favorites,
+      trackIds: [...favorites.trackIds, trackId],
+      updatedAt: Date.now(),
+    };
+
+    await this.updatePlaylist(updatedFavorites);
+    return { added: true };
   }
 
   // Settings
