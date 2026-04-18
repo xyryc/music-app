@@ -1,10 +1,19 @@
 import { ScreenGradient } from "@/components/screen-gradient";
 import { usePlayer } from "@/contexts/player-provider";
+import { parseFilenameMetadata } from "@/services/track-metadata";
 import { storageService } from "@/services/storage";
 import { Playlist } from "@/types/playlist";
 import { Track } from "@/types/track";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { toast } from "@baronha/ting";
+import { Audio } from "expo-av";
+import * as DocumentPicker from "expo-document-picker";
+import {
+  copyAsync,
+  documentDirectory,
+  getInfoAsync,
+  makeDirectoryAsync,
+} from "expo-file-system/legacy";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus, Trash2 } from "lucide-react-native";
@@ -31,6 +40,7 @@ export default function PlaylistsScreen() {
   const [isCreateSheetVisible, setIsCreateSheetVisible] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
+  const [isImportingToPlaylist, setIsImportingToPlaylist] = useState(false);
   const [actionSheetType, setActionSheetType] = useState<"delete" | "empty" | null>(null);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
@@ -40,14 +50,18 @@ export default function PlaylistsScreen() {
         return;
       }
 
-      if (isCreateSheetVisible) {
-        await sheetRef.current.present();
-      } else {
-        await sheetRef.current.dismiss();
+      try {
+        if (isCreateSheetVisible) {
+          await sheetRef.current.present();
+        } else {
+          await sheetRef.current.dismiss();
+        }
+      } catch {
+        // Ignore transient TrueSheet lifecycle errors during rapid mount/unmount.
       }
     };
 
-    syncSheet();
+    void syncSheet();
   }, [isCreateSheetVisible]);
 
   useEffect(() => {
@@ -56,14 +70,18 @@ export default function PlaylistsScreen() {
         return;
       }
 
-      if (actionSheetType) {
-        await actionSheetRef.current.present();
-      } else {
-        await actionSheetRef.current.dismiss();
+      try {
+        if (actionSheetType) {
+          await actionSheetRef.current.present();
+        } else {
+          await actionSheetRef.current.dismiss();
+        }
+      } catch {
+        // Ignore transient TrueSheet lifecycle errors during rapid mount/unmount.
       }
     };
 
-    syncActionSheet();
+    void syncActionSheet();
   }, [actionSheetType]);
 
   const handleCloseCreatePlaylistSheet = () => {
@@ -80,6 +98,28 @@ export default function PlaylistsScreen() {
     const data = await storageService.getPlaylists();
     setPlaylists(data);
   }, []);
+
+  const generateId = () => {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  };
+
+  const getDurationFromUri = async (uri: string): Promise<number> => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri },
+        {
+          shouldPlay: false,
+          androidImplementation: "MediaPlayer",
+        },
+      );
+      const status = await sound.getStatusAsync();
+      await sound.unloadAsync();
+      return (status as any).durationMillis || 0;
+    } catch (error) {
+      console.error("Error getting duration:", error);
+      return 0;
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -150,12 +190,111 @@ export default function PlaylistsScreen() {
     setSelectedPlaylist(null);
   };
 
-  const handleImportToEmptyPlaylist = () => {
-    setActionSheetType(null);
-    const targetPlaylist = selectedPlaylist;
-    setSelectedPlaylist(null);
-    if (targetPlaylist) {
-      router.push("/import");
+  const handleImportToEmptyPlaylist = async () => {
+    if (!selectedPlaylist || isImportingToPlaylist) {
+      return;
+    }
+
+    try {
+      setIsImportingToPlaylist(true);
+
+      const targetPlaylist = selectedPlaylist;
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["audio/*"],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const tracksDir = `${documentDirectory}tracks/`;
+      const dirInfo = await getInfoAsync(tracksDir);
+      if (!dirInfo.exists) {
+        await makeDirectoryAsync(tracksDir, { intermediates: true });
+      }
+
+      const importedTrackIds: string[] = [];
+
+      for (const asset of result.assets) {
+        const assetInfo = await getInfoAsync(asset.uri);
+        if (!assetInfo.exists) {
+          console.error("Source file does not exist:", asset.uri);
+          continue;
+        }
+
+        const fileExt = asset.name.split(".").pop() || "mp3";
+        const fileName = `${generateId()}.${fileExt}`;
+        const permanentUri = `${tracksDir}${fileName}`;
+
+        await copyAsync({
+          from: asset.uri,
+          to: permanentUri,
+        });
+
+        const checkInfo = await getInfoAsync(permanentUri);
+        if (!checkInfo.exists || checkInfo.size === 0) {
+          console.error("Failed to copy file or file is empty:", permanentUri);
+          continue;
+        }
+
+        const duration = await getDurationFromUri(permanentUri);
+        const filenameMetadata = parseFilenameMetadata(asset.name);
+
+        const track: Track = {
+          id: generateId(),
+          title:
+            filenameMetadata.title ||
+            asset.name.replace(/\.[^/.]+$/, "") ||
+            "Unknown Track",
+          artist: filenameMetadata.artist,
+          uri: permanentUri,
+          source: "local",
+          duration,
+          dateAdded: Date.now(),
+          playCount: 0,
+        };
+
+        await storageService.addToLibrary(track);
+        importedTrackIds.push(track.id);
+      }
+
+      if (importedTrackIds.length === 0) {
+        toast({
+          title: "No tracks imported",
+          message: "Could not import selected files.",
+          preset: "error",
+        });
+        return;
+      }
+
+      const mergedTrackIds = Array.from(
+        new Set([...targetPlaylist.trackIds, ...importedTrackIds]),
+      );
+
+      await storageService.updatePlaylist({
+        ...targetPlaylist,
+        trackIds: mergedTrackIds,
+        updatedAt: Date.now(),
+      });
+
+      await loadPlaylists();
+      setActionSheetType(null);
+      setSelectedPlaylist(null);
+      toast({
+        title: "Tracks imported",
+        message: `${importedTrackIds.length} track(s) added to "${targetPlaylist.name}".`,
+        preset: "done",
+      });
+    } catch (error) {
+      console.error("Error importing to playlist:", error);
+      toast({
+        title: "Error",
+        message: "Failed to import track. Please try again.",
+        preset: "error",
+      });
+    } finally {
+      setIsImportingToPlaylist(false);
     }
   };
 
@@ -175,7 +314,11 @@ export default function PlaylistsScreen() {
       : `"${selectedPlaylist?.name ?? ""}" has no tracks yet.`;
 
   const actionPrimaryLabel =
-    actionSheetType === "delete" ? "Delete" : "Import Music";
+    actionSheetType === "delete"
+      ? "Delete"
+      : isImportingToPlaylist
+        ? "Importing..."
+        : "Import Music";
 
   const actionPrimaryHandler =
     actionSheetType === "delete"
@@ -405,6 +548,13 @@ export default function PlaylistsScreen() {
               <TouchableOpacity
                 onPress={actionPrimaryHandler}
                 className={actionPrimaryButtonClassName}
+                disabled={actionSheetType === "empty" && isImportingToPlaylist}
+                style={{
+                  opacity:
+                    actionSheetType === "empty" && isImportingToPlaylist
+                      ? 0.6
+                      : 1,
+                }}
               >
                 <Text className={actionPrimaryTextClassName}>
                   {actionPrimaryLabel}
