@@ -4,8 +4,11 @@ import { storageService } from "@/services/storage";
 import { Playlist } from "@/types/playlist";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus, Trash2 } from "lucide-react-native";
-import { useCallback, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useColorScheme } from "nativewind";
+import { LinearGradient } from "expo-linear-gradient";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
 
 import { Track } from "@/types/track";
 
@@ -15,7 +18,38 @@ const FAVORITES_PLAYLIST_NAME = "favorites";
 export default function PlaylistsScreen() {
   const router = useRouter();
   const { controls } = usePlayer();
+  const { colorScheme } = useColorScheme();
+  const sheetRef = useRef<TrueSheet>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [isCreateSheetVisible, setIsCreateSheetVisible] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
+
+  useEffect(() => {
+    const syncSheet = async () => {
+      if (!sheetRef.current) {
+        return;
+      }
+
+      if (isCreateSheetVisible) {
+        await sheetRef.current.present();
+      } else {
+        await sheetRef.current.dismiss();
+      }
+    };
+
+    syncSheet();
+  }, [isCreateSheetVisible]);
+
+  const handleCloseCreatePlaylistSheet = () => {
+    setIsCreateSheetVisible(false);
+    setNewPlaylistName("");
+    setIsCreatingPlaylist(false);
+  };
+
+  const handleShowCreatePlaylistSheet = () => {
+    setIsCreateSheetVisible(true);
+  };
 
   const loadPlaylists = useCallback(async () => {
     const data = await storageService.getPlaylists();
@@ -28,33 +62,31 @@ export default function PlaylistsScreen() {
     }, [loadPlaylists]),
   );
 
-  const handleCreatePlaylist = () => {
-    Alert.prompt(
-      "New Playlist",
-      "Enter playlist name",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Create",
-          onPress: (name: string | undefined) => {
-            if (!name || !name.trim()) return;
+  const handleCreatePlaylist = async () => {
+    if (!newPlaylistName.trim() || isCreatingPlaylist) {
+      return;
+    }
 
-            const newPlaylist: Playlist = {
-              id: `${Date.now()}`,
-              name: name.trim(),
-              trackIds: [],
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            };
+    try {
+      setIsCreatingPlaylist(true);
 
-            storageService.createPlaylist(newPlaylist);
-            loadPlaylists();
-          },
-        },
-      ],
-      "plain-text",
-      "My Playlist",
-    );
+      const now = Date.now();
+      const newPlaylist: Playlist = {
+        id: `${now}`,
+        name: newPlaylistName.trim(),
+        trackIds: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await storageService.createPlaylist(newPlaylist);
+      await loadPlaylists();
+      handleCloseCreatePlaylistSheet();
+    } catch (error) {
+      console.error("Failed to create playlist:", error);
+      Alert.alert("Error", "Could not create playlist.");
+      setIsCreatingPlaylist(false);
+    }
   };
 
   const handleDeletePlaylist = async (playlist: Playlist) => {
@@ -98,7 +130,7 @@ export default function PlaylistsScreen() {
       <View className="flex-row items-center justify-between px-4 pt-14 pb-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <Text className="text-2xl font-bold text-gray-900 dark:text-white">Playlists</Text>
         <TouchableOpacity
-          onPress={handleCreatePlaylist}
+          onPress={handleShowCreatePlaylistSheet}
           className="flex-row items-center bg-blue-500 px-4 py-2 rounded-lg"
         >
           <Plus size={20} color="#FFFFFF" />
@@ -154,6 +186,71 @@ export default function PlaylistsScreen() {
           </View>
         )}
       </ScrollView>
+
+      <TrueSheet
+        ref={sheetRef}
+        detents={["auto"]}
+        cornerRadius={24}
+        grabber
+        dismissible
+        dimmed
+        onDidDismiss={handleCloseCreatePlaylistSheet}
+        backgroundColor={colorScheme === "dark" ? "#111827" : "#FFFFFF"}
+      >
+        <View className="bg-white dark:bg-gray-800 overflow-hidden">
+          <LinearGradient
+            colors={
+              colorScheme === "dark"
+                ? ["#1f2937", "#111827", "#000000"]
+                : ["#f3f4f6", "#e5e7eb", "#ffffff"]
+            }
+            className="px-5 pb-4 pt-8"
+          >
+            <Text className={colorScheme === "dark" ? "text-white text-lg font-semibold" : "text-gray-900 text-lg font-semibold"}>
+              Create Playlist
+            </Text>
+            <Text className={colorScheme === "dark" ? "text-white/80 mt-1 text-sm" : "text-gray-900/80 mt-1 text-sm"}>
+              Give your playlist a name
+            </Text>
+          </LinearGradient>
+
+          <View className="px-5 pt-4 pb-6">
+            <TextInput
+              value={newPlaylistName}
+              onChangeText={setNewPlaylistName}
+              placeholder="My Playlist"
+              placeholderTextColor={colorScheme === "dark" ? "#9CA3AF" : "#6B7280"}
+              className="rounded-xl px-4 py-3 border text-gray-900 dark:text-white bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleCreatePlaylist}
+            />
+
+            <View className="flex-row mt-4 gap-3">
+              <TouchableOpacity
+                onPress={handleCloseCreatePlaylistSheet}
+                className="flex-1 rounded-xl py-3 items-center bg-gray-200 dark:bg-gray-700"
+                disabled={isCreatingPlaylist}
+              >
+                <Text className="font-semibold text-gray-800 dark:text-gray-200">Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleCreatePlaylist}
+                className="flex-1 rounded-xl py-3 items-center bg-blue-500"
+                disabled={isCreatingPlaylist || !newPlaylistName.trim()}
+                style={{
+                  opacity: isCreatingPlaylist || !newPlaylistName.trim() ? 0.6 : 1,
+                }}
+              >
+                <Text className="font-semibold text-white">
+                  {isCreatingPlaylist ? "Creating..." : "Create"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </TrueSheet>
     </ScreenGradient>
   );
 }
