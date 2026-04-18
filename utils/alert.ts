@@ -43,3 +43,26 @@ export function showWarn(title: string, message?: string) {
     preset: "error",
   });
 }
+
+export interface AlertButton {
+  text: string;
+  style?: "default" | "cancel" | "destructive";
+  onPress?: () => void;
+}
+
+export function showAlert(
+  title: string,
+  message?: string,
+  buttons?: AlertButton[]
+) {
+  alert({
+    title,
+    message,
+    preset: "wa",
+    buttons: buttons?.map((btn) => ({
+      text: btn.text,
+      style: btn.style || "default",
+      onPress: btn.onPress,
+    })),
+  });
+}

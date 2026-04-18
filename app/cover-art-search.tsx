@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Alert, FlatList, Text } from "react-native";
+import { View, TouchableOpacity, FlatList, Text } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Track } from "@/types/track";
 import { CoverArtResult, CoverArtService } from "@/services/cover-art";
 import { ChevronLeft, Image as ImageIcon } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useCoverArt } from "@/contexts/cover-art-context";
 import { useColorScheme } from "nativewind";
+import { showSuccess } from "@/utils/alert";
 
 export default function CoverArtSearchScreen() {
   const { track } = useLocalSearchParams();
@@ -26,7 +27,6 @@ export default function CoverArtSearchScreen() {
   }
 
   const coverArtService = CoverArtService.getInstance();
-  const navigation = useNavigation();
 
   useEffect(() => {
     setSearchResults(null);
@@ -64,30 +64,11 @@ export default function CoverArtSearchScreen() {
   };
 
   const handleCoverSelect = (cover: CoverArtResult) => {
-    Alert.alert(
-      "Select Cover Art",
-      "Do you want to use this cover art for this track?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Select",
-          onPress: () => {
-            // Handle the cover selection
-            if (trackObj) {
-              // Use the context to pass the selection back to the parent
-              setCoverSelection(trackObj.id, cover.url);
-              console.log("Selected cover:", cover.url);
-
-              // Navigate back
-              navigation.goBack();
-            }
-          }
-        }
-      ]
-    );
+    if (trackObj) {
+      setCoverSelection(trackObj.id, cover.url);
+      showSuccess("Cover Art Updated");
+      router.back();
+    }
   };
 
   const renderCoverItem = ({ item }: { item: CoverArtResult }) => (
@@ -165,7 +146,7 @@ export default function CoverArtSearchScreen() {
       <SafeAreaView edges={["top"]} className="flex-1">
         {/* Header */}
         <View className="flex-row items-center px-4 pt-2 pb-4 border-b border-gray-700">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 mr-2">
+          <TouchableOpacity onPress={() => router.back()} className="p-2 mr-2">
             <ChevronLeft size={24} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
           <View className="flex-1">
