@@ -16,7 +16,7 @@ import {
 } from "expo-file-system/legacy";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Music, Plus, Trash2 } from "lucide-react-native";
+import { Music, Plus } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -41,7 +41,7 @@ export default function PlaylistsScreen() {
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
   const [isImportingToPlaylist, setIsImportingToPlaylist] = useState(false);
-  const [actionSheetType, setActionSheetType] = useState<"delete" | "empty" | null>(null);
+  const [isPlaylistActionsVisible, setIsPlaylistActionsVisible] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function PlaylistsScreen() {
       }
 
       try {
-        if (actionSheetType) {
+        if (isPlaylistActionsVisible) {
           await actionSheetRef.current.present();
         } else {
           await actionSheetRef.current.dismiss();
@@ -82,7 +82,7 @@ export default function PlaylistsScreen() {
     };
 
     void syncActionSheet();
-  }, [actionSheetType]);
+  }, [isPlaylistActionsVisible]);
 
   const handleCloseCreatePlaylistSheet = () => {
     setIsCreateSheetVisible(false);
@@ -163,9 +163,14 @@ export default function PlaylistsScreen() {
     }
   };
 
-  const handleRequestDeletePlaylist = (playlist: Playlist) => {
+  const handleShowPlaylistActions = (playlist: Playlist) => {
     setSelectedPlaylist(playlist);
-    setActionSheetType("delete");
+    setIsPlaylistActionsVisible(true);
+  };
+
+  const handleCloseActionSheet = () => {
+    setIsPlaylistActionsVisible(false);
+    setSelectedPlaylist(null);
   };
 
   const handleConfirmDeletePlaylist = async () => {
@@ -176,8 +181,7 @@ export default function PlaylistsScreen() {
     const playlistName = selectedPlaylist.name;
     await storageService.deletePlaylist(selectedPlaylist.id);
     await loadPlaylists();
-    setActionSheetType(null);
-    setSelectedPlaylist(null);
+    handleCloseActionSheet();
     toast({
       title: "Playlist deleted",
       message: `"${playlistName}" was removed.`,
@@ -185,12 +189,7 @@ export default function PlaylistsScreen() {
     });
   };
 
-  const handleCloseActionSheet = () => {
-    setActionSheetType(null);
-    setSelectedPlaylist(null);
-  };
-
-  const handleImportToEmptyPlaylist = async () => {
+  const handleImportToPlaylist = async () => {
     if (!selectedPlaylist || isImportingToPlaylist) {
       return;
     }
@@ -227,10 +226,7 @@ export default function PlaylistsScreen() {
         const fileName = `${generateId()}.${fileExt}`;
         const permanentUri = `${tracksDir}${fileName}`;
 
-        await copyAsync({
-          from: asset.uri,
-          to: permanentUri,
-        });
+        await copyAsync({ from: asset.uri, to: permanentUri });
 
         const checkInfo = await getInfoAsync(permanentUri);
         if (!checkInfo.exists || checkInfo.size === 0) {
@@ -279,8 +275,7 @@ export default function PlaylistsScreen() {
       });
 
       await loadPlaylists();
-      setActionSheetType(null);
-      setSelectedPlaylist(null);
+      handleCloseActionSheet();
       toast({
         title: "Tracks imported",
         message: `${importedTrackIds.length} track(s) added to "${targetPlaylist.name}".`,
@@ -298,53 +293,22 @@ export default function PlaylistsScreen() {
     }
   };
 
-  const handleShowEmptyPlaylistActions = (playlist: Playlist) => {
-    setSelectedPlaylist(playlist);
-    setActionSheetType("empty");
-  };
-
-  const actionTitle =
-    actionSheetType === "delete"
-      ? "Delete Playlist"
-      : "⚠️ Playlist is empty";
-
-  const actionMessage =
-    actionSheetType === "delete"
-      ? `Are you sure you want to delete "${selectedPlaylist?.name ?? ""}"?`
-      : `"${selectedPlaylist?.name ?? ""}" has no tracks yet.`;
-
-  const actionPrimaryLabel =
-    actionSheetType === "delete"
-      ? "Delete"
-      : isImportingToPlaylist
-        ? "Importing..."
-        : "Import Music";
-
-  const actionPrimaryHandler =
-    actionSheetType === "delete"
-      ? handleConfirmDeletePlaylist
-      : handleImportToEmptyPlaylist;
-
-  const actionPrimaryButtonClassName =
-    actionSheetType === "delete"
-      ? "flex-1 rounded-xl py-3 items-center bg-red-500"
-      : "flex-1 rounded-xl py-3 items-center bg-blue-500";
-
-  const actionPrimaryTextClassName = "font-semibold text-white";
-
-  const actionDescriptionClassName =
-    colorScheme === "dark" ? "text-white/80 mt-1 text-sm" : "text-gray-900/80 mt-1 text-sm";
-
   const actionTitleClassName =
     colorScheme === "dark"
       ? "text-white text-lg font-semibold"
       : "text-gray-900 text-lg font-semibold";
+
+  const actionDescriptionClassName =
+    colorScheme === "dark"
+      ? "text-white/80 mt-1 text-sm"
+      : "text-gray-900/80 mt-1 text-sm";
 
   const actionGradientColors =
     colorScheme === "dark"
       ? (["#1f2937", "#111827", "#000000"] as const)
       : (["#f3f4f6", "#e5e7eb", "#ffffff"] as const);
 
+  const importButtonLabel = isImportingToPlaylist ? "Importing..." : "Import Music";
   const handleOpenPlaylist = async (playlist: Playlist) => {
     const library = await storageService.getLibrary();
     const playlistTracks: Track[] = library.filter((track) =>
@@ -352,7 +316,7 @@ export default function PlaylistsScreen() {
     );
 
     if (playlistTracks.length === 0) {
-      handleShowEmptyPlaylistActions(playlist);
+      handleShowPlaylistActions(playlist);
       return;
     }
 
@@ -397,6 +361,7 @@ export default function PlaylistsScreen() {
               <TouchableOpacity
                 key={playlist.id}
                 onPress={() => handleOpenPlaylist(playlist)}
+                onLongPress={() => handleShowPlaylistActions(playlist)}
                 className="bg-white dark:bg-gray-900 rounded-xl p-4 flex-row items-center"
                 activeOpacity={0.7}
               >
@@ -414,19 +379,6 @@ export default function PlaylistsScreen() {
                     {playlist.trackIds.length} tracks
                   </Text>
                 </View>
-                {playlist.id !== FAVORITES_PLAYLIST_ID &&
-                  playlist.name.trim().toLowerCase() !==
-                    FAVORITES_PLAYLIST_NAME && (
-                    <TouchableOpacity
-                      onPress={(event) => {
-                        event.stopPropagation();
-                        handleRequestDeletePlaylist(playlist);
-                      }}
-                      className="p-2"
-                    >
-                      <Trash2 size={20} color="#EF4444" />
-                    </TouchableOpacity>
-                  )}
               </TouchableOpacity>
             ))}
           </View>
@@ -530,37 +482,41 @@ export default function PlaylistsScreen() {
             colors={actionGradientColors}
             className="px-5 pb-4 pt-8"
           >
-            <Text className={actionTitleClassName}>{actionTitle}</Text>
-            <Text className={actionDescriptionClassName}>{actionMessage}</Text>
+            <Text className={actionTitleClassName}>Playlist Actions</Text>
+            <Text className={actionDescriptionClassName}>
+              {selectedPlaylist ? `"${selectedPlaylist.name}"` : ""}
+            </Text>
           </LinearGradient>
 
-          <View className="px-5 pt-4 pb-6">
-            <View className="flex-row mt-1 gap-3">
-              <TouchableOpacity
-                onPress={handleCloseActionSheet}
-                className="flex-1 rounded-xl py-3 items-center bg-gray-200 dark:bg-gray-700"
-              >
-                <Text className="font-semibold text-gray-800 dark:text-gray-200">
-                  Cancel
-                </Text>
-              </TouchableOpacity>
+          <View className="px-5 pt-4 pb-6 gap-3">
+            <TouchableOpacity
+              onPress={handleImportToPlaylist}
+              className="rounded-xl py-3 items-center bg-blue-500"
+              disabled={isImportingToPlaylist}
+              style={{ opacity: isImportingToPlaylist ? 0.6 : 1 }}
+            >
+              <Text className="font-semibold text-white">{importButtonLabel}</Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={actionPrimaryHandler}
-                className={actionPrimaryButtonClassName}
-                disabled={actionSheetType === "empty" && isImportingToPlaylist}
-                style={{
-                  opacity:
-                    actionSheetType === "empty" && isImportingToPlaylist
-                      ? 0.6
-                      : 1,
-                }}
-              >
-                <Text className={actionPrimaryTextClassName}>
-                  {actionPrimaryLabel}
-                </Text>
-              </TouchableOpacity>
-            </View>
+            {selectedPlaylist?.id !== FAVORITES_PLAYLIST_ID &&
+              selectedPlaylist?.name.trim().toLowerCase() !==
+                FAVORITES_PLAYLIST_NAME && (
+                <TouchableOpacity
+                  onPress={handleConfirmDeletePlaylist}
+                  className="rounded-xl py-3 items-center bg-red-500"
+                >
+                  <Text className="font-semibold text-white">Delete Playlist</Text>
+                </TouchableOpacity>
+              )}
+
+            <TouchableOpacity
+              onPress={handleCloseActionSheet}
+              className="rounded-xl py-3 items-center bg-gray-200 dark:bg-gray-700"
+            >
+              <Text className="font-semibold text-gray-800 dark:text-gray-200">
+                Cancel
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TrueSheet>
