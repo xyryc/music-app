@@ -9,7 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, router } from "expo-router";
 import { useCoverArt } from "@/contexts/cover-art-context";
 import { useColorScheme } from "nativewind";
-import { showSuccess } from "@/utils/alert";
+import { toast } from "@baronha/ting";
 
 export default function CoverArtSearchScreen() {
   const { track } = useLocalSearchParams();
@@ -66,7 +66,10 @@ export default function CoverArtSearchScreen() {
   const handleCoverSelect = (cover: CoverArtResult) => {
     if (trackObj) {
       setCoverSelection(trackObj.id, cover.url);
-      showSuccess("Cover Art Updated");
+      toast({
+        title: "Cover Art Updated",
+        preset: "done",
+      });
       router.back();
     }
   };

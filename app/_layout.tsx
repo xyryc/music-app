@@ -6,7 +6,7 @@ import "../global.css";
 import { CoverArtProvider } from "@/contexts/cover-art-context";
 import { PlayerProvider } from "@/contexts/player-provider";
 import { storageService } from "@/services/storage";
-import { configureAlert } from "@/utils/alert";
+import { setup } from "@baronha/ting";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -17,7 +17,13 @@ export default function RootLayout() {
   const [isThemeReady, setIsThemeReady] = useState(false);
 
   useEffect(() => {
-    configureAlert();
+    setup({
+      toast: {
+        backgroundColor: "#1F2937",
+        titleColor: "#FFFFFF",
+        messageColor: "#D1D5DB",
+      },
+    });
   }, []);
 
   useEffect(() => {
