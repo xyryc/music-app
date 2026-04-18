@@ -8,7 +8,7 @@ export default function TabLayout() {
   const isDark = colorScheme === "dark";
 
   return (
-    <Tabs
+    <Tabs initialRouteName="library"
       screenOptions={{
         tabBarActiveTintColor: "#0A7EA4",
         tabBarInactiveTintColor: isDark ? "#9CA3AF" : "#6B7280",

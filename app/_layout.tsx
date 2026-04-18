@@ -45,7 +45,8 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PlayerProvider>
         <CoverArtProvider>
-          <Stack>
+          <Stack initialRouteName="(tabs)">
+            <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
               name="import"
