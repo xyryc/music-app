@@ -4,7 +4,7 @@
     "slug": "vyb",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "vyb",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -12,9 +12,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.xyryc.vyb",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ]
+        "UIBackgroundModes": ["audio"]
       },
       "appleTeamId": "3KZ7XWRYB7"
     },

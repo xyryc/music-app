@@ -23,7 +23,7 @@ export default function Index() {
       }}
     >
       <Image
-        source={require("../assets/images/app-logo.png")}
+        source={require("../assets/images/app-icon.png")}
         style={{ width: 180, height: 180, borderRadius: 20 }}
         resizeMode="contain"
       />
