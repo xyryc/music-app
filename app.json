@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "vyb",
+    "name": "Vyb",
     "slug": "vyb",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,6 +8,17 @@
     "scheme": "vyb",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "backgroundColor": "#000000"
+      }
+    },
+    "notification": {
+      "icon": "./assets/images/notification_icon.png"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.xyryc.vyb",
@@ -18,10 +29,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#00070f",
+        "foregroundImage": "./assets/images/android-adaptive-foreground.png",
+        "monochromeImage": "./assets/images/android-adaptive-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": true,
@@ -58,7 +68,7 @@
         {
           "enableBackgroundAudio": true,
           "audioSessionCategory": "playback",
-          "notificationIcon": "./assets/images/notification-icon.png"
+          "notificationIcon": "./assets/images/notification_icon.png"
         }
       ]
     ],
