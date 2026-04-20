@@ -25,6 +25,7 @@ async function main() {
     'images',
     'android-adaptive-monochrome.png'
   );
+  const outSplash = path.join(repoRoot, 'assets', 'images', 'splash-icon.png');
   const outNotification = path.join(
     repoRoot,
     'assets',
@@ -119,6 +120,22 @@ async function main() {
   const cropH = maxY - minY + 1;
   const cropped = extracted.clone().crop(minX, minY, cropW, cropH);
 
+  // Splash icon: extracted logo, centered on transparent 1024x1024.
+  {
+    const splashMax = Math.round(canvasSize * 0.5);
+    const splashScale = splashMax / Math.max(cropW, cropH);
+    const splashW = Math.max(1, Math.round(cropW * splashScale));
+    const splashH = Math.max(1, Math.round(cropH * splashScale));
+    const splashLogo = cropped.clone().resize(splashW, splashH, Jimp.RESIZE_BICUBIC);
+    const splashCanvas = new Jimp(canvasSize, canvasSize, 0x00000000);
+    splashCanvas.composite(
+      splashLogo,
+      Math.round((canvasSize - splashW) / 2),
+      Math.round((canvasSize - splashH) / 2)
+    );
+    await splashCanvas.writeAsync(outSplash);
+  }
+
   const targetMax = Math.round(canvasSize * safeScale);
   const scale = targetMax / Math.max(cropW, cropH);
   const outW = Math.max(1, Math.round(cropW * scale));
@@ -187,6 +204,7 @@ async function main() {
         input: path.relative(repoRoot, inputPath),
         foreground: path.relative(repoRoot, outForeground),
         monochrome: path.relative(repoRoot, outMonochrome),
+        splash: path.relative(repoRoot, outSplash),
         notification: path.relative(repoRoot, outNotification),
         backgroundColor,
       },

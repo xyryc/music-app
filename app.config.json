@@ -11,9 +11,9 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
+      "backgroundColor": "#00070f",
       "dark": {
-        "backgroundColor": "#000000"
+        "backgroundColor": "#00070f"
       }
     },
     "notification": {
@@ -28,6 +28,7 @@
       "appleTeamId": "3KZ7XWRYB7"
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#00070f",
         "foregroundImage": "./assets/images/android-adaptive-foreground.png",
@@ -56,9 +57,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#00070f",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#00070f"
           }
         }
       ],

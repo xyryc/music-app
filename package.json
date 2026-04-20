@@ -8,7 +8,10 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "eslint app/",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "release:android:aab": "node scripts/release-android.js aab",
+    "release:android:apk": "node scripts/release-android.js apk",
+    "release:android:both": "node scripts/release-android.js both"
   },
   "dependencies": {
     "@baronha/ting": "^1.2.3",

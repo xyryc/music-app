@@ -114,7 +114,7 @@ export default function LibraryScreen() {
         alert({
           title: "Already in Favorites",
           message: `"${track.title}" is already saved.`,
-          icon: { uri: require("../../assets/images/icon.png"), size: 50 },
+          icon: { uri: require("../../assets/images/app-icon.png"), size: 50 },
           borderRadius: 24,
         });
       }
