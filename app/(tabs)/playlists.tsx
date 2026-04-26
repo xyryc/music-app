@@ -18,8 +18,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Image,
   ScrollView,
   Text,
   TextInput,
@@ -43,6 +44,33 @@ export default function PlaylistsScreen() {
   const [isImportingToPlaylist, setIsImportingToPlaylist] = useState(false);
   const [isPlaylistActionsVisible, setIsPlaylistActionsVisible] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const [libraryTracks, setLibraryTracks] = useState<Track[]>([]);
+
+  const trackById = useMemo(() => {
+    return new Map(libraryTracks.map((track) => [track.id, track]));
+  }, [libraryTracks]);
+
+  const playlistCoverArtById = useMemo(() => {
+    const coverArtMap = new Map<string, string>();
+
+    for (const playlist of playlists) {
+      let coverArtUri: string | undefined;
+
+      for (const trackId of playlist.trackIds) {
+        const track = trackById.get(trackId);
+        if (track?.coverArt) {
+          coverArtUri = track.coverArt;
+          break;
+        }
+      }
+
+      if (coverArtUri) {
+        coverArtMap.set(playlist.id, coverArtUri);
+      }
+    }
+
+    return coverArtMap;
+  }, [playlists, trackById]);
 
   useEffect(() => {
     const syncSheet = async () => {
@@ -99,6 +127,15 @@ export default function PlaylistsScreen() {
     setPlaylists(data);
   }, []);
 
+  const loadLibraryTracks = useCallback(async () => {
+    const library = await storageService.getLibrary();
+    setLibraryTracks(library);
+  }, []);
+
+  const loadScreenData = useCallback(async () => {
+    await Promise.all([loadPlaylists(), loadLibraryTracks()]);
+  }, [loadPlaylists, loadLibraryTracks]);
+
   const generateId = () => {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   };
@@ -123,8 +160,8 @@ export default function PlaylistsScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadPlaylists();
-    }, [loadPlaylists]),
+      void loadScreenData();
+    }, [loadScreenData]),
   );
 
   const handleCreatePlaylist = async () => {
@@ -145,7 +182,7 @@ export default function PlaylistsScreen() {
       };
 
       await storageService.createPlaylist(newPlaylist);
-      await loadPlaylists();
+      await loadScreenData();
       handleCloseCreatePlaylistSheet();
       toast({
         title: "Playlist created",
@@ -180,7 +217,7 @@ export default function PlaylistsScreen() {
 
     const playlistName = selectedPlaylist.name;
     await storageService.deletePlaylist(selectedPlaylist.id);
-    await loadPlaylists();
+    await loadScreenData();
     handleCloseActionSheet();
     toast({
       title: "Playlist deleted",
@@ -274,7 +311,7 @@ export default function PlaylistsScreen() {
         updatedAt: Date.now(),
       });
 
-      await loadPlaylists();
+      await loadScreenData();
       handleCloseActionSheet();
       toast({
         title: "Tracks imported",
@@ -348,39 +385,48 @@ export default function PlaylistsScreen() {
             <Text className="font-semibold mb-2 text-gray-900 dark:text-white">
               No playlists yet
             </Text>
-            <Text
-              variant="caption"
-              className="text-gray-500 dark:text-gray-400 text-center"
-            >
+            <Text className="text-gray-500 dark:text-gray-400 text-center">
               Create your first playlist to organize your music
             </Text>
           </View>
         ) : (
           <View className="gap-3">
-            {playlists.map((playlist) => (
-              <TouchableOpacity
-                key={playlist.id}
-                onPress={() => handleOpenPlaylist(playlist)}
-                onLongPress={() => handleShowPlaylistActions(playlist)}
-                className="bg-white dark:bg-gray-900 rounded-xl p-4 flex-row items-center"
-                activeOpacity={0.7}
-              >
-                <View className="w-14 h-14 rounded-lg bg-purple-500 items-center justify-center mr-4">
-                  <Music size={24} color="#FFFFFF" />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    className="font-semibold text-gray-900 dark:text-white"
-                    numberOfLines={1}
-                  >
-                    {playlist.name}
-                  </Text>
-                  <Text variant="caption" className="text-gray-500">
-                    {playlist.trackIds.length} tracks
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {playlists.map((playlist) => {
+              const coverArtUri = playlistCoverArtById.get(playlist.id);
+
+              return (
+                <TouchableOpacity
+                  key={playlist.id}
+                  onPress={() => handleOpenPlaylist(playlist)}
+                  onLongPress={() => handleShowPlaylistActions(playlist)}
+                  className="bg-white dark:bg-gray-900 rounded-xl p-4 flex-row items-center"
+                  activeOpacity={0.7}
+                >
+                  <View className="w-14 h-14 rounded-lg bg-purple-500 items-center justify-center mr-4 overflow-hidden">
+                    {coverArtUri ? (
+                      <Image
+                        source={{ uri: coverArtUri }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Music size={24} color="#FFFFFF" />
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <Text
+                      className="font-semibold text-gray-900 dark:text-white"
+                      numberOfLines={1}
+                    >
+                      {playlist.name}
+                    </Text>
+                    <Text className="text-gray-500">
+                      {playlist.trackIds.length} tracks
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </ScrollView>
