@@ -5,7 +5,9 @@
       "Bash(npm run:*)",
       "Bash(npm uninstall:*)",
       "Bash(python3 -)",
-      "Bash(sips -g pixelWidth -g pixelHeight -g format \"/Users/anik/Desktop/music-app/archive/app_mockup.png\")"
+      "Bash(sips -g pixelWidth -g pixelHeight -g format \"/Users/anik/Desktop/music-app/archive/app_mockup.png\")",
+      "Bash(sips -z 512 512 \"/Users/anik/Desktop/music-app/assets/images/app-icon.png\" --out \"/Users/anik/Desktop/music-app/archive/app-icon-512.png\")",
+      "Bash(sips -g format -g pixelWidth -g pixelHeight \"/Users/anik/Desktop/music-app/archive/app-icon-512.png\")"
     ]
   }
 }
