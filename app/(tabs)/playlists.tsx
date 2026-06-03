@@ -6,7 +6,7 @@ import { Playlist } from "@/types/playlist";
 import { Track } from "@/types/track";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { toast } from "@baronha/ting";
-import { Audio } from "expo-av";
+import { createAudioPlayer } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import {
   copyAsync,
@@ -142,16 +142,22 @@ export default function PlaylistsScreen() {
 
   const getDurationFromUri = async (uri: string): Promise<number> => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri },
-        {
-          shouldPlay: false,
-          androidImplementation: "MediaPlayer",
-        },
-      );
-      const status = await sound.getStatusAsync();
-      await sound.unloadAsync();
-      return (status as any).durationMillis || 0;
+      const player = createAudioPlayer({ uri }, { downloadFirst: false });
+      const startedAt = Date.now();
+      const timeoutMs = 5000;
+
+      while (Date.now() - startedAt < timeoutMs) {
+        if (player.isLoaded) {
+          const duration = Math.round(player.duration * 1000) || 0;
+          player.remove();
+          return duration;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      player.remove();
+      return 0;
     } catch (error) {
       console.error("Error getting duration:", error);
       return 0;

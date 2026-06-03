@@ -2,7 +2,7 @@ import { ScreenGradient } from "@/components/screen-gradient";
 import { parseFilenameMetadata } from "@/services/track-metadata";
 import { storageService } from "@/services/storage";
 import { Track } from "@/types/track";
-import { Audio } from "expo-av";
+import { createAudioPlayer } from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import {
   documentDirectory,
@@ -29,16 +29,29 @@ export default function ImportScreen() {
 
   const getDurationFromUri = async (uri: string): Promise<number> => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
+      const player = createAudioPlayer(
         { uri },
         {
-          shouldPlay: false,
-          androidImplementation: "MediaPlayer",
+          downloadFirst: false,
+          updateInterval: 500,
         },
       );
-      const status = await sound.getStatusAsync();
-      await sound.unloadAsync();
-      return (status as any).durationMillis || 0;
+      const startedAt = Date.now();
+      const timeoutMs = 5000;
+
+      while (Date.now() - startedAt < timeoutMs) {
+        const status = player.currentStatus;
+        if (status.isLoaded) {
+          const durationMillis = Math.round(status.duration * 1000);
+          player.remove();
+          return durationMillis;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+
+      player.remove();
+      return 0;
     } catch (error) {
       console.error("Error getting duration:", error);
       return 0;
@@ -150,10 +163,10 @@ export default function ImportScreen() {
 
       if (duration === 0) {
         toast({
-        title: "Error",
-        message: "Could not load audio from this URL",
-        preset: "error",
-      });
+          title: "Error",
+          message: "Could not load audio from this URL",
+          preset: "error",
+        });
         setIsImporting(false);
         return;
       }
