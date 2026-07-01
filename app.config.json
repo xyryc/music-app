@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/app-icon.png",
     "scheme": "vyb",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.xyryc.vyb",
@@ -51,9 +51,10 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#00070f",
+          "backgroundColor": "#ffffff",
           "dark": {
-            "backgroundColor": "#00070f"
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#111827"
           }
         }
       ],

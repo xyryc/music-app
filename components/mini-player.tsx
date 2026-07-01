@@ -2,8 +2,8 @@ import { usePlayer } from "@/contexts/player-provider";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music, Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
-import { Text, TouchableOpacity, View } from "react-native";
 import { useColorScheme } from "nativewind";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface MiniPlayerProps {
   onPress: () => void;
@@ -44,7 +44,12 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
             <Image
               source={{ uri: state.currentTrack.coverArt }}
               placeholder={state.currentTrack.coverArtBlurhash}
-              style={{ width: 48, height: 48, borderRadius: 8, marginRight: 12 }}
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 8,
+                marginRight: 12,
+              }}
               contentFit="cover"
               transition={200}
             />
@@ -57,15 +62,28 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
               }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              className="items-center justify-center"
-              style={{ width: 48, height: 48, borderRadius: 8, marginRight: 12 }}
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                width: 48,
+                height: 48,
+                borderRadius: 8,
+                marginRight: 12,
+              }}
             >
-              <Music size={20} color={colorScheme === "dark" ? "#FFFFFF" : "#000000"} />
+              <Music
+                size={20}
+                color={colorScheme === "dark" ? "#FFFFFF" : "#000000"}
+              />
             </LinearGradient>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="flex-1">
+        <TouchableOpacity
+          onPress={onPress}
+          activeOpacity={0.7}
+          className="flex-1"
+        >
           <Text
             numberOfLines={1}
             className="text-base font-semibold text-gray-900 dark:text-white"
@@ -74,9 +92,10 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
           </Text>
           <Text
             numberOfLines={1}
-            className={colorScheme === "dark"
-              ? "text-sm text-gray-300"
-              : "text-sm text-gray-600"
+            className={
+              colorScheme === "dark"
+                ? "text-sm text-gray-300"
+                : "text-sm text-gray-600"
             }
           >
             {state.currentTrack.artist || "Unknown Artist"}
@@ -91,7 +110,10 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
             }}
             className="w-10 h-10 items-center justify-center mr-1"
           >
-            <SkipBack size={22} color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"} />
+            <SkipBack
+              size={22}
+              color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -115,22 +137,31 @@ export function MiniPlayer({ onPress }: MiniPlayerProps) {
             }}
             className="w-10 h-10 items-center justify-center"
           >
-            <SkipForward size={22} color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"} />
+            <SkipForward
+              size={22}
+              color={colorScheme === "dark" ? "#FFFFFF" : "#1A1A1A"}
+            />
           </TouchableOpacity>
         </View>
       </View>
 
       <View className="flex-row justify-between px-4 pb-2">
-        <Text className={colorScheme === "dark"
-          ? "text-sm text-gray-300"
-          : "text-sm text-gray-600"
-        }>
+        <Text
+          className={
+            colorScheme === "dark"
+              ? "text-sm text-gray-300"
+              : "text-sm text-gray-600"
+          }
+        >
           {formatTime(state.position)}
         </Text>
-        <Text className={colorScheme === "dark"
-          ? "text-sm text-gray-300"
-          : "text-sm text-gray-600"
-        }>
+        <Text
+          className={
+            colorScheme === "dark"
+              ? "text-sm text-gray-300"
+              : "text-sm text-gray-600"
+          }
+        >
           {formatTime(state.duration)}
         </Text>
       </View>

@@ -1,9 +1,11 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Image, View } from "react-native";
+import { Image, useColorScheme, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -17,7 +19,7 @@ export default function Index() {
     <View
       style={{
         flex: 1,
-        backgroundColor: "#111827",
+        backgroundColor: isDark ? "#111827" : "#ffffff",
         alignItems: "center",
         justifyContent: "center",
       }}

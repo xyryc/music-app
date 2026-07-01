@@ -1,10 +1,14 @@
-import { Text } from "react-native";
 import { Track } from "@/types/track";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Music } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
-import { GestureResponderEvent, TouchableOpacity, View } from "react-native";
+import {
+  GestureResponderEvent,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface TrackItemProps {
   track: Track;
@@ -52,7 +56,14 @@ export function TrackItem({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="items-center justify-center"
-          style={{ width: 48, height: 48, borderRadius: 8, marginRight: 16 }}
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 8,
+            marginRight: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Music
             size={20}
@@ -65,9 +76,10 @@ export function TrackItem({
       <View className="flex-1">
         <Text
           numberOfLines={1}
-          className={isPlaying
-            ? "text-base font-semibold text-blue-500"
-            : "text-base font-medium text-gray-900 dark:text-white"
+          className={
+            isPlaying
+              ? "text-base font-semibold text-blue-500"
+              : "text-base font-medium text-gray-900 dark:text-white"
           }
         >
           {track.title}

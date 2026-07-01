@@ -10,10 +10,11 @@ import { setup } from "@baronha/ting";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { View } from "react-native";
+import { useColorScheme as useSystemColorScheme, View } from "react-native";
 
 export default function RootLayout() {
   const { colorScheme, setColorScheme } = useColorScheme();
+  const systemColorScheme = useSystemColorScheme();
   const [isThemeReady, setIsThemeReady] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,14 @@ export default function RootLayout() {
   }, [setColorScheme]);
 
   if (!isThemeReady) {
-    return <View style={{ flex: 1, backgroundColor: "#111827" }} />;
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: systemColorScheme === "dark" ? "#111827" : "#ffffff",
+        }}
+      />
+    );
   }
 
   return (
