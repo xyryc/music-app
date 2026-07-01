@@ -34,28 +34,19 @@ export default function LibraryScreen() {
     }, [loadLibrary]),
   );
 
-  const handleUpdateTrackCover = useCallback(
-    async (track: Track, coverUrl: string) => {
-      try {
-        const coverArtBlurhash = await ExpoImage.generateBlurhashAsync(
-          coverUrl,
-          [4, 3],
-        );
-        const updatedTrack = {
-          ...track,
-          coverArt: coverUrl,
-          coverArtBlurhash: coverArtBlurhash || undefined,
-        };
-        await storageService.updateTrack(updatedTrack);
-
-        setLibrary((prevLibrary) =>
-          prevLibrary.map((item) =>
-            item.id === track.id ? updatedTrack : item,
-          ),
-        );
-      } catch (error) {
-        console.error("Failed to update track cover:", error);
-      }
+  const updateTrackCover = useCallback(
+    async (track: Track, coverUrl: string): Promise<Track> => {
+      const coverArtBlurhash = await ExpoImage.generateBlurhashAsync(
+        coverUrl,
+        [4, 3],
+      );
+      const updatedTrack = {
+        ...track,
+        coverArt: coverUrl,
+        coverArtBlurhash: coverArtBlurhash || undefined,
+      };
+      await storageService.updateTrack(updatedTrack);
+      return updatedTrack;
     },
     [],
   );
@@ -65,11 +56,17 @@ export default function LibraryScreen() {
       const { trackId, coverUrl } = selectedCover;
       const track = library.find((t) => t.id === trackId);
       if (track) {
-        handleUpdateTrackCover(track, coverUrl);
         clearCoverSelection();
+        updateTrackCover(track, coverUrl).then((updatedTrack) => {
+          setLibrary((prevLibrary) =>
+            prevLibrary.map((item) =>
+              item.id === track.id ? updatedTrack : item,
+            ),
+          );
+        });
       }
     }
-  }, [selectedCover, library, clearCoverSelection, handleUpdateTrackCover]);
+  }, [selectedCover, library, clearCoverSelection, updateTrackCover]);
 
   const handlePlayTrack = async (track: Track) => {
     await controls.play(track, library);

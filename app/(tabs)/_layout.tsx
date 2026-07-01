@@ -1,23 +1,16 @@
 import { Tabs } from "expo-router";
 import { ListMusic, Music, Settings } from "lucide-react-native";
 import React from "react";
-import { useColorScheme } from "nativewind";
+import { TabBar } from "@/components/tab-bar";
 
 export default function TabLayout() {
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
-    <Tabs initialRouteName="library"
+    <Tabs
+      initialRouteName="library"
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: "#0A7EA4",
-        tabBarInactiveTintColor: isDark ? "#9CA3AF" : "#6B7280",
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: isDark ? "#111827" : "#FFFFFF",
-          borderTopColor: isDark ? "#374151" : "#E5E7EB",
-          borderTopWidth: 1,
-        },
+        animation: "shift",
       }}
     >
       <Tabs.Screen

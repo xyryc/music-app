@@ -11,57 +11,47 @@ import { useCoverArt } from "@/contexts/cover-art-context";
 import { useColorScheme } from "nativewind";
 import { toast } from "@baronha/ting";
 
+const coverArtService = CoverArtService.getInstance();
+
+async function fetchCoverArt(currentTrack: Track): Promise<CoverArtResult[] | null> {
+  const result = await coverArtService.searchCoverArt(currentTrack);
+  return result?.images ?? null;
+}
+
 export default function CoverArtSearchScreen() {
   const { track } = useLocalSearchParams();
   const { setCoverSelection } = useCoverArt();
   const { colorScheme } = useColorScheme();
   const [searchResults, setSearchResults] = useState<CoverArtResult[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isLoading = searchResults === null && error === null;
 
   let trackObj: Track | null = null;
   try {
     trackObj = track ? JSON.parse(track as string) : null;
-  } catch (e) {
-    console.error("Failed to parse track:", e);
+  } catch {
+    console.error("Failed to parse track");
   }
 
-  const coverArtService = CoverArtService.getInstance();
-
   useEffect(() => {
-    setSearchResults(null);
-    setError(null);
-
-    if (!trackObj) {
-      return;
-    }
-
-    loadCoverArt(trackObj);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [track]);
-
-  const loadCoverArt = async (currentTrack?: Track | null) => {
-    if (!currentTrack) return;
-
-    setIsLoading(true);
-    setError(null);
-    setSearchResults(null);
-
+    let currentTrack: Track | null = null;
     try {
-      const result = await coverArtService.searchCoverArt(currentTrack);
-
-      if (result && result.images.length > 0) {
-        setSearchResults(result.images);
+      currentTrack = track ? JSON.parse(track as string) : null;
+    } catch {
+      console.error("Failed to parse track");
+    }
+    if (!currentTrack) return;
+    fetchCoverArt(currentTrack).then((images) => {
+      if (images && images.length > 0) {
+        setSearchResults(images);
       } else {
         setError("No cover art found for this track");
       }
-    } catch (err) {
-      console.error("Cover art search error:", err);
+    }).catch(() => {
       setError("Failed to search for cover art");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    });
+  }, [track]);
 
   const handleCoverSelect = (cover: CoverArtResult) => {
     if (trackObj) {
@@ -71,6 +61,22 @@ export default function CoverArtSearchScreen() {
         preset: "done",
       });
       router.back();
+    }
+  };
+
+  const handleRetry = () => {
+    if (trackObj) {
+      setSearchResults(null);
+      setError(null);
+      fetchCoverArt(trackObj).then((images) => {
+        if (images && images.length > 0) {
+          setSearchResults(images);
+        } else {
+          setError("No cover art found for this track");
+        }
+      }).catch(() => {
+        setError("Failed to search for cover art");
+      });
     }
   };
 
@@ -120,7 +126,7 @@ export default function CoverArtSearchScreen() {
         {error}
       </Text>
       <TouchableOpacity
-        onPress={() => loadCoverArt(trackObj)}
+        onPress={handleRetry}
         className="bg-blue-600 px-6 py-2 rounded-full mt-6"
       >
         <Text className={colorScheme === "dark" ? "text-white" : "text-black"}>Try Again</Text>

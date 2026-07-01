@@ -13,7 +13,7 @@ import {
   documentDirectory,
   getInfoAsync,
   makeDirectoryAsync,
-} from "expo-file-system/legacy";
+} from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Music, Plus } from "lucide-react-native";

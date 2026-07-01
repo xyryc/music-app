@@ -2,9 +2,43 @@ import { ScreenGradient } from "@/components/screen-gradient";
 import { AppSettings, storageService } from "@/services/storage";
 import { toast } from "@baronha/ting";
 import { Info, Music, Smartphone, Trash2 } from "lucide-react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useColorScheme } from "nativewind";
 import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+
+const SettingItem = ({
+  icon,
+  title,
+  description,
+  value,
+  onValueChange,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description?: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+}) => (
+  <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800">
+    <View className="flex-row items-center flex-1">
+      <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center mr-4">
+        {icon}
+      </View>
+      <View className="flex-1">
+        <Text className="font-medium text-gray-900 dark:text-white">{title}</Text>
+        {description && (
+          <Text className="text-sm text-gray-600 dark:text-gray-300">{description}</Text>
+        )}
+      </View>
+    </View>
+    <Switch
+      value={value}
+      onValueChange={onValueChange}
+      trackColor={{ false: "#D1D5DB", true: "#0A7EA4" }}
+      thumbColor="#FFFFFF"
+    />
+  </View>
+);
 
 export default function SettingsScreen() {
   const { setColorScheme, colorScheme } = useColorScheme();
@@ -15,14 +49,9 @@ export default function SettingsScreen() {
     showLyrics: false,
   });
 
-  const loadSettings = useCallback(async () => {
-    const data = await storageService.getSettings();
-    setSettings(data);
-  }, []);
-
   useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+    storageService.getSettings().then(setSettings);
+  }, []);
 
   const updateSetting = async <K extends keyof AppSettings>(
     key: K,
@@ -58,57 +87,23 @@ export default function SettingsScreen() {
               setSettings(resetSettings);
               setColorScheme(resetSettings.theme);
               toast({
-        title: "Success",
-        message: "Library cleared successfully",
-        preset: "done",
-      });
+                title: "Success",
+                message: "Library cleared successfully",
+                preset: "done",
+              });
             } catch (error) {
               console.error("Failed to clear library:", error);
               toast({
-        title: "Error",
-        message: "Failed to clear library",
-        preset: "error",
-      });
+                title: "Error",
+                message: "Failed to clear library",
+                preset: "error",
+              });
             }
           },
         },
       ],
     );
   };
-
-  const SettingItem = ({
-    icon,
-    title,
-    description,
-    value,
-    onValueChange,
-  }: {
-    icon: React.ReactNode;
-    title: string;
-    description?: string;
-    value: boolean;
-    onValueChange: (value: boolean) => void;
-  }) => (
-    <View className="flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800">
-      <View className="flex-row items-center flex-1">
-        <View className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 items-center justify-center mr-4">
-          {icon}
-        </View>
-        <View className="flex-1">
-          <Text className="font-medium text-gray-900 dark:text-white">{title}</Text>
-          {description && (
-            <Text className="text-sm text-gray-600 dark:text-gray-300">{description}</Text>
-          )}
-        </View>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: "#D1D5DB", true: "#0A7EA4" }}
-        thumbColor="#FFFFFF"
-      />
-    </View>
-  );
 
   return (
     <ScreenGradient>

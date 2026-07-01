@@ -2,15 +2,13 @@ import { NowPlayingScreen } from "@/components/now-playing-screen";
 import { usePlayer } from "@/contexts/player-provider";
 import { Track } from "@/types/track";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function PlayerScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { state, controls } = usePlayer();
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const playInitiatedRef = useRef(false);
 
   const queueFromParams = useMemo(() => {
@@ -38,7 +36,7 @@ export default function PlayerScreen() {
       artist: (params.trackArtist as string) || "Unknown Artist",
       duration: parseInt(params.trackDuration as string) || 0,
       source: "local",
-      dateAdded: Date.now(),
+      dateAdded: 0,
       playCount: 0,
     } satisfies Track;
   }, [
@@ -59,23 +57,10 @@ export default function PlayerScreen() {
 
   useEffect(() => {
     if (trackFromParams && !playInitiatedRef.current) {
-      setCurrentTrack(trackFromParams);
-      setIsLoading(false);
       playInitiatedRef.current = true;
-
       void controls.play(trackFromParams, playbackQueue);
-    } else if (state.currentTrack) {
-      setCurrentTrack(state.currentTrack);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
     }
-  }, [
-    trackFromParams,
-    playbackQueue,
-    state.currentTrack?.id,
-    state.currentTrack?.title,
-  ]);
+  }, [trackFromParams, playbackQueue, controls]);
 
   const handleMinimize = () => {
     router.back();
