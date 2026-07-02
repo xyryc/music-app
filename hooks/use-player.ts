@@ -29,6 +29,9 @@ export function usePlayer() {
   const [state, setState] = useState<PlayerState>(defaultPlayerState);
   const statusUpdateRef = useRef<number | null>(null);
   const currentTrackRef = useRef<Track | null>(null);
+  const handleStatusUpdateRef = useRef<(status: PlaybackStatus) => void>(
+    () => {},
+  );
 
   const handleTrackEnd = useCallback(() => {
     setState((prev) => {
@@ -52,7 +55,11 @@ export function usePlayer() {
         if (nextIndex < prev.queue.length) {
           const nextTrack = prev.queue[nextIndex];
           currentTrackRef.current = nextTrack;
-          void audioService.loadTrack(nextTrack, handleStatusUpdate, true);
+          void audioService.loadTrack(
+            nextTrack,
+            handleStatusUpdateRef.current,
+            true,
+          );
           return {
             ...prev,
             currentTrack: nextTrack,
@@ -65,7 +72,11 @@ export function usePlayer() {
         if (prev.repeatMode === "all" && prev.queue.length > 0) {
           const firstTrack = prev.queue[0];
           currentTrackRef.current = firstTrack;
-          void audioService.loadTrack(firstTrack, handleStatusUpdate, true);
+          void audioService.loadTrack(
+            firstTrack,
+            handleStatusUpdateRef.current,
+            true,
+          );
           return {
             ...prev,
             currentTrack: firstTrack,
@@ -104,7 +115,25 @@ export function usePlayer() {
   );
 
   useEffect(() => {
-    audioService.initialize();
+    handleStatusUpdateRef.current = handleStatusUpdate;
+  }, [handleStatusUpdate]);
+
+  useEffect(() => {
+    void (async () => {
+      await audioService.initialize();
+      const session = await storageService.getPlaybackSession();
+      if (session?.currentTrack) {
+        currentTrackRef.current = session.currentTrack;
+        setState((prev) => ({
+          ...prev,
+          currentTrack: session.currentTrack,
+          queue: session.queue,
+          queueIndex: session.queueIndex,
+          position: session.position,
+          isPlaying: false,
+        }));
+      }
+    })();
     void audioService.setOnTrackEnd(handleTrackEnd);
 
     // Don't unload on unmount - keep audio playing across navigation
@@ -189,7 +218,7 @@ export function usePlayer() {
 
         const loaded = await audioService.loadTrack(
           trackToPlay,
-          handleStatusUpdate,
+          handleStatusUpdateRef.current,
           true,
         );
 
@@ -201,6 +230,15 @@ export function usePlayer() {
             isPlaying: true,
             position: 0,
           }));
+          void storageService.savePlaybackSession({
+            currentTrack: trackToPlay,
+            queue: queue || state.queue,
+            queueIndex: queue
+              ? queue.findIndex((t) => t.id === trackToPlay.id)
+              : state.queue.findIndex((t) => t.id === trackToPlay.id),
+            position: 0,
+            isPlaying: true,
+          });
 
           storageService.getLibrary().then(async (library) => {
             const updatedLibrary = library.map((t) =>
@@ -215,17 +253,24 @@ export function usePlayer() {
         console.error("Error playing track:", error);
       }
     },
-    [state.queue, state.isPlaying, handleStatusUpdate],
+    [state.queue, state.isPlaying],
   );
 
   const pause = useCallback(async () => {
     try {
       await audioService.pause();
       setState((prev) => ({ ...prev, isPlaying: false }));
+      void storageService.savePlaybackSession({
+        currentTrack: currentTrackRef.current,
+        queue: state.queue,
+        queueIndex: state.queueIndex,
+        position: state.position,
+        isPlaying: false,
+      });
     } catch (error) {
       console.error("Error pausing:", error);
     }
-  }, []);
+  }, [state.queue, state.queueIndex, state.position]);
 
   const togglePlayPause = useCallback(async () => {
     if (state.isPlaying) {
@@ -242,10 +287,17 @@ export function usePlayer() {
     try {
       await audioService.stop();
       setState((prev) => ({ ...prev, isPlaying: false, position: 0 }));
+      void storageService.savePlaybackSession({
+        currentTrack: currentTrackRef.current,
+        queue: state.queue,
+        queueIndex: state.queueIndex,
+        position: 0,
+        isPlaying: false,
+      });
     } catch (error) {
       console.error("Error stopping:", error);
     }
-  }, []);
+  }, [state.queue, state.queueIndex]);
 
   const seek = useCallback(async (position: number) => {
     try {
@@ -273,7 +325,18 @@ export function usePlayer() {
       const nextTrack = prev.queue[targetIndex];
 
       currentTrackRef.current = nextTrack;
-      void audioService.loadTrack(nextTrack, handleStatusUpdate, true);
+      void audioService.loadTrack(
+        nextTrack,
+        handleStatusUpdateRef.current,
+        true,
+      );
+      void storageService.savePlaybackSession({
+        currentTrack: nextTrack,
+        queue: prev.queue,
+        queueIndex: targetIndex,
+        position: 0,
+        isPlaying: true,
+      });
 
       return {
         ...prev,
@@ -283,7 +346,7 @@ export function usePlayer() {
         position: 0,
       };
     });
-  }, [handleStatusUpdate]);
+  }, []);
 
   const playPrevious = useCallback(async () => {
     setState((prev) => {
@@ -301,7 +364,18 @@ export function usePlayer() {
       const prevTrack = prev.queue[targetIndex];
 
       currentTrackRef.current = prevTrack;
-      void audioService.loadTrack(prevTrack, handleStatusUpdate, true);
+      void audioService.loadTrack(
+        prevTrack,
+        handleStatusUpdateRef.current,
+        true,
+      );
+      void storageService.savePlaybackSession({
+        currentTrack: prevTrack,
+        queue: prev.queue,
+        queueIndex: targetIndex,
+        position: 0,
+        isPlaying: true,
+      });
 
       return {
         ...prev,
@@ -311,7 +385,7 @@ export function usePlayer() {
         position: 0,
       };
     });
-  }, [handleStatusUpdate]);
+  }, []);
 
   const setRepeatMode = useCallback((mode: RepeatMode) => {
     setState((prev) => ({ ...prev, repeatMode: mode }));

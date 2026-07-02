@@ -258,6 +258,21 @@ class AudioService {
     }
   }
 
+  async shutdown() {
+    try {
+      await this.stop();
+      await this.unload();
+      await this.cleanup();
+      this.currentTrack = null;
+      this.onStatusUpdate = null;
+      this.onTrackEnd = null;
+      return true;
+    } catch (error) {
+      console.error("Error shutting down audio service:", error);
+      return false;
+    }
+  }
+
   async unload() {
     try {
       this.statusListenerCleanup?.();

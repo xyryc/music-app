@@ -5,6 +5,7 @@ import "../global.css";
 
 import { CoverArtProvider } from "@/contexts/cover-art-context";
 import { PlayerProvider } from "@/contexts/player-provider";
+import { audioService } from "@/services/audio";
 import { storageService } from "@/services/storage";
 import { setup } from "@baronha/ting";
 import { useColorScheme } from "nativewind";
@@ -43,6 +44,12 @@ export default function RootLayout() {
       isMounted = false;
     };
   }, [setColorScheme]);
+
+  useEffect(() => {
+    return () => {
+      void audioService.shutdown();
+    };
+  }, []);
 
   if (!isThemeReady) {
     return (

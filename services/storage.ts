@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   PLAYLISTS: "music_player_playlists",
   SETTINGS: "music_player_settings",
   QUEUE: "music_player_queue",
+  PLAYBACK_SESSION: "music_player_playback_session",
 };
 
 const FAVORITES_PLAYLIST_ID = "favorites";
@@ -17,6 +18,14 @@ export interface AppSettings {
   skipSilence: boolean;
   equalizerEnabled: boolean;
   showLyrics: boolean;
+}
+
+export interface PlaybackSession {
+  currentTrack: Track | null;
+  queue: Track[];
+  queueIndex: number;
+  position: number;
+  isPlaying: boolean;
 }
 
 const defaultSettings: AppSettings = {
@@ -215,6 +224,35 @@ class StorageService {
       );
     } catch (error) {
       console.error("Error saving queue:", error);
+    }
+  }
+
+  async getPlaybackSession(): Promise<PlaybackSession | null> {
+    try {
+      const data = await SecureStore.getItemAsync(STORAGE_KEYS.PLAYBACK_SESSION);
+      return data ? (JSON.parse(data) as PlaybackSession) : null;
+    } catch (error) {
+      console.error("Error getting playback session:", error);
+      return null;
+    }
+  }
+
+  async savePlaybackSession(session: PlaybackSession): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(
+        STORAGE_KEYS.PLAYBACK_SESSION,
+        JSON.stringify(session),
+      );
+    } catch (error) {
+      console.error("Error saving playback session:", error);
+    }
+  }
+
+  async clearPlaybackSession(): Promise<void> {
+    try {
+      await SecureStore.deleteItemAsync(STORAGE_KEYS.PLAYBACK_SESSION);
+    } catch (error) {
+      console.error("Error clearing playback session:", error);
     }
   }
 
