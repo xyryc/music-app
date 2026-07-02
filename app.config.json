@@ -72,7 +72,8 @@
       "expo-image",
       "expo-status-bar",
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/with-stop-on-task-removed"
     ],
     "experiments": {
       "typedRoutes": true,

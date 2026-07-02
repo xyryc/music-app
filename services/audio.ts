@@ -4,6 +4,7 @@ import { getInfoAsync } from "expo-file-system/legacy";
 import {
   addListener,
   Command,
+  disableMediaControls,
   enableMediaControls,
   PlaybackState,
   removeAllListeners,
@@ -29,6 +30,17 @@ class AudioService {
 
   async initialize() {
     try {
+      // Clean up any stale media session from a previous app session
+      // (e.g., if the app was swiped away and the foreground service
+      //  outlived the activity). This prevents lingering audio playback
+      //  and stale notifications on the next app launch.
+      try {
+        await this.unload();
+        await disableMediaControls();
+      } catch {
+        // Ignore errors during cleanup — the session may already be gone
+      }
+
       await setAudioModeAsync({
         allowsRecording: false,
         shouldPlayInBackground: true,
@@ -52,7 +64,7 @@ class AudioService {
           Command.NEXT_TRACK,
         ],
         notification: {
-          showWhenClosed: true,
+          showWhenClosed: false,
           color: "#0A7EA4",
         },
         android: {
@@ -335,6 +347,7 @@ class AudioService {
         this.remoteListenerCleanup = null;
       }
       await removeAllListeners();
+      await disableMediaControls();
     } catch (error) {
       console.error("Error cleaning up media controls:", error);
     }
